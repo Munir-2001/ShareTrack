@@ -35,7 +35,7 @@ function AuthScreen() {
     const handleAuth = () => {
         if (isSignUp) {
             // Dispatch signup action
-            dispatch(registerUser({ email, password, username, phone }))
+            dispatch(registerUser( { username: username, phone: phone, email: email, password: password } ))
         } else {
             // Dispatch login action
             dispatch(loginUser({ email, password }))

@@ -3,6 +3,8 @@ const express = require('express');
 const dotenv = require('dotenv').config();
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
+const cors = require('cors');
+const { createUser } = require('./controllers/userController');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -11,10 +13,21 @@ const PORT = process.env.PORT || 5001;
 connectDB();
 
 // Middleware
-app.use(express.json()); // For parsing application/json
+app.use(express.json());
+// const corsOptions = {
+//     origin: '*',
+//     optionsSuccessStatus: 200,
+// };
+// app.use(cors(corsOptions));
+
 
 // Routes
 app.use('/api/auth', userRoutes);
+
+
+// app.post('/api/auth/register', (req, res) => {
+//     createUser(req, res);
+// })
 
 // Home route
 app.get('/', (req, res) => {

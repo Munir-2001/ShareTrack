@@ -39,7 +39,6 @@ function App(): React.JSX.Element {
     <Provider store={store}>
 
       <SafeAreaView style={styles.app}>
-        <Text> Hello World </Text>
         <Main />
       </SafeAreaView>
     </Provider>

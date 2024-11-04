@@ -5,19 +5,19 @@ import { API_URL } from '../../../constants';
 export const registerUser = (userData) => {
     return async (dispatch) => {
         try {
-
-
             const response = await fetch(`${API_URL}/api/auth/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    // "Accept": "*/*",
                 },
                 body: JSON.stringify(userData),
             });
-
             if (!response.ok) {
                 throw new Error(`Registration failed: ${response.statusText}`);
             }
+
 
             const user = await response.json();
             dispatch({
