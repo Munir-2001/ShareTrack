@@ -21,18 +21,25 @@ import { loginUser, registerUser } from '../../Redux/Actions/AuthActions/AuthAct
 interface AuthScreenProps {
     isSignUp: boolean;
     setIsSignUp: React.Dispatch<React.SetStateAction<boolean>>; // Function type for state setter
+    navigation: any;
 }
 
-const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, setIsSignUp }) =>  {
+const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ navigation,isSignUp, setIsSignUp }) =>  {
     const isDarkMode = useColorScheme() === 'dark';
     const dispatch = useAppDispatch();
-    const user = useAppSelector((state: { auth: any }) => state.auth.user);
+    const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
 
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [confirmPassword, setConfirmPassword] = React.useState('');
     const [username, setUsername] = React.useState('');
     const [phone, setPhone] = React.useState('');
+
+    React.useEffect(() => {
+        if (isAuth) {
+            navigation.navigate('Dashboard');
+        }
+    }, [isAuth]);
 
     const handleAuth = () => {
 
@@ -51,7 +58,7 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, se
 
         if (isSignUp) {
             // Dispatch signup action
-            dispatch(registerUser({ email, password, username, phone }))
+            dispatch(registerUser({ email, password, username, phone }));
         } else {
             dispatch(loginUser({ email, password }));
         }

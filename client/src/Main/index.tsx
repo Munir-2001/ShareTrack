@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { PropsWithChildren } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import {
     Alert,
     SafeAreaView,
@@ -28,35 +28,44 @@ const Stack = createNativeStackNavigator();
 
 
 
-function Main(){
+function Main() {
     const isDarkMode = useColorScheme() === 'dark';
     const isAuth = useSelector((state: { auth: any }) => state.auth.isAuth);
     const [isSignUp, setIsSignUp] = React.useState(false);
+    const [authState, setAuthState] = useState(isAuth || false);
 
+    useEffect(() => {
+        setAuthState(isAuth);
+    }, [isAuth]);
+   
     return (
         <NavigationContainer>
-        <Stack.Navigator initialRouteName={isAuth ? "Dashboard" : "Launch"}>
-        <Stack.Screen 
-                    name="Launch" 
+            <Stack.Navigator initialRouteName={authState ? "Dashboard" : "Launch"}>
+                <Stack.Screen
+                    name="Launch"
                     options={{ headerShown: false }}>
                     {(props) => (
                         <LaunchScreen {...props} setIsSignUp={setIsSignUp} />
                     )}
                 </Stack.Screen>
-                <Stack.Screen 
-                    name="Auth" 
+                <Stack.Screen
+                    name="Auth"
                     options={{ title: 'Authentication' }}>
                     {(props) => (
                         <AuthScreen {...props} isSignUp={isSignUp} setIsSignUp={setIsSignUp} />
                     )}
                 </Stack.Screen>
-            <Stack.Screen 
-                name="Dashboard" 
-                component={Dashboard} 
-                options={{ headerShown: false }} 
-            />
-        </Stack.Navigator>
-    </NavigationContainer>
+
+                <Stack.Screen
+                    name="Dashboard"
+                    options={{ title: 'Dashboard' }}>
+                    {(props) => (
+                        <Dashboard {...props} />
+                    )}
+                </Stack.Screen>
+
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 }
 

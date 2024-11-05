@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import {
     useColorScheme,
@@ -14,14 +14,25 @@ import {
 
 import { useDispatch, useSelector } from 'react-redux';
 
-function Dashboard(){
+function Dashboard({ navigation }: PropsWithChildren<any>) {
     const isDarkMode = useColorScheme() === 'dark';
     const dispatch = useDispatch();
     const user = useSelector((state: { auth: any }) => state.auth.user);
+    const isAuth = useSelector((state: { auth: any }) => state.auth.isAuth);
+
+    const [userState, setUserState] = useState(user);
+
+    useEffect(() => {
+        setUserState(user);
+        if (isAuth) {
+            navigation.navigate('Dashboard');
+        }
+    }, [user]);
 
     const handleLogout = () => {
         // Dispatch logout action
         dispatch({ type: 'LOGOUT' });
+        navigation.navigate('Launch');
     };
 
     return (
@@ -33,7 +44,7 @@ function Dashboard(){
                 alignItems: 'center',
                 padding: 16,
             }}>
-                <Text> Dashboard </Text>
+            <Text> Dashboard </Text>
 
             {user ? (
                 <>
