@@ -38,7 +38,7 @@ function App(): React.JSX.Element {
   return (
     <Provider store={store}>
 
-      <SafeAreaView style={[styles.app, { backgroundColor: isDarkMode ? Colors.black : Colors.white }]}>
+      <SafeAreaView style={styles.app}>
         <Main />
       </SafeAreaView>
     </Provider>

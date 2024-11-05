@@ -20,7 +20,6 @@ const createUser = async (req, res) => {
         // Remove password from the response
         const userResponse = user.toObject();
         delete userResponse.password;
-
         res.status(201).json(userResponse);
     } catch (err) {
         res.status(400).json({ message: err.message });

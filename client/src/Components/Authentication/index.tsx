@@ -50,7 +50,8 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, se
         }
 
         if (isSignUp) {
-            dispatch(registerUser({ email:email, password:password, username:username, phone:phone }));
+            // Dispatch signup action
+            dispatch(registerUser({ email, password, username, phone }))
         } else {
             dispatch(loginUser({ email, password }));
         }
