@@ -15,7 +15,8 @@ export const registerUser = (userData) => {
                 body: JSON.stringify(userData),
             });
             if (!response.ok) {
-                throw new Error(`Registration failed: ${response.statusText}`);
+                const error = await response.json();
+                throw new Error(error.message);
             }
 
 
@@ -25,7 +26,7 @@ export const registerUser = (userData) => {
                 payload: user, // Save the user object to Redux state
             });
         } catch (error) {
-            console.error("Error registering user:", error);
+            Alert.alert("Error registering user:", error.message);
             // Optionally, dispatch an error action here
         }
     };
@@ -44,7 +45,8 @@ export const loginUser = (credentials) => {
             });
 
             if (!response.ok) {
-                throw new Error(`Login failed: ${response.statusText}`);
+                const error = await response.json();
+                throw new Error(error.message);
             }
 
             const user = await response.json();
@@ -53,7 +55,7 @@ export const loginUser = (credentials) => {
                 payload: user, // Save the user object to Redux state
             });
         } catch (error) {
-            console.error("Error logging in user:", error);
+            Alert.alert("Error registering user:", error.message);
             // Optionally, dispatch an error action here
         }
     };

@@ -24,7 +24,7 @@ interface AuthScreenProps {
     navigation: any;
 }
 
-const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ navigation,isSignUp, setIsSignUp }) =>  {
+const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ navigation, isSignUp, setIsSignUp }) => {
     const isDarkMode = useColorScheme() === 'dark';
     const dispatch = useAppDispatch();
     const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
@@ -43,11 +43,11 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ navigation,i
 
     const handleAuth = () => {
 
-        if(isSignUp && password !== confirmPassword){
+        if (isSignUp && password !== confirmPassword) {
             Alert.alert('Passwords do not match');
             return;
         }
-        if (isSignUp && (!username || !phone || !password || !confirmPassword || !email) ) {
+        if (isSignUp && (!username || !phone || !password || !confirmPassword || !email)) {
             Alert.alert('Please fill in all fields');
             return;
         }
@@ -64,8 +64,8 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ navigation,i
         }
     };
 
-    
-    
+
+
 
 
     return (
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     logo: {
         fontSize: 32,
         fontWeight: 'bold',
-        color: '#1E2A78', 
+        color: '#1E2A78',
         marginVertical: 20,
         marginTop: 75,
     },
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     signInButton: {
-        backgroundColor: '#1E2A78', 
+        backgroundColor: '#1E2A78',
         paddingVertical: 15,
         paddingHorizontal: 60,
         borderRadius: 30,
