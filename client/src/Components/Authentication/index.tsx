@@ -1,5 +1,6 @@
 import React from 'react';
-import type { PropsWithChildren } from 'react';
+import { PropsWithChildren } from 'react';
+
 import {
     SafeAreaView,
     ScrollView,
@@ -9,45 +10,64 @@ import {
     useColorScheme,
     View,
     TextInput,
-    Button,
+    TouchableOpacity,
+    Alert,
+    Image,
 } from 'react-native';
 
-import {
-    Colors,
-} from 'react-native/Libraries/NewAppScreen';
-
-// import { useDispatch, useSelector } from 'react-redux';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 import { loginUser, registerUser } from '../../Redux/Actions/AuthActions/AuthAction';
-import { API_URL } from '../../constants';
+interface AuthScreenProps {
+    isSignUp: boolean;
+    setIsSignUp: React.Dispatch<React.SetStateAction<boolean>>; // Function type for state setter
+}
 
-function AuthScreen() {
+const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, setIsSignUp }) =>  {
     const isDarkMode = useColorScheme() === 'dark';
     const dispatch = useAppDispatch();
     const user = useAppSelector((state: { auth: any }) => state.auth.user);
 
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
+    const [confirmPassword, setConfirmPassword] = React.useState('');
     const [username, setUsername] = React.useState('');
     const [phone, setPhone] = React.useState('');
-    const [isSignUp, setIsSignUp] = React.useState(false);
 
     const handleAuth = () => {
+
+        if(isSignUp && password !== confirmPassword){
+            Alert.alert('Passwords do not match');
+            return;
+        }
+        if (isSignUp && (!username || !phone || !password || !confirmPassword || !email) ) {
+            Alert.alert('Please fill in all fields');
+            return;
+        }
+        if (!isSignUp && (!password || !email)) {
+            Alert.alert('Please fill in all fields');
+            return;
+        }
+
         if (isSignUp) {
-            // Dispatch signup action
-            dispatch(registerUser({ email, password, username, phone }))
+            dispatch(registerUser({ email:email, password:password, username:username, phone:phone }));
         } else {
-            // Dispatch login action
-            dispatch(loginUser({ email, password }))
+            dispatch(loginUser({ email, password }));
         }
     };
 
+    
+    
+
+
     return (
         <View style={{ backgroundColor: isDarkMode ? Colors.black : Colors.white }}>
-            <Text> AUTH </Text>
             <ScrollView contentInsetAdjustmentBehavior="automatic">
                 <View style={styles.container}>
-                    <Text style={styles.header}>{isSignUp ? 'Sign Up' : 'Login'}</Text>
+                    <Text style={styles.logo}>
+                        SHARE<Text style={styles.track}>TRACK</Text>
+                    </Text>
+                    {!isSignUp && <Image source={require('../../Assets/profile.jpg')} style={styles.profileImage} />}
                     {isSignUp && (
                         <>
                             <TextInput
@@ -79,35 +99,90 @@ function AuthScreen() {
                         onChangeText={setPassword}
                         secureTextEntry
                     />
-                    <Button title={isSignUp ? 'Create Account' : 'Login'} onPress={handleAuth} />
-                    <Button
-                        title={`Switch to ${isSignUp ? 'Login' : 'Sign Up'}`}
-                        onPress={() => setIsSignUp(prev => !prev)}
-                    />
+                    {isSignUp && (
+                        <>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Confirm Password"
+                                value={confirmPassword} // Ensure you bind to confirmPassword
+                                onChangeText={setConfirmPassword}
+                                secureTextEntry
+                            />
+                        </>
+                    )}
+                    <TouchableOpacity style={styles.signInButton} onPress={handleAuth}>
+                        <Text style={styles.buttonText}>{isSignUp ? 'Create Account' : 'Login'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setIsSignUp(prev => !prev)}>
+                        <Text style={styles.switchButtonText}>
+                            Switch to {isSignUp ? 'Login' : 'Sign Up'}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 16,
-    },
     header: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
     },
+    logo: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#1E2A78', 
+        marginVertical: 20,
+        marginTop: 75,
+    },
+    track: {
+        color: '#E63946',
+        marginVertical: 20,
+        marginTop: 75,
+    },
+    container: {
+        flexGrow: 1,
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 20,
+    },
     input: {
-        height: 40,
-        borderColor: 'gray',
+        width: '80%',
+        padding: 15,
+        borderColor: '#999',
         borderWidth: 1,
         borderRadius: 5,
-        paddingHorizontal: 10,
-        marginBottom: 15,
+        marginVertical: 10,
+        backgroundColor: '#F5F5F5',
+        textAlign: 'center',
+    },
+    signInButton: {
+        backgroundColor: '#1E2A78', 
+        paddingVertical: 15,
+        paddingHorizontal: 60,
+        borderRadius: 30,
+        marginTop: 20,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    switchButtonText: {
+        color: '#1E2A78',
+        marginTop: 10,
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    profileImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        marginVertical: 10,
     },
 });
 

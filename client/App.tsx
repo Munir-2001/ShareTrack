@@ -38,8 +38,7 @@ function App(): React.JSX.Element {
   return (
     <Provider store={store}>
 
-      <SafeAreaView style={styles.app}>
-        <Text> Hello World </Text>
+      <SafeAreaView style={[styles.app, { backgroundColor: isDarkMode ? Colors.black : Colors.white }]}>
         <Main />
       </SafeAreaView>
     </Provider>
@@ -49,7 +48,6 @@ function App(): React.JSX.Element {
 const styles = StyleSheet.create({
   app: {
     flex: 1,
-    backgroundColor: 'wheat'
   }
 });
 
