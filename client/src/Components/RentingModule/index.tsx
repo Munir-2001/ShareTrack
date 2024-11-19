@@ -23,7 +23,8 @@ export default function RentingModule() {
     return (
         <>
 
-            <Stack.Navigator initialRouteName="ITEMS">
+            <Stack.Navigator initialRouteName="ITEMS"
+            screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="ITEMS">
                     {(props) => <ItemScreen {...props} />}
                 </Stack.Screen>

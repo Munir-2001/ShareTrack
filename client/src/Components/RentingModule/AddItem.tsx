@@ -128,7 +128,7 @@ export default function AddItemScreen(props: any) {
                     const optionList = { key: options, value: options };
                     return (
                         <View key={key} style={styles.inputContainer}>
-                            {type !== fieldTypes.switch && <Text style={styles.switchText}>{label}</Text>}
+                            {type !== fieldTypes.switch && <Text style={styles.inputLabel}>{label}</Text>}
                             {type === fieldTypes.text && (
                                 <TextInput
                                     style={styles.input}
@@ -166,6 +166,8 @@ export default function AddItemScreen(props: any) {
                                     <Switch
                                         value={formData[key]}
                                         onValueChange={(value) => handleInputChange(key, value)}
+                                        trackColor={{ false: '#DDD', true: '#E63946' }}
+                                        thumbColor={formData[key] ? '#FFF' : '#F4F3F4'}
                                     />
                                 </View>
                             )}
@@ -177,6 +179,9 @@ export default function AddItemScreen(props: any) {
                                     <SelectList
                                         setSelected={(val: any) => handleInputChange(key, val)}
                                         data={options || []}
+                                        boxStyles={styles.selectBox}
+                                    dropdownStyles={styles.selectDropdown}
+                                    placeholder={`Select ${label}`}
                                     />
                                 </View>
                             )}
@@ -199,49 +204,82 @@ export default function AddItemScreen(props: any) {
 const styles = StyleSheet.create({
     container: {
         padding: 20,
+        backgroundColor: '#F9F9F9',
     },
     screenText: {
-        fontSize: 24,
+        fontSize: 26,
+        fontWeight: 'bold',
+        color: '#1E2A78',
         textAlign: 'center',
         marginBottom: 20,
+
     },
     inputContainer: {
         marginBottom: 15,
     },
+    inputLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#444',
+        marginBottom: 5,
+    },
     input: {
         height: 50,
-        borderColor: 'gray',
         borderWidth: 1,
-        marginBottom: 10,
-        paddingLeft: 10,
+        borderColor: '#DDD',
+        borderRadius: 10,
+        paddingHorizontal: 12,
+        backgroundColor: '#FFF',
         fontSize: 16,
+        color: '#333',
+        elevation: 3,
     },
     switchText: {
         fontSize: 14,
         textAlign: 'left',
-        fontWeight: 'bold',
+        fontWeight: '600',
         marginBottom: 5,
 
     },
     switchContainer: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-
-        marginBottom: 20,
-        borderColor: 'gray',
-        borderWidth: 1,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 8,
+        backgroundColor: '#FFF',
 
     },
+    selectBox: {
+        backgroundColor: '#FFF',
+        borderWidth: 1,
+        borderColor: '#DDD',
+        borderRadius: 10,
+        paddingHorizontal: 10,
+        height: 50,
+        fontSize: 16,
+        color: '#333',
+    },
+    selectDropdown: {
+        backgroundColor: '#FFF',
+        borderWidth: 1,
+        borderColor: '#DDD',
+        borderRadius: 8,
+    },
+
     button: {
-        backgroundColor: '#007bff',
-        padding: 15,
+        backgroundColor: '#1E2A78',
+        paddingVertical: 15,
+        borderRadius: 10,
         alignItems: 'center',
-        borderRadius: 5,
-        marginBottom: 20,
+        marginTop: 10,
+        elevation: 2,
     },
     buttonText: {
-        color: 'white',
+        color: '#FFF',
         fontSize: 18,
+        fontWeight: 'bold',
     },
     dateRange: {
         flexDirection: 'row',
