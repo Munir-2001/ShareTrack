@@ -31,16 +31,19 @@ import { store } from './src/Redux/Store/Store';
 import Main from './src/Main';
 import { BorderWidth } from 'react-bootstrap-icons';
 
+
+
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-
+  
 
   return (
     <Provider store={store}>
-
-      <SafeAreaView style={styles.app}>
-        <Main />
-      </SafeAreaView>
+      {/* <NavigationContainer> */}
+        <SafeAreaView style={styles.app}>
+          <Main/>
+        </SafeAreaView>
+      {/* </NavigationContainer> */}
     </Provider>
   );
 }

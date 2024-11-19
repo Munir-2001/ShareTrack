@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PropsWithChildren } from 'react';
 
 import {
@@ -18,28 +18,26 @@ import {
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 import { loginUser, registerUser } from '../../Redux/Actions/AuthActions/AuthAction';
+
 interface AuthScreenProps {
     isSignUp: boolean;
-    setIsSignUp: React.Dispatch<React.SetStateAction<boolean>>; // Function type for state setter
-    navigation: any;
+    setIsSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ navigation, isSignUp, setIsSignUp }) => {
+const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, setIsSignUp }) => {
     const isDarkMode = useColorScheme() === 'dark';
+
     const dispatch = useAppDispatch();
     const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
 
-    const [email, setEmail] = React.useState('');
-    const [password, setPassword] = React.useState('');
-    const [confirmPassword, setConfirmPassword] = React.useState('');
-    const [username, setUsername] = React.useState('');
-    const [phone, setPhone] = React.useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [username, setUsername] = useState('');
+    const [phone, setPhone] = useState('');
 
-    React.useEffect(() => {
-        if (isAuth) {
-            navigation.navigate('Dashboard');
-        }
-    }, [isAuth]);
+
+    
 
     const handleAuth = () => {
 
@@ -69,7 +67,7 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ navigation, 
 
 
     return (
-        <View style={{ backgroundColor: isDarkMode ? Colors.black : Colors.white }}>
+        <View style={{ flex:1,backgroundColor: isDarkMode ? Colors.black : Colors.white }}>
             <ScrollView contentInsetAdjustmentBehavior="automatic">
                 <View style={styles.container}>
                     <Text style={styles.logo}>

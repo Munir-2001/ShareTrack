@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { PropsWithChildren } from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+
+
+
 import {
     Alert,
     SafeAreaView,
@@ -17,56 +18,80 @@ import {
     Colors,
 } from 'react-native/Libraries/NewAppScreen';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../Redux/Store/hooks';
+
+
 import AuthScreen from '../Components/Authentication';
-import Dashboard from '../Dashboard';
 import LaunchScreen from '../LaunchScreen';
 
+import Dashboard from '../Dashboard';
+import RentingModule from '../Components/RentingModule';
+import ProfileScreen from '../Components/Profile';
+
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+
+
+
+const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 
 
 
-
-function Main() {
+export default function Main() {
     const isDarkMode = useColorScheme() === 'dark';
-    const isAuth = useSelector((state: { auth: any }) => state.auth.isAuth);
-    const [isSignUp, setIsSignUp] = React.useState(false);
+    const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
+    const [isSignUp, setIsSignUp] = useState(false);
     const [authState, setAuthState] = useState(isAuth || false);
 
     useEffect(() => {
         setAuthState(isAuth);
     }, [isAuth]);
-   
-    return (
+
+
+
+    return (<>
         <NavigationContainer>
-            <Stack.Navigator initialRouteName={authState ? "Dashboard" : "Launch"}>
-                <Stack.Screen
-                    name="Launch"
-                    options={{ headerShown: false }}>
-                    {(props) => (
-                        <LaunchScreen {...props} setIsSignUp={setIsSignUp} />
-                    )}
-                </Stack.Screen>
-                <Stack.Screen
-                    name="Auth"
-                    options={{ title: 'Authentication' }}>
-                    {(props) => (
-                        <AuthScreen {...props} isSignUp={isSignUp} setIsSignUp={setIsSignUp} />
-                    )}
-                </Stack.Screen>
+            {
+                isAuth ? (
 
-                <Stack.Screen
-                    name="Dashboard"
-                    options={{ title: 'Dashboard' }}>
-                    {(props) => (
-                        <Dashboard {...props} />
-                    )}
-                </Stack.Screen>
+                    <Tab.Navigator screenOptions={{ headerShown: false, }}>
+                        <Tab.Screen name="Dashboard" >
 
-            </Stack.Navigator>
+                            {() => <Dashboard />}
+                        </Tab.Screen>
+
+                        <Tab.Screen name="Profile" >
+                            {() => <ProfileScreen />}
+                        </Tab.Screen>
+
+                        <Tab.Screen name="Rent">
+                            {() => <RentingModule />}
+                        </Tab.Screen>
+
+
+                    </Tab.Navigator>
+
+                ) : (
+                    <Stack.Navigator initialRouteName="Launch" screenOptions={{ headerShown: false, }}>
+                        <Stack.Screen name="Launch" >
+                            {() => <LaunchScreen setIsSignUp={setIsSignUp} />}
+                        </Stack.Screen>
+                        <Stack.Screen name="Auth" >
+                            {() => <AuthScreen isSignUp={isSignUp} setIsSignUp={setIsSignUp} />}
+                        </Stack.Screen>
+
+
+                    </Stack.Navigator>
+
+                )
+            }
         </NavigationContainer>
-    );
+    </>);
 }
 
 const styles = StyleSheet.create({
@@ -77,4 +102,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Main;
+

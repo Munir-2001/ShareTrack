@@ -2,13 +2,26 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true },
-    phone: { type: String, required: true },
+    // Identifiers / CREDAENTIALS
+    username: { type: String, required: true, unique: true },
+    phone: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: false },
+
+    // Personal Information
     photo: { type: String, required: false },
     role: { type: String, required: false, default: 'user' },
-    isVerified: { type: Boolean, default: false },
+    credit_score: { type: Number, required: false },
+    age: { type: Number, required: false },
+
+    // Verification
+    isEmailVerified: { type: Boolean, default: false },
+    isPhoneVerified: { type: Boolean, default: false },
+    isBlocked: { type: Boolean, default: false },
+    blockedUntil: { type: Date, required: false },
+    blockReason: { type: String, required: false },
+
+
 },
     { timestamps: true, }
 

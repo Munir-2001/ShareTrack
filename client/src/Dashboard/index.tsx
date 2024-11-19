@@ -1,70 +1,58 @@
-import React, { useEffect, useState } from 'react';
-import type { PropsWithChildren } from 'react';
+import React from 'react';
 import {
     useColorScheme,
     View,
     Text,
-    Button,
     StyleSheet,
 } from 'react-native';
 
-import {
-    Colors,
-} from 'react-native/Libraries/NewAppScreen';
+import { useAppDispatch, useAppSelector } from '../Redux/Store/hooks';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-function Dashboard({ navigation }: PropsWithChildren<any>) {
-    const isDarkMode = useColorScheme() === 'dark';
-    const dispatch = useDispatch();
-    const user = useSelector((state: { auth: any }) => state.auth.user);
-    const isAuth = useSelector((state: { auth: any }) => state.auth.isAuth);
+// Individual screens
+function ScreenOne() {
+    return <View><Text style={styles.screenText}>ONE</Text></View>
+}
 
-    const [userState, setUserState] = useState(user);
+function ScreenTwo() {
+    return <View><Text style={styles.screenText}>TWO</Text></View>
+}
 
-    useEffect(() => {
-        setUserState(user);
-        if (isAuth) {
-            navigation.navigate('Dashboard');
-        }
-    }, [user]);
+function ScreenThree() {
+    return <View><Text style={styles.screenText}>THREE</Text></View>
+}
 
-    const handleLogout = () => {
-        // Dispatch logout action
-        dispatch({ type: 'LOGOUT' });
-        navigation.navigate('Launch');
-    };
+const Stack = createNativeStackNavigator();
+
+export default function Dashboard() {
+
 
     return (
-        <View
-            style={{
+        <>
 
-                backgroundColor: isDarkMode ? Colors.black : Colors.white,
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: 16,
-            }}>
-            <Text> Dashboard </Text>
+            <Stack.Navigator initialRouteName="TWO">
+                <Stack.Screen name="ONE">
+                    {() => <ScreenOne />}
+                </Stack.Screen>
 
-            {user ? (
-                <>
-                    <Text style={styles.userInfo}>Welcome, {user.username || user.email}!</Text>
-                    <Text style={styles.userInfo}>Email: {user.email}</Text>
-                    <Text style={styles.userInfo}>Phone: {user.phone}</Text>
-                    <Button title="Logout" onPress={handleLogout} />
-                </>
-            ) : (
-                <Text style={styles.userInfo}>No user is logged in.</Text>
-            )}
-        </View>
+                <Stack.Screen name="TWO">
+                    {() => <ScreenTwo />}
+                </Stack.Screen>
+                <Stack.Screen name="THREE">
+                    {() => <ScreenThree />}
+                </Stack.Screen>
+            </Stack.Navigator>
+        </>
+
     );
 }
 
 const styles = StyleSheet.create({
-    userInfo: {
-        fontSize: 18,
-        marginBottom: 10,
+    screenText: {
+        fontSize: 24,
+        textAlign: 'center',
+        margin: 20,
     },
 });
-
-export default Dashboard;
