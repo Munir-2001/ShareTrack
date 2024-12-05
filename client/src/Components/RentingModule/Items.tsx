@@ -11,7 +11,10 @@ import {
 import { getAllItems, getUserItems } from '../../Redux/Actions/AuthActions/ItemAction';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 
+import { deleteItem } from '../../Redux/Actions/AuthActions/ItemAction';
+
 export default function ItemScreen(props: any) {
+
     const dispatch = useAppDispatch();
     const user = useAppSelector((state: { auth: any }) => state.auth.user);
     const all_items = useAppSelector((state: { item: any }) => state.item.all_items);
@@ -68,7 +71,8 @@ export default function ItemScreen(props: any) {
             <ScrollView>
                 <View style={styles.itemsRow}>
                     {data.map((item: any, index: number) => (
-                        <View key={item._id} style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}>
+
+                        ((showAll && item.owner !== user._id) || (!showAll)) && <View key={item._id} style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}>
                             <Image
                                 source={{ uri: 'https://via.placeholder.com/150' }} // Placeholder image URL
                                 style={styles.itemImage}
@@ -76,10 +80,10 @@ export default function ItemScreen(props: any) {
                             <Text style={styles.itemName}>{item.name}</Text>
                             <Text style={styles.itemPrice}>Price: {item.price} Pkr</Text>
                             <Text style={styles.itemCategory}>Type: {item.category}</Text>
-                            
+
                             <Text style={styles.itemDescription}>{item.description}</Text>
-                            {!showAll && (
-                                <TouchableOpacity style={styles.deleteButton} onPress={() => { /* Handle delete */ }}>
+                            {(item.owner === user._id) && (
+                                <TouchableOpacity style={styles.deleteButton} onPress={() => { dispatch(deleteItem(item._id)) }}>
                                     <Text style={styles.deleteText}>Delete</Text>
                                 </TouchableOpacity>
                             )}
@@ -171,22 +175,22 @@ const styles = StyleSheet.create({
     },
     itemCategory: {
         fontSize: 14,
-        color: '#333', 
+        color: '#333',
         marginBottom: 3,
     },
     itemPrice: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#333', 
+        color: '#333',
         marginBottom: 3,
     },
     itemDescription: {
         fontSize: 14,
-        color: '#333', 
+        color: '#333',
         marginBottom: 15,
     },
     deleteButton: {
-        backgroundColor: '#1E2A78', 
+        backgroundColor: '#1E2A78',
         paddingVertical: 8,
         paddingHorizontal: 15,
         borderRadius: 4,

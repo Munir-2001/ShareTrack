@@ -60,13 +60,14 @@ export default function Main() {
             {
                 isAuth ? (
 
-                    <Tab.Navigator screenOptions={{ header: () => <Header />,  headerShown: true, tabBarActiveTintColor: '#1E2A78'}}>
-                        <Tab.Screen name="Dashboard" >
+                    <Tab.Navigator screenOptions={{ header: () => <Header />, headerShown: true, tabBarActiveTintColor: '#1E2A78' }}>
 
+
+                        <Tab.Screen name="Dashboard">
                             {() => <Dashboard />}
                         </Tab.Screen>
 
-                        <Tab.Screen name="Profile" >
+                        <Tab.Screen name="Profile">
                             {() => <ProfileScreen />}
                         </Tab.Screen>
 

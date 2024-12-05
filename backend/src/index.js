@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 
 const userRoutes = require('./routes/userRoutes');
 const itemRoutes = require('./routes/itemRoutes');
+const relationshipRoutes = require('./routes/relationshipRoutes');
 
 
 
@@ -21,6 +22,8 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', userRoutes);
 app.use('/api/item', itemRoutes);
+app.use('/api/relationship', relationshipRoutes);
+
 
 
 
