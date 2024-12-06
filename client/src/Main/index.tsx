@@ -32,6 +32,7 @@ import ProfileScreen from '../Components/Profile';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Header from '../Components/Header';
 
 
 
@@ -59,13 +60,14 @@ export default function Main() {
             {
                 isAuth ? (
 
-                    <Tab.Navigator screenOptions={{ headerShown: false, }}>
-                        <Tab.Screen name="Dashboard" >
+                    <Tab.Navigator screenOptions={{ header: () => <Header />, headerShown: true, tabBarActiveTintColor: '#1E2A78' }}>
 
+
+                        <Tab.Screen name="Dashboard">
                             {() => <Dashboard />}
                         </Tab.Screen>
 
-                        <Tab.Screen name="Profile" >
+                        <Tab.Screen name="Profile">
                             {() => <ProfileScreen />}
                         </Tab.Screen>
 
