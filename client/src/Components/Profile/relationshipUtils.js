@@ -14,13 +14,14 @@ export const getFriends = async (userId) => {
         });
 
         if (!response.ok) {
-            throw new Error(`Error fetching friends: ${response.statusText}`);
+            const error = await response.json();
+            throw new Error(error.message);
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Failed to fetch friends:", error);
+
         throw error;
     }
 };
@@ -37,13 +38,14 @@ export const getFriendRequestsReceived = async (userId) => {
         });
 
         if (!response.ok) {
-            throw new Error(`Error fetching friend requests received: ${response.statusText}`);
+            const error = await response.json();
+            throw new Error(error.message);
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Failed to fetch friend requests received:", error);
+
         throw error;
     }
 };
@@ -60,13 +62,41 @@ export const getFriendRequestsSent = async (userId) => {
         });
 
         if (!response.ok) {
-            throw new Error(`Error fetching friend requests sent: ${response.statusText}`);
+            const error = await response.json();
+            throw new Error(error.message);
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Failed to fetch friend requests sent:", error);
+
+        throw error;
+    }
+};
+
+
+// Get all blocked friends for a user
+export const getBlockedUsers = async (userId) => {
+    try {
+        const response = await fetch(`${API_URL}/api/relationship/blocked/${userId}`, {
+            method: "GET",
+
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include", // Include cookies for session authentication if required
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message);
+        }
+
+        const data = await response.json();
+        return data;
+    }
+
+    catch (error) {
         throw error;
     }
 };
@@ -84,13 +114,14 @@ export const requestFriend = async (userId, friendUsername) => {
         });
 
         if (!response.ok) {
-            throw new Error(`Error requesting friend: ${response.statusText}`);
+            const error = await response.json();
+            throw new Error(error.message);
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Failed to request friend:", error);
+
         throw error;
     }
 };
@@ -103,24 +134,25 @@ export const approveFriendRequest = async (relationshipId) => {
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for session authentication if required
-            body: JSON.stringify({ relationshipId }),
+            credentials: "include",
+            body: JSON.stringify({ relationshipId: relationshipId }),
         });
 
         if (!response.ok) {
-            throw new Error(`Error approving friend request: ${response.statusText}`);
+            const error = await response.json();
+            throw new Error(error.message);
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Failed to approve friend request:", error);
+
         throw error;
     }
 };
 
 // Delete a friend request / unfriend a friend / unblock a friend
-export const deleteRelationship = async (userId, friendId) => {
+export const deleteRelationship = async (relationshipId) => {
     try {
         const response = await fetch(`${API_URL}/api/relationship/delete`, {
             method: "DELETE",
@@ -128,23 +160,24 @@ export const deleteRelationship = async (userId, friendId) => {
                 "Content-Type": "application/json",
             },
             credentials: "include", // Include cookies for session authentication if required
-            body: JSON.stringify({ relationshipId }),
+            body: JSON.stringify({ relationshipId: relationshipId }),
         });
 
         if (!response.ok) {
-            throw new Error(`Error deleting friend request: ${response.statusText}`);
+            const error = await response.json();
+            throw new Error(error.message);
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Failed to delete friend request:", error);
+
         throw error;
     }
 };
 
 // Block a friend
-export const blockFriend = async (relationshipId, userId) => {
+export const blockFriend = async (relationshipId, blockerId) => {
     try {
         const response = await fetch(`${API_URL}/api/relationship/block`, {
             method: "PUT",
@@ -152,17 +185,18 @@ export const blockFriend = async (relationshipId, userId) => {
                 "Content-Type": "application/json",
             },
             credentials: "include", // Include cookies for session authentication if required
-            body: JSON.stringify({ relationshipId, userId }),
+            body: JSON.stringify({ relationshipId: relationshipId, blockerId: blockerId }),
         });
 
         if (!response.ok) {
-            throw new Error(`Error blocking friend: ${response.statusText}`);
+            const error = await response.json();
+            throw new Error(error.message);
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Failed to block friend:", error);
+
         throw error;
     }
 };
