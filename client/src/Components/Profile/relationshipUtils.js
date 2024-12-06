@@ -194,6 +194,7 @@ export const blockFriend = async (relationshipId, blockerId) => {
         }
 
         const data = await response.json();
+        console.log("Blocking friend", data);  
         return data;
     } catch (error) {
 

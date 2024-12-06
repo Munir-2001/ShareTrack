@@ -10,6 +10,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
+import Icon from '@react-native-vector-icons/ionicons';
 
 type SegmentControlProps = {
   options: string[];
@@ -23,7 +24,6 @@ const SegmentControl: React.FC<SegmentControlProps> = React.memo(
 
     const internalPadding = 20;
     const segmentedControlWidth = windowWidth - 40;
-
     const itemWidth =
       (segmentedControlWidth - internalPadding) / options.length;
 
@@ -36,25 +36,20 @@ const SegmentControl: React.FC<SegmentControlProps> = React.memo(
       };
     }, [selectedOption, options, itemWidth]);
 
+    // Define icons for each option (customize based on your needs)
+    const icons = {
+      'Your Friends': 'people',
+      'Pending Requests': 'hourglass',
+      'Add Friends': 'person-add',
+      'Blocked Users': 'ban',
+    };
+
     return (
       <View
-        style={[
-          styles.container,
-          {
-            width: segmentedControlWidth,
-            borderRadius: 20,
-            paddingLeft: internalPadding / 2,
-          },
-        ]}
+        style={[styles.container, { width: segmentedControlWidth, paddingLeft: internalPadding / 2 }]}
       >
         <Animated.View
-          style={[
-            {
-              width: itemWidth,
-            },
-            rStyle,
-            styles.activeBox,
-          ]}
+          style={[{ width: itemWidth }, rStyle, styles.activeBox]}
         />
         {options.map((option) => {
           return (
@@ -64,17 +59,21 @@ const SegmentControl: React.FC<SegmentControlProps> = React.memo(
               }}
               key={option}
               style={[
-                {
-                  width: itemWidth,
-                },
+                { width: itemWidth },
                 styles.labelContainer,
-                selectedOption === option && styles.selectedLabelContainer, // Style for selected option
+                selectedOption === option && styles.selectedLabelContainer,
               ]}
             >
+              <Icon
+                name={icons[option]} // Dynamically use the icon for the current option
+                size={20} // Icon size (can be adjusted)
+                color={selectedOption === option ? '#FFF' : '#333'} // Change icon color based on selection
+                style={styles.icon}
+              />
               <Text
                 style={[
                   styles.label,
-                  selectedOption === option && styles.selectedLabelText, // Style for selected text
+                  selectedOption === option && styles.selectedLabelText,
                 ]}
               >
                 {option}
@@ -90,11 +89,12 @@ const SegmentControl: React.FC<SegmentControlProps> = React.memo(
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    height: 55,
-    backgroundColor: '#F5F5F5',
+    height: 80, // Increased height for better spacing
+    backgroundColor: '#f9f9f9',
     borderRadius: 20,
-    position: 'relative', 
-    overflow: 'hidden', 
+    position: 'relative',
+    overflow: 'hidden',
+    padding: 10,
   },
   activeBox: {
     position: 'absolute',
@@ -106,25 +106,32 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     elevation: 3,
-    height: '80%',
-    top: '10%',
+    height: '95%',
+    // top: '10%',
     backgroundColor: '#1E2A78',
   },
   labelContainer: {
     justifyContent: 'center',
     alignItems: 'center',
     height: '100%',
-    backgroundColor: '#F5F5F5', 
+    backgroundColor: '#F5F5F5',
+    flexDirection: 'column', // Change to column to stack icon above text
+    paddingHorizontal: 10,
   },
   selectedLabelContainer: {
-    backgroundColor: '#1E2A78', 
+    backgroundColor: '#1E2A78',
   },
   label: {
-    fontSize: 16,
-    color: '#333', 
+    fontSize: 12,
+    color: '#333',
+    marginTop: 5, // Space between icon and text
+    textAlign: 'center',
   },
   selectedLabelText: {
-    color: '#FFF', 
+    color: '#FFF',
+  },
+  icon: {
+     // Space between icon and text (if needed)
   },
 });
 
