@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20, 
+    elevation: 4,
   },
   drawerIcon: {
     position: 'absolute',

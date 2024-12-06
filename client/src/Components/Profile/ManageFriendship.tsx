@@ -5,8 +5,9 @@ import {
     Button,
     FlatList,
     StyleSheet,
-    TextInput, Alert
+    TextInput, Alert, TouchableOpacity,
 } from 'react-native';
+import Icon from '@react-native-vector-icons/ionicons';
 import {
     getFriends,
     getFriendRequestsReceived,
@@ -15,8 +16,12 @@ import {
     deleteRelationship,
     requestFriend,
 } from './relationshipUtils'; // Adjust the path if needed
+import { SegmentControl } from './SegmentControl';
 
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
+
+const options = ['Your Friends', 'Pending Requests', 'Sent Requests'];
+
 
 export default function ConnectionScreen({ navigation }: PropsWithChildren<any>) {
     // const dispatch = useAppDispatch();
@@ -28,6 +33,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
     const [sentRequests, setSentRequests] = useState([]);
     const [blockedUsers, setBlockedUsers] = useState([]);
     const [friendRequestUsername, setFriendRequestUsername] = useState('');
+    const [selectedOption, setSelectedOption] = useState('Your Friends');
 
     useEffect(() => {
         setUserId(user?._id || null);
@@ -72,7 +78,15 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
     }
     return (
         <View style={styles.container}>
-            <Button title="Go to Profile" onPress={gotoProfile} />
+            <TouchableOpacity onPress={gotoProfile} style={styles.backButtonContainer}>
+                <Icon name="arrow-back" size={30} color="#1E2A78" style={styles.icon} />
+                <Text style={styles.backButtonText}>Back to Profile</Text>
+            </TouchableOpacity>
+            <SegmentControl
+        options={options}
+        selectedOption={selectedOption}
+        onOptionPress={setSelectedOption}
+      />
             <Text style={styles.header}>Friends</Text>
             <FlatList
                 data={friends}
@@ -110,7 +124,8 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        padding: 20,
+        backgroundColor: '#fff',
     },
     header: {
         fontSize: 18,
@@ -125,4 +140,18 @@ const styles = StyleSheet.create({
         padding: 8,
         marginBottom: 10,
     },
+    backButtonContainer: {
+        flexDirection: 'row',
+        alignItems: 'center', 
+        marginBottom: 10, 
+      },
+      icon: {
+        marginRight: 8, 
+      },
+      backButtonText: {
+        fontSize: 16, 
+        color: '#1E2A78', 
+        fontWeight: 'bold', 
+      },
+    
 });

@@ -7,6 +7,8 @@ import {
     ScrollView,
     Image,
 } from 'react-native';
+import Icon from '@react-native-vector-icons/ionicons';
+
 
 import { getAllItems, getUserItems } from '../../Redux/Actions/AuthActions/ItemAction';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
@@ -47,9 +49,7 @@ export default function ItemScreen(props: any) {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity style={styles.addButton} onPress={() => navigate("ADDITEM")}>
-                <Text style={styles.addButtonText}>Add a Listing</Text>
-            </TouchableOpacity>
+            
             <View style={styles.toggleButtonsContainer}>
                 <TouchableOpacity
                     style={[styles.toggleButton, showAll && styles.activeButton]}
@@ -84,13 +84,19 @@ export default function ItemScreen(props: any) {
                             <Text style={styles.itemDescription}>{item.description}</Text>
                             {(item.owner === user._id) && (
                                 <TouchableOpacity style={styles.deleteButton} onPress={() => { dispatch(deleteItem(item._id)) }}>
-                                    <Text style={styles.deleteText}>Delete</Text>
+                                     <Icon name="trash-outline" size={20} color="#1E2A78" />
                                 </TouchableOpacity>
                             )}
+                            
                         </View>
                     ))}
+                    
                 </View>
+            
             </ScrollView>
+            {!showAll && <TouchableOpacity style={styles.fab} onPress={() => navigate("ADDITEM")}>
+                        <Icon name="add" size={28} color="#fff" />
+                    </TouchableOpacity>}
         </View>
     );
 }
@@ -99,7 +105,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: '#fff',
     },
     addButton: {
         backgroundColor: '#1E2A78', // Primary blue color
@@ -150,7 +156,7 @@ const styles = StyleSheet.create({
         borderRadius: 8, // Rounded corners
         padding: 15,
         marginBottom: 15, // Space between cards
-        width: '48%', // Adjust width to fit two items per row
+        width: '45%', // Adjust width to fit two items per row
         marginRight: '2%', // Space between items
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
@@ -190,12 +196,13 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     deleteButton: {
-        backgroundColor: '#1E2A78',
-        paddingVertical: 8,
-        paddingHorizontal: 15,
+        // paddingVertical: 3,
+        // paddingHorizontal: 15,
         borderRadius: 4,
         alignSelf: 'flex-start',
-        marginTop: 10,
+        // marginTop: 10,
+        justifyContent: 'center', // Center the icon
+        alignItems: 'center',
     },
     deleteText: {
         color: '#fff', // Primary red color
@@ -203,4 +210,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'right',
     },
+    fab: {
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        backgroundColor: '#1E2A78',
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5, 
+      },
 });

@@ -33,6 +33,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Header from '../Components/Header';
+import Icon from '@react-native-vector-icons/ionicons';
+
 
 
 
@@ -60,23 +62,39 @@ export default function Main() {
             {
                 isAuth ? (
 
-                    <Tab.Navigator screenOptions={{ header: () => <Header />, headerShown: true, tabBarActiveTintColor: '#1E2A78' }}>
+                    <Tab.Navigator
+  screenOptions={({ route }) => ({
+    header: () => <Header />,
+    headerShown: true,
+    tabBarActiveTintColor: '#1E2A78', 
+    tabBarInactiveTintColor: '#8e8e93', 
+    tabBarIcon: ({ color, size }) => {
+      let iconName;
 
+      if (route.name === 'Dashboard') {
+        iconName = 'home-outline'; 
+      } else if (route.name === 'Profile') {
+        iconName = 'person-outline'; 
+      } else if (route.name === 'Rent') {
+        iconName = 'receipt-outline'; 
+      }
 
-                        <Tab.Screen name="Dashboard">
-                            {() => <Dashboard />}
-                        </Tab.Screen>
+      return <Icon name={iconName} size={size || 24} color={color} />;
+    },
+    tabBarStyle: {
+      backgroundColor: '#fff', 
+      height: 60, 
+    },
+    tabBarLabelStyle: {
+      fontSize: 12, 
+    },
+  })}
+>
+  <Tab.Screen name="Dashboard">{() => <Dashboard />}</Tab.Screen>
+  <Tab.Screen name="Profile">{() => <ProfileScreen />}</Tab.Screen>
+  <Tab.Screen name="Rent">{() => <RentingModule />}</Tab.Screen>
+</Tab.Navigator>
 
-                        <Tab.Screen name="Profile">
-                            {() => <ProfileScreen />}
-                        </Tab.Screen>
-
-                        <Tab.Screen name="Rent">
-                            {() => <RentingModule />}
-                        </Tab.Screen>
-
-
-                    </Tab.Navigator>
 
                 ) : (
                     <Stack.Navigator initialRouteName="Launch" screenOptions={{ headerShown: false, }}>
