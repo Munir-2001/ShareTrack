@@ -1,5 +1,6 @@
 // src/routes/relationshipRoutes.js
 const express = require('express');
+
 const {
     requestRelationship,
     approveRelationship,
@@ -7,7 +8,9 @@ const {
     blockRelationship,
     getAllFriends,
     getAllFriendRequestsReceived,
-    getAllFriendRequestsSent } = require('../controllers/relationshipController');
+    getAllFriendRequestsSent,
+    getBlockedRelationships
+} = require('../controllers/relationshipController');
 
 const relationshipRouter = express.Router();
 
@@ -31,6 +34,10 @@ relationshipRouter.get('/requests/received/:userId', getAllFriendRequestsReceive
 
 // Route to get all friend requests sent by a user
 relationshipRouter.get('/requests/sent/:userId', getAllFriendRequestsSent);
+
+// Route to get all blocked relationships of a user
+relationshipRouter.get('/blocked/:userId', getBlockedRelationships);
+
 
 
 
