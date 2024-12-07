@@ -28,7 +28,7 @@ import {SegmentControl} from './SegmentControl';
 import {useAppDispatch, useAppSelector} from '../../Redux/Store/hooks';
 
 const options = ['Add Friends', 'Your Friends', 'Blocked Users'];
-interface Friend {
+interface User {
   _id: string;
   username: string;
   relationship: {
@@ -41,7 +41,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
   const user = useAppSelector((state: {auth: any}) => state.auth.user);
   const isAuth = useAppSelector((state: {auth: any}) => state.auth.isAuth);
   const [userId, setUserId] = useState(user._id || null); // Replace with dynamic user ID
-  const [friends, setFriends] = useState([]);
+  const [friends, setFriends] = useState<User[]>([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [blockedUsers, setBlockedUsers] = useState([]);
@@ -49,7 +49,9 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
   const [selectedOption, setSelectedOption] = useState('Add Friends');
   const [filter, setFilter] = useState('Received');
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
+  const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
+  const [searchQuery, setSearchQuery] = useState(''); 
+  const [filteredFriends, setFilteredFriends] = useState<User[]>([]); 
 
   const filteredData = filter === 'Received' ? pendingRequests : sentRequests;
 
@@ -70,6 +72,8 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
     sentRequests,
   ]);
 
+  
+
   const fetchData = async () => {
     try {
       const friendsData = await getFriends(userId);
@@ -85,6 +89,17 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
       console.error('Error fetching data:', error);
     }
   };
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = friends.filter((friend) =>
+        friend.username.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredFriends(filtered);
+    } else {
+      setFilteredFriends(friends);
+    }
+  }, [searchQuery, friends]);
+
 
   const handleSendFriendRequest = async () => {
     if (!friendRequestUsername) return;
@@ -107,7 +122,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
     navigation.navigate('PROFILE');
   };
 
-  const openModal = friend => {
+  const openModal = (friend:User) => {
     setSelectedFriend(friend);
     setModalVisible(true);
     console.log('open modal');
@@ -145,8 +160,14 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
       {/* <Text style={styles.header}>Friends</Text> */}
       {selectedOption === 'Your Friends' && (
         <View style={{flex: 1}}>
+            <TextInput
+            style={styles.searchInput}
+            placeholder="Search friends by username"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
           <FlatList
-            data={friends}
+            data={filteredFriends}
             keyExtractor={(item: any) => item.relationship._id.toString()}
             renderItem={({item}) => (
               <View style={styles.listElement}>
@@ -211,7 +232,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
         </View>
       )}
 
-      <View style={{flex: 1}}>
+      {/* <View style={{flex: 1}}> */}
         {selectedOption === 'Add Friends' && (
           <View style={{flex: 1}}>
             {/* Header */}
@@ -307,7 +328,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
             </View>
           </View>
         )}
-      </View>
+      {/* </View> */}
 
       {/* <Text style={styles.header}>Blocked Users</Text> */}
       {selectedOption === 'Blocked Users' && (
@@ -513,6 +534,19 @@ const styles = StyleSheet.create({
   },
 
   modalCancelButton: {
+    marginTop: 10,
+  },
+  searchInput: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    backgroundColor: '#f9f9f9',
+    fontSize: 16,
+    color: '#333',
+    elevation: 3,
+    marginBottom: 15,
     marginTop: 10,
   },
 });
