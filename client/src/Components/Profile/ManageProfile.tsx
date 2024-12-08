@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import type { PropsWithChildren } from 'react';
+import React, {useEffect, useState} from 'react';
+import type {PropsWithChildren} from 'react';
 import {
   useColorScheme,
   View,
@@ -8,39 +8,42 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  Modal,
   ScrollView,
-  Alert
+  Alert,
+  Pressable,
 } from 'react-native';
 
-import { ImageLibraryOptions, launchImageLibrary } from "react-native-image-picker";
+import {
+  ImageLibraryOptions,
+  launchImageLibrary,
+} from 'react-native-image-picker';
 
-
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Icon from '@react-native-vector-icons/ionicons';
 
-import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
-import { API_URL } from '../../constants';
+import {useAppDispatch, useAppSelector} from '../../Redux/Store/hooks';
+import {API_URL} from '../../constants';
 
-export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
+export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
   const isDarkMode = useColorScheme() === 'dark';
   const dispatch = useAppDispatch();
 
-  const user = useAppSelector((state: { auth: any }) => state.auth.user);
-  const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
+  const user = useAppSelector((state: {auth: any}) => state.auth.user);
+  const isAuth = useAppSelector((state: {auth: any}) => state.auth.isAuth);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [adjustmentVisible, setAdjustmentVisible] = useState(false);
 
   const [userState, setUserState] = useState(user);
   const [photo, setPhoto] = useState<any | null>({
     uri: null,
     fileName: null,
-    type: null
+    type: null,
   });
 
-
   const pickImage = async () => {
-
-
     const options: ImageLibraryOptions = {
-      mediaType: "photo",
+      mediaType: 'photo',
       quality: 1,
     };
 
@@ -48,40 +51,38 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     console.log(response);
 
     if (response.didCancel) {
-      Alert.alert("Cancelled", "Image selection cancelled");
-    }
-    else if (response.errorCode) {
-      Alert.alert("Error", response.errorMessage);
-    }
-    else {
+      Alert.alert('Cancelled', 'Image selection cancelled');
+    } else if (response.errorCode) {
+      Alert.alert('Error', response.errorMessage);
+    } else {
       if (response.assets && response.assets.length > 0) {
         console.log(response);
         const selectedPhoto = response.assets[0];
         setPhoto(selectedPhoto || null);
+        setAdjustmentVisible(true);
       }
     }
   };
 
   const uploadImage = async () => {
-
     if (!photo) {
-      Alert.alert("No Image Selected", "Please select an image first.");
+      Alert.alert('No Image Selected', 'Please select an image first.');
       return;
     }
 
     const formData = new FormData();
-    formData.append("file", {
+    formData.append('file', {
       uri: photo.uri,
       name: photo.fileName,
       type: photo.type,
     });
-    formData.append("username", user.username); // Replace with actual username or dynamic input.
+    formData.append('username', user.username); // Replace with actual username or dynamic input.
 
     try {
       const response = await fetch(`${API_URL}/api/auth/photo`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "multipart/form-data",
+          'Content-Type': 'multipart/form-data',
         },
         body: formData,
       });
@@ -89,23 +90,32 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert("Success", `Photo URL: ${data.photoUrl}`);
+        Alert.alert('Success', `Photo URL: ${data.photoUrl}`);
       } else {
-        Alert.alert("Upload Error", data.message || "Something went wrong.");
+        Alert.alert('Upload Error', data.message || 'Something went wrong.');
       }
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      Alert.alert('Error', error.message);
     }
+    setAdjustmentVisible(false);
   };
 
-
-
   const handleLogout = () => {
-    dispatch({ type: 'LOGOUT' });
+    dispatch({type: 'LOGOUT'});
   };
 
   const gotoConnections = () => {
     navigation.navigate('CONNECTIONS');
+  };
+  const openModal = () => {
+    setModalVisible(true);
+    console.log('open modal');
+  };
+
+  const closeModal = () => {
+    console.log('Closing Modal');
+    setModalVisible(false);
+    console.log('Modal Visible State:', modalVisible); // Log after state chang
   };
 
   return (
@@ -119,25 +129,82 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
           <View style={styles.topHalf} />
 
           <View style={styles.profilePictureContainer}>
-            <Image
-              source={{ uri: photo.uri || user.photo || 'https://via.placeholder.com/100' }}
-              style={styles.profilePicture}
-            />
+            <TouchableOpacity onPress={openModal}>
+              <Image
+                source={{
+                  uri:
+                    user.photo ||
+                    photo.uri ||
+                    'https://via.placeholder.com/100',
+                }}
+                style={styles.profilePicture}
+              />
+            </TouchableOpacity>
+            <Modal
+              visible={modalVisible}
+              transparent={true}
+              animationType="slide">
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                <Pressable
+                    style={[styles.modalButton]}
+                    onPress={() => {
+                      closeModal();
+                    }}>
+                    <Text style={[styles.modalButtonText, {color: 'red'}]}>
+                      Remove Profile Picture
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    style={[styles.modalButton]}
+                    onPress={() => {
+                      pickImage();
 
-            {/* <Button title='' */}
+                      closeModal();
+                    }}>
+                    <Text style={[styles.modalButtonText]}>
+                      Change Profile Picture
+                    </Text>
+                  </Pressable>
+                  
+                  {/* Cancel Button */}
+                  <TouchableOpacity onPress={closeModal}>
+                    <Text style={styles.modalButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+            <Modal
+              visible={adjustmentVisible}
+              transparent={false}
+              animationType="slide">
+              <View style={styles.adjustmentContainer}>
+                <Text style={styles.adjustmentHeader}>
+                  Your Profile Picture
+                </Text>
+                {photo && (
+                  <Image
+                    source={{uri: photo.uri}}
+                    style={styles.adjustedImage}
+                  />
+                )}
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity style={styles.button} onPress={uploadImage}>
+                    <Text style={styles.buttonText}>Confirm</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setAdjustmentVisible(false)}>
+                    <Text style={styles.buttonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
 
-            {/* <TouchableOpacity onPress={pickImage} style={{flexDirection:"row"}}>
-              <Icon name="camera" size={44} color="#1E2A78" />
-              <Text style={{ color: '#1E2A78', fontSize: 12 }}>Change Photo</Text>
-            </TouchableOpacity> */}
-
-            <View style={{ zIndex: 999 }}>
+            {/* <View style={{zIndex: 999}}>
               <Button title="Change Photo" onPress={pickImage} />
               <Button title="Upload Photo" onPress={uploadImage} />
-            </View>
-
-
-
+            </View> */}
           </View>
 
           <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -267,7 +334,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
@@ -303,7 +370,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
@@ -315,10 +382,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginTop: 5,
   },
-  buttonContainer: {
-    marginTop: 20, // Add space above the buttons
-    paddingHorizontal: 20, // Optional for adding some space around buttons
-  },
+
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -328,7 +392,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
@@ -339,5 +403,80 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 10,
+  },
+  adjustmentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  adjustmentHeader: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  adjustedImage: {
+    width: 300,
+    height: 300,
+    marginBottom: 20,
+    borderRadius: 150,
+  },
+  button: {
+    backgroundColor: '#1E2A78',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '80%',
+    marginTop: 20, // Optional spacing from other elements
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 1000,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    zIndex: 1001,
+    pointerEvents: 'auto',
+  },
+
+  modalHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#333',
+  },
+
+  modalButton: {
+    width: '100%', // Buttons take up full width of the modal
+    // paddingVertical: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+    paddingBottom: 10,
+    marginBottom: 10,
+  },
+
+  modalButtonText: {
+    color: '#1E2A78',
+    fontSize: 16,
+  },
+
+  modalCancelButton: {
+    marginTop: 10,
   },
 });
