@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useEffect, useState } from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   useColorScheme,
   View,
@@ -9,24 +9,99 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Alert
 } from 'react-native';
 
-import {Colors} from 'react-native/Libraries/NewAppScreen';
+import { ImageLibraryOptions, launchImageLibrary } from "react-native-image-picker";
+
+
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 import Icon from '@react-native-vector-icons/ionicons';
 
-import {useAppDispatch, useAppSelector} from '../../Redux/Store/hooks';
+import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
+import { API_URL } from '../../constants';
 
-export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
+export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const isDarkMode = useColorScheme() === 'dark';
   const dispatch = useAppDispatch();
 
-  const user = useAppSelector((state: {auth: any}) => state.auth.user);
-  const isAuth = useAppSelector((state: {auth: any}) => state.auth.isAuth);
+  const user = useAppSelector((state: { auth: any }) => state.auth.user);
+  const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
 
   const [userState, setUserState] = useState(user);
+  const [photo, setPhoto] = useState<any | null>({
+    uri: null,
+    fileName: null,
+    type: null
+  });
+
+
+  const pickImage = async () => {
+
+
+    const options: ImageLibraryOptions = {
+      mediaType: "photo",
+      quality: 1,
+    };
+
+    const response = await launchImageLibrary(options);
+    console.log(response);
+
+    if (response.didCancel) {
+      Alert.alert("Cancelled", "Image selection cancelled");
+    }
+    else if (response.errorCode) {
+      Alert.alert("Error", response.errorMessage);
+    }
+    else {
+      if (response.assets && response.assets.length > 0) {
+        console.log(response);
+        const selectedPhoto = response.assets[0];
+        setPhoto(selectedPhoto || null);
+      }
+    }
+  };
+
+  const uploadImage = async () => {
+
+    if (!photo) {
+      Alert.alert("No Image Selected", "Please select an image first.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", {
+      uri: photo.uri,
+      name: photo.fileName,
+      type: photo.type,
+    });
+    formData.append("username", user.username); // Replace with actual username or dynamic input.
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/photo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert("Success", `Photo URL: ${data.photoUrl}`);
+      } else {
+        Alert.alert("Upload Error", data.message || "Something went wrong.");
+      }
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+
 
   const handleLogout = () => {
-    dispatch({type: 'LOGOUT'});
+    dispatch({ type: 'LOGOUT' });
   };
 
   const gotoConnections = () => {
@@ -45,9 +120,24 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
 
           <View style={styles.profilePictureContainer}>
             <Image
-              source={{uri: 'https://via.placeholder.com/100'}}
+              source={{ uri: photo.uri || user.photo || 'https://via.placeholder.com/100' }}
               style={styles.profilePicture}
             />
+
+            {/* <Button title='' */}
+
+            {/* <TouchableOpacity onPress={pickImage} style={{flexDirection:"row"}}>
+              <Icon name="camera" size={44} color="#1E2A78" />
+              <Text style={{ color: '#1E2A78', fontSize: 12 }}>Change Photo</Text>
+            </TouchableOpacity> */}
+
+            <View style={{ zIndex: 999 }}>
+              <Button title="Change Photo" onPress={pickImage} />
+              <Button title="Upload Photo" onPress={uploadImage} />
+            </View>
+
+
+
           </View>
 
           <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -177,7 +267,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
@@ -213,7 +303,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
@@ -238,7 +328,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 8,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,

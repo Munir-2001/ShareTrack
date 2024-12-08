@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const uploadToStorage = require('../config/storage');
+
 
 // Register a new user, ensuring no repeated email, username, or phone
 const createUser = async (req, res) => {
@@ -82,4 +84,38 @@ const updateUser = async (req, res) => {
     }
 }
 
-module.exports = { createUser, loginUser };
+const updatePhoto = async (req, res) => {
+    try {
+        const { username } = req.body;
+
+        // console.log('username', username);
+
+        const user = await User.findOne({ username: username }).exec();
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const photo = req.file; // Multer adds this to req
+
+        // console.log('photo', photo);
+
+        if (!photo) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const photoUrl = await uploadToStorage(photo, 'profilepictures');
+
+
+        user.photo = photoUrl;
+        console.log('user', photoUrl);
+        await user.save();
+        res.status(200).json({ photoUrl });
+
+
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({ message: err.message });
+    }
+}
+
+module.exports = { createUser, loginUser, updateUser, updatePhoto };
