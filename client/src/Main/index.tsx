@@ -64,7 +64,7 @@ export default function Main() {
 
                     <Tab.Navigator
   screenOptions={({ route }) => ({
-    header: () => <Header />,
+    header: () => (route.name === 'Profile' ? null : <Header />),
     headerShown: true,
     tabBarActiveTintColor: '#1E2A78', 
     tabBarInactiveTintColor: '#8e8e93', 

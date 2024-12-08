@@ -10,8 +10,11 @@ import {
 
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 import ConnectionScreen from './ManageFriendship';
 import ProfileScreen from './ManageProfile';
+import UserProfile from './UserProfile';
+
 
 
 const Stack = createNativeStackNavigator();
@@ -22,7 +25,7 @@ export default function Dashboard() {
     return (
         <>
 
-            <Stack.Navigator initialRouteName="CONNECTIONS" screenOptions={{
+            <Stack.Navigator initialRouteName="PROFILE" screenOptions={{
                 headerShown: false,
             }}>
                 <Stack.Screen name="PROFILE">
@@ -32,6 +35,7 @@ export default function Dashboard() {
                 <Stack.Screen name="CONNECTIONS">
                     {(props) => <ConnectionScreen {...props} />}
                 </Stack.Screen>
+                <Stack.Screen name="UserProfile" component={UserProfile} />
             </Stack.Navigator>
         </>
 

@@ -36,7 +36,6 @@ const SegmentControl: React.FC<SegmentControlProps> = React.memo(
       };
     }, [selectedOption, options, itemWidth]);
 
-    // Define icons for each option (customize based on your needs)
     const icons = {
       'Your Friends': 'people',
       'Pending Requests': 'hourglass',
@@ -65,8 +64,8 @@ const SegmentControl: React.FC<SegmentControlProps> = React.memo(
               ]}
             >
               <Icon
-                name={icons[option]} // Dynamically use the icon for the current option
-                size={20} // Icon size (can be adjusted)
+                name={icons[option]} 
+                size={20} 
                 color={selectedOption === option ? '#FFF' : '#333'} // Change icon color based on selection
                 style={styles.icon}
               />

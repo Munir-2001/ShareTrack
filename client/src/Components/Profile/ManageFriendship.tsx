@@ -34,6 +34,7 @@ interface User {
   relationship: {
     _id: string;
   };
+  photo: string;
 }
 
 export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
@@ -46,7 +47,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
   const [sentRequests, setSentRequests] = useState([]);
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [friendRequestUsername, setFriendRequestUsername] = useState('');
-  const [selectedOption, setSelectedOption] = useState('Add Friends');
+  const [selectedOption, setSelectedOption] = useState('Your Friends');
   const [filter, setFilter] = useState('Received');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
@@ -111,7 +112,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
     try {
       await requestFriend(userId, friendRequestUsername);
       Alert.alert('Friend request sent!');
-      setFriendRequestUsername(''); // Clear the input
+      setFriendRequestUsername(''); 
       fetchData();
     } catch (error: any) {
       Alert.alert(error.message);
@@ -177,9 +178,15 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                   style={styles.profilePicture}
                 />
                 {/* User details */}
-                <View style={styles.userDetails}>
-                  <Text style={styles.userName}>{item.username}</Text>
-                </View>
+                <TouchableOpacity style={styles.userDetails}
+               onPress={() => 
+  navigation.navigate('UserProfile', { 
+    userId: item._id, 
+    username: item.username, 
+    profilePicture: item.photo // Assuming profilePicture is a field in the user object
+  })
+}>  <Text style={styles.userName}>{item.username}</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => openModal(item)}>
                   <Icon name="ellipsis-vertical" size={24} color="#1E2A78" />
