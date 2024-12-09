@@ -19,6 +19,9 @@ import {
   launchImageLibrary,
 } from 'react-native-image-picker';
 
+import ImagePicker from 'react-native-image-crop-picker';
+
+
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Icon from '@react-native-vector-icons/ionicons';
 
@@ -59,8 +62,37 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
         console.log(response);
         const selectedPhoto = response.assets[0];
         setPhoto(selectedPhoto || null);
+        // setAdjustmentVisible(true);
+        pickAndCropImage();
+      }
+    }
+  };
+  const pickAndCropImage = async () => {
+    try {
+      const croppedImage = await ImagePicker.openCropper({
+        path: photo.uri,
+        cropping: true,
+        freeStyleCropEnabled: true,
+        mediaType: 'photo',
+        cropperCircleOverlay: true, 
+        showCropFrame: true,
+        cropperToolbarTitle:'',
+      // cropperCircleOverlay:true,
+      // showCropGuidelines:false,
+      // showCropFrame:false,
+      // hideBottomControls: true,
+      });
+
+      if (croppedImage) {
+        setPhoto({
+          uri: croppedImage.path,
+          fileName: croppedImage.filename || 'cropped_image.jpg',
+          type: croppedImage.mime,
+        });
         setAdjustmentVisible(true);
       }
+    } catch (error) {
+      console.log('Error cropping image:', error);
     }
   };
 
@@ -146,7 +178,7 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
               animationType="slide">
               <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                <Pressable
+                  <Pressable
                     style={[styles.modalButton]}
                     onPress={() => {
                       closeModal();
@@ -166,7 +198,7 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
                       Change Profile Picture
                     </Text>
                   </Pressable>
-                  
+
                   {/* Cancel Button */}
                   <TouchableOpacity onPress={closeModal}>
                     <Text style={styles.modalButtonText}>Cancel</Text>
@@ -177,7 +209,7 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
             <Modal
               visible={adjustmentVisible}
               transparent={false}
-              animationType="slide">
+              animationType="none">
               <View style={styles.adjustmentContainer}>
                 <Text style={styles.adjustmentHeader}>
                   Your Profile Picture
@@ -189,8 +221,12 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
                   />
                 )}
                 <View style={styles.buttonContainer}>
-                  <TouchableOpacity style={styles.button} onPress={uploadImage}>
-                    <Text style={styles.buttonText}>Confirm</Text>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={uploadImage}>
+                    {/* <Text style={styles.buttonText} onPress={uploadImage}> */}
+                      <Text style={styles.buttonText}>Confirm</Text>
+                    {/* </Text> */}
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.button}
@@ -406,20 +442,30 @@ const styles = StyleSheet.create({
   },
   adjustmentContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    justifyContent: 'center', // Center items vertically
+    alignItems: 'center', // Center items horizontally
+    paddingHorizontal: 20, // Padding on left and right
+    paddingVertical: 10, // Padding on top and bottom
+    backgroundColor: '#f9f9f9', // Light background color for better visibility
   },
   adjustmentHeader: {
-    fontSize: 18,
-    marginBottom: 20,
+    fontSize: 18, // Standard readable font size
+    marginBottom: 20, // Space below the header
+    fontWeight: 'bold', // Make the header bold
+    color: '#333', // Dark gray color for contrast
+    textAlign: 'center', // Center-align the text
   },
   adjustedImage: {
-    width: 300,
-    height: 300,
-    marginBottom: 20,
-    borderRadius: 150,
+    width: 300, // Fixed width
+    height: 300, // Fixed height
+    marginBottom: 20, // Space below the image
+    borderRadius: 150, // Circular shape for the image
+    borderWidth: 2, // Optional border for emphasis
+    borderColor: '#ddd', // Light gray border color
+    resizeMode: 'cover', // Ensure the image covers the entire frame
+    backgroundColor: '#e0e0e0', // Fallback background for missing images
   },
+  
   button: {
     backgroundColor: '#1E2A78',
     padding: 10,
