@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useEffect, useState } from 'react';
+import type { PropsWithChildren } from 'react';
 import {
   useColorScheme,
   View,
@@ -21,29 +21,30 @@ import {
 
 import ImagePicker from 'react-native-image-crop-picker';
 
+import { updateUser } from '../../Redux/Actions/AuthActions/AuthAction';
 
-import {Colors} from 'react-native/Libraries/NewAppScreen';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 import Icon from '@react-native-vector-icons/ionicons';
 
-import {useAppDispatch, useAppSelector} from '../../Redux/Store/hooks';
-import {API_URL} from '../../constants';
+import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
+import { API_URL } from '../../constants';
 
-export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
+export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const isDarkMode = useColorScheme() === 'dark';
   const dispatch = useAppDispatch();
 
-  const user = useAppSelector((state: {auth: any}) => state.auth.user);
-  const isAuth = useAppSelector((state: {auth: any}) => state.auth.isAuth);
+  const user = useAppSelector((state: { auth: any }) => state.auth.user);
+  // const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
   const [modalVisible, setModalVisible] = useState(false);
   const [adjustmentVisible, setAdjustmentVisible] = useState(false);
 
   const [userState, setUserState] = useState(user);
-  const [photo, setPhoto] = useState<any | null>({
-    uri: null,
-    fileName: null,
-    type: null,
-  });
+  const [photo, setPhoto] = useState<any | null>(null);
 
+
+  useEffect(() => {
+    setUserState(user);
+  }, [user]);
 
   const pickImage = async () => {
     const options: ImageLibraryOptions = {
@@ -79,13 +80,13 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
         cropping: true,
         freeStyleCropEnabled: true,
         mediaType: 'photo',
-        cropperCircleOverlay: true, 
+        cropperCircleOverlay: true,
         showCropFrame: true,
-        cropperToolbarTitle:'',
-      // cropperCircleOverlay:true,
-      // showCropGuidelines:false,
-      // showCropFrame:false,
-      // hideBottomControls: true,
+        cropperToolbarTitle: '',
+        // cropperCircleOverlay:true,
+        // showCropGuidelines:false,
+        // showCropFrame:false,
+        // hideBottomControls: true,
       });
 
       if (croppedImage) {
@@ -113,7 +114,7 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
       name: photo.fileName,
       type: photo.type,
     });
-    formData.append('username', user.username); // Replace with actual username or dynamic input.
+    formData.append('username', userState.username); // Replace with actual username or dynamic input.
 
     try {
       const response = await fetch(`${API_URL}/api/auth/photo`, {
@@ -128,6 +129,15 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
 
       if (response.ok) {
         Alert.alert('Success', `Photo URL: ${data.photoUrl}`);
+        // Update the user state with the new photo URL
+        setUserState({
+          ...userState,
+          photo: data.photoUrl,
+        });
+        setPhoto(null);
+        dispatch(updateUser(userState));
+
+
       } else {
         Alert.alert('Upload Error', data.message || 'Something went wrong.');
       }
@@ -138,7 +148,7 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
   };
 
   const handleLogout = () => {
-    dispatch({type: 'LOGOUT'});
+    dispatch({ type: 'LOGOUT' });
   };
 
   const gotoConnections = () => {
@@ -161,22 +171,26 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
         backgroundColor: isDarkMode ? Colors.black : Colors.white,
         flex: 1,
       }}>
-      {user ? (
+      {userState ? (
         <>
           <View style={styles.topHalf} />
 
           <View style={styles.profilePictureContainer}>
-            <TouchableOpacity onPress={openModal}>
+            <TouchableOpacity onPress={openModal} style={styles.profileContainer}>
               <Image
                 source={{
                   uri:
-                    user.photo ||
-                    photo.uri ||
+                    photo?.uri ||
+                    userState?.photo ||
                     'https://via.placeholder.com/100',
                 }}
                 style={styles.profilePicture}
               />
+              <View style={styles.editOverlay}>
+                <Icon name="camera" size={24} color="#E0E0E0" />
+              </View>
             </TouchableOpacity>
+
             <Modal
               visible={modalVisible}
               transparent={true}
@@ -188,7 +202,7 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
                     onPress={() => {
                       closeModal();
                     }}>
-                    <Text style={[styles.modalButtonText, {color: 'red'}]}>
+                    <Text style={[styles.modalButtonText, { color: 'red' }]}>
                       Remove Profile Picture
                     </Text>
                   </Pressable>
@@ -221,7 +235,7 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
                 </Text>
                 {photo && (
                   <Image
-                    source={{uri: photo.uri}}
+                    source={{ uri: photo.uri }}
                     style={styles.adjustedImage}
                   />
                 )}
@@ -230,7 +244,7 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
                     style={styles.button}
                     onPress={uploadImage}>
                     {/* <Text style={styles.buttonText} onPress={uploadImage}> */}
-                      <Text style={styles.buttonText}>Confirm</Text>
+                    <Text style={styles.buttonText}>Confirm</Text>
                     {/* </Text> */}
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -249,7 +263,7 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
           </View>
 
           <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <Text style={styles.userName}>{user.username || user.email}</Text>
+            <Text style={styles.userName}>{userState.username || userState.email}</Text>
             <View style={styles.amountBox}>
               <View style={styles.column}>
                 <Text style={styles.columnTitle}>Receivable</Text>
@@ -360,12 +374,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profilePicture: {
-    width: 150,
-    height: 150,
+    width: "100%",
+    height: "100%",
     borderRadius: 75,
     borderWidth: 3,
     borderColor: '#FFF',
-    zIndex: 1,
+    zIndex: 0,
   },
   amountBox: {
     flexDirection: 'row',
@@ -375,7 +389,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
@@ -411,7 +425,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
@@ -433,7 +447,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 8,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
@@ -470,7 +484,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover', // Ensure the image covers the entire frame
     backgroundColor: '#e0e0e0', // Fallback background for missing images
   },
-  
+
   button: {
     backgroundColor: '#1E2A78',
     padding: 10,
@@ -529,5 +543,20 @@ const styles = StyleSheet.create({
 
   modalCancelButton: {
     marginTop: 10,
+  },
+  profileContainer: {
+    width: 100, // Adjust size as needed
+    height: 100,
+    borderRadius: 50, // Ensures it's circular
+    overflow: 'hidden', // Ensures overlay stays within the circle
+    position: 'relative',
+    zIndex: 1,
+  },
+
+  editOverlay: {
+    ...StyleSheet.absoluteFillObject, // Fills the parent container
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Half-grayish background
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

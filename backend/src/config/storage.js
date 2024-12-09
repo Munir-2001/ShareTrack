@@ -10,6 +10,7 @@ const storage = new Storage({
 const uploadToStorage = async (photo, folderName = "profilepictures") => {
     try {
         const gcs = storage.bucket("sharetrack-bucket");
+
         const storagePath = `${folderName}/${photo.originalname}`; // Destination in the bucket
 
         const blob = gcs.file(storagePath); // Creates a reference to the destination

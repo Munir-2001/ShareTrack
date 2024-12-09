@@ -24,6 +24,12 @@ export default AuthReducer = (state = initialState, action) => {
                 user: null,
                 isAuth: false,
             };
+
+        case "UPDATE":
+            return {
+                ...state,
+                user: action.payload,
+            };
         default:
             return state;
     }

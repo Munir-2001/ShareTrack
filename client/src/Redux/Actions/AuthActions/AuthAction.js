@@ -67,3 +67,33 @@ export const logoutUser = () => {
         type: "LOGOUT",
     };
 };
+
+
+export const updateUser = (userData) => {
+    return async (dispatch) => {
+        try {
+            // const response = await fetch(`${API_URL}/api/auth/update`, {
+            //     method: "PUT",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //         Authorization: `Bearer ${userData.token}`,
+            //     },
+            //     body: JSON.stringify(userData),
+            // });
+
+            // if (!response.ok) {
+            //     const error = await response.json();
+            //     throw new Error(error.message);
+            // }
+
+            // const user = await response.json();
+            dispatch({
+                type: "UPDATE",
+                payload: userData, // Save the user object to Redux state
+            });
+        } catch (error) {
+            Alert.alert("Error updating user:", error.message);
+            // Optionally, dispatch an error action here
+        }
+    };
+}

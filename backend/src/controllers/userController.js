@@ -103,6 +103,11 @@ const updatePhoto = async (req, res) => {
             return res.status(400).json({ message: "No file uploaded" });
         }
 
+
+        // set filename as username + timestamp
+        const filename = `${username}-${Date.now()}`;
+        photo.originalname = `${filename}.${photo.originalname.split('.').pop()}`;
+
         const photoUrl = await uploadToStorage(photo, 'profilepictures');
 
 
