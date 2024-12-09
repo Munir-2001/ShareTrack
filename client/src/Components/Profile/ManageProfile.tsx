@@ -44,6 +44,7 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
     type: null,
   });
 
+
   const pickImage = async () => {
     const options: ImageLibraryOptions = {
       mediaType: 'photo',
@@ -63,14 +64,18 @@ export default function ProfileScreen({navigation}: PropsWithChildren<any>) {
         const selectedPhoto = response.assets[0];
         setPhoto(selectedPhoto || null);
         // setAdjustmentVisible(true);
-        pickAndCropImage();
+        pickAndCropImage(selectedPhoto);
       }
     }
   };
-  const pickAndCropImage = async () => {
+  const pickAndCropImage = async (selectedPhoto: any) => {
+    if (!selectedPhoto || !selectedPhoto.uri) {
+      console.log('Invalid photo selected for cropping.');
+      return;
+    }
     try {
       const croppedImage = await ImagePicker.openCropper({
-        path: photo.uri,
+        path: selectedPhoto.uri,
         cropping: true,
         freeStyleCropEnabled: true,
         mediaType: 'photo',
