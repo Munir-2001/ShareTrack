@@ -21,7 +21,6 @@ export const getFriends = async (userId) => {
         const data = await response.json();
         return data;
     } catch (error) {
-
         throw error;
     }
 };
@@ -45,7 +44,6 @@ export const getFriendRequestsReceived = async (userId) => {
         const data = await response.json();
         return data;
     } catch (error) {
-
         throw error;
     }
 };
@@ -69,18 +67,15 @@ export const getFriendRequestsSent = async (userId) => {
         const data = await response.json();
         return data;
     } catch (error) {
-
         throw error;
     }
 };
-
 
 // Get all blocked friends for a user
 export const getBlockedUsers = async (userId) => {
     try {
         const response = await fetch(`${API_URL}/api/relationship/blocked/${userId}`, {
             method: "GET",
-
             headers: {
                 "Content-Type": "application/json",
             },
@@ -95,7 +90,6 @@ export const getBlockedUsers = async (userId) => {
         const data = await response.json();
         return data;
     }
-
     catch (error) {
         throw error;
     }
@@ -121,7 +115,6 @@ export const requestFriend = async (userId, friendUsername) => {
         const data = await response.json();
         return data;
     } catch (error) {
-
         throw error;
     }
 };
@@ -146,7 +139,6 @@ export const approveFriendRequest = async (relationshipId) => {
         const data = await response.json();
         return data;
     } catch (error) {
-
         throw error;
     }
 };
@@ -171,7 +163,6 @@ export const deleteRelationship = async (relationshipId) => {
         const data = await response.json();
         return data;
     } catch (error) {
-
         throw error;
     }
 };
@@ -197,8 +188,30 @@ export const blockFriend = async (relationshipId, blockerId) => {
         console.log("Blocking friend", data);  
         return data;
     } catch (error) {
-
         throw error;
+    }
+};
+
+export const sendMoney = async (senderUsername, receiverUsername, amount) => {
+    try {
+        const response = await fetch(`${API_URL}/api/relationship/sendMoney`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ senderUsername, receiverUsername, amount }),
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(responseData.message || "Failed to send money.");
+        }
+
+        return responseData; // Returns { message: 'Money sent successfully' }
+    } catch (error) {
+        console.error("Error sending money:", error.message);
+        throw new Error(error.message);
     }
 };
 

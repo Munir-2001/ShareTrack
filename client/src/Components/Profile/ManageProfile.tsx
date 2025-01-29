@@ -34,7 +34,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((state: { auth: any }) => state.auth.user);
-  const balance = useAppSelector((state: { auth: any }) => state.auth.balance);
+  const [balance, setBalance] = useState(user.balance); // Initialize balance from user data
   // const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
   const [modalVisible, setModalVisible] = useState(false);
   const [adjustmentVisible, setAdjustmentVisible] = useState(false);
@@ -138,7 +138,6 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
         setPhoto(null);
         dispatch(updateUser(userState));
 
-
       } else {
         Alert.alert('Upload Error', data.message || 'Something went wrong.');
       }
@@ -165,6 +164,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     setModalVisible(false);
     console.log('Modal Visible State:', modalVisible); // Log after state chang
   };
+
 
   return (
     <View

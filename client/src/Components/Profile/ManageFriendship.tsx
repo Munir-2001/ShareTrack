@@ -24,6 +24,7 @@ import {
   getBlockedUsers,
 } from './relationshipUtils'; // Adjust the path if needed
 import {SegmentControl} from './SegmentControl';
+import SendMoney from './SendMoney'; // Import the SendMoney component
 
 import {useAppDispatch, useAppSelector} from '../../Redux/Store/hooks';
 
@@ -178,14 +179,15 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                   style={styles.profilePicture}
                 />
                 {/* User details */}
-                <TouchableOpacity style={styles.userDetails}
-               onPress={() => 
-  navigation.navigate('UserProfile', { 
-    userId: item._id, 
-    username: item.username, 
-    profilePicture: item.photo // Assuming profilePicture is a field in the user object
-  })
-}>  <Text style={styles.userName}>{item.username}</Text>
+                <TouchableOpacity
+                  style={styles.userDetails}
+                  onPress={() => {
+                    console.log('Selected friend:', item);
+                    console.log('Selected friend username:', item.username);
+                     // Debug log
+                    setSelectedFriend(item); // Set the selected friend
+                  }}>
+                  <Text style={styles.userName}>{item.username}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => openModal(item)}>
@@ -380,7 +382,14 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
         />
       )}
         
-
+      {selectedFriend && (
+        <SendMoney
+          friendUsername={selectedFriend.username}
+          onClose={() => {
+            setSelectedFriend(null);
+          }} // Close the SendMoney component
+        />
+      )}
     </View>
   );
 }

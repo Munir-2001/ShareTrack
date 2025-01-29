@@ -213,14 +213,18 @@ const getBlockedRelationships = async (req, res) => {
     }
 }
 const sendMoney = async (req, res) => {
-    const { senderId, receiverId, amount } = req.body;
+    const { senderUsername, receiverUsername, amount } = req.body;
+    console.log('Received:', { senderUsername, receiverUsername, amount }); // Debug log
 
     try {
-        const sender = await User.findById(senderId);
-        const receiver = await User.findById(receiverId);
+        const sender = await User.findOne({ username: senderUsername });
+        const receiver = await User.findOne({ username: receiverUsername });
 
-        if (!sender || !receiver) {
-            return res.status(404).json({ message: 'User not found' });
+        if (!sender) {
+            return res.status(404).json({ message: 'Sender not found' });
+        }
+        if (!receiver) {
+            return res.status(404).json({ message: 'Receiver not found' });
         }
 
         if (sender.balance < amount) {
