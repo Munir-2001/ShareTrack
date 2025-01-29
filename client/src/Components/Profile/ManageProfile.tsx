@@ -34,6 +34,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((state: { auth: any }) => state.auth.user);
+  const balance = useAppSelector((state: { auth: any }) => state.auth.balance);
   // const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
   const [modalVisible, setModalVisible] = useState(false);
   const [adjustmentVisible, setAdjustmentVisible] = useState(false);
@@ -264,6 +265,12 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
 
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             <Text style={styles.userName}>{userState.username || userState.email}</Text>
+            
+            <View style={styles.balanceBox}>
+              <Text style={styles.balanceTitle}>Current Balance</Text>
+              <Text style={styles.balanceAmount}>${balance?.toFixed(2) || '0.00'}</Text>
+            </View>
+
             <View style={styles.amountBox}>
               <View style={styles.column}>
                 <Text style={styles.columnTitle}>Receivable</Text>
@@ -558,5 +565,29 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)', // Half-grayish background
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  balanceBox: {
+    margin: 10,
+    padding: 15,
+    backgroundColor: '#1E2A78',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    alignItems: 'center',
+  },
+  balanceTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 5,
+  },
+  balanceAmount: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
   },
 });

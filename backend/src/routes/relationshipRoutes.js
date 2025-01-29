@@ -9,7 +9,8 @@ const {
     getAllFriends,
     getAllFriendRequestsReceived,
     getAllFriendRequestsSent,
-    getBlockedRelationships
+    getBlockedRelationships,
+    sendMoney
 } = require('../controllers/relationshipController');
 
 const relationshipRouter = express.Router();
@@ -38,6 +39,7 @@ relationshipRouter.get('/requests/sent/:userId', getAllFriendRequestsSent);
 // Route to get all blocked relationships of a user
 relationshipRouter.get('/blocked/:userId', getBlockedRelationships);
 
+relationshipRouter.post('/sendMoney', sendMoney);
 
 
 

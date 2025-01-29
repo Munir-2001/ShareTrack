@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     role: { type: String, required: false, default: 'user' },
     credit_score: { type: Number, required: false },
     age: { type: Number, required: false },
-
+    balance : {type: Number, required: false, default: 0},
     // Verification
     isEmailVerified: { type: Boolean, default: false },
     isPhoneVerified: { type: Boolean, default: false },

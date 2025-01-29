@@ -129,7 +129,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
     console.log('open modal');
   };
 
-  const closeModal = () => {
+  const closeModal = ():void => {
     console.log('Closing Modal'); // Add this log
     setSelectedFriend(null);
     setModalVisible(false);
@@ -230,9 +230,11 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                   <Text style={styles.modalButtonText}>Unfriend</Text>
                 </Pressable>
                 {/* Cancel Button */}
-                <TouchableOpacity onPress={closeModal}>
-                  <Text style={styles.modalButtonText}>Cancel</Text>
-                </TouchableOpacity>
+                <Pressable
+                style={[styles.modalButton]}
+                onPress={closeModal}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+            </Pressable>
               </View>
             </View>
           </Modal>

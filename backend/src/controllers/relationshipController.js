@@ -212,7 +212,33 @@ const getBlockedRelationships = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 }
+const sendMoney = async (req, res) => {
+    const { senderId, receiverId, amount } = req.body;
 
+    try {
+        const sender = await User.findById(senderId);
+        const receiver = await User.findById(receiverId);
+
+        if (!sender || !receiver) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (sender.balance < amount) {
+            return res.status(400).json({ message: 'Insufficient balance' });
+        }
+
+        // Deduct amount from sender and add to receiver
+        sender.balance -= amount;
+        receiver.balance += amount;
+
+        await sender.save();
+        await receiver.save();
+
+        res.status(200).json({ message: 'Money sent successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 
 module.exports = {
@@ -223,5 +249,6 @@ module.exports = {
     getAllFriends,
     getAllFriendRequestsReceived,
     getAllFriendRequestsSent,
-    getBlockedRelationships
+    getBlockedRelationships,
+    sendMoney
 }

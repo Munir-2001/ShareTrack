@@ -10,7 +10,7 @@ export default AuthReducer = (state = initialState, action) => {
                 ...state,
                 user: action.payload,
                 isAuth: true,
-
+                balance: action.payload.balance
             };
         case "REGISTER":
             return {
