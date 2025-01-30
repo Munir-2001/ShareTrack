@@ -213,6 +213,41 @@ export const sendMoney = async (senderUsername, receiverUsername, amount) => {
         console.error("Error sending money:", error.message);
         throw new Error(error.message);
     }
+
+    
 };
 
 
+
+export const requestMoney = async (senderUsername, receiverUsername, amount) => {
+    try {
+        console.log('in req money relation ship utils')
+
+        const requestData = {
+            senderUsername: senderUsername,
+            receiverUsername: receiverUsername,
+            amount: Number(amount), // Ensure it's a number
+          };
+          
+
+      const response = await fetch(`${API_URL}/api/relationship/requestMoney`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+      console.log('outside the api call')
+      const responseData = await response.json();
+      console.log('response')
+      console.log(responseData)
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Failed to request money.');
+      }
+  
+      return responseData; // Returns { message: 'Money request sent successfully' }
+    } catch (error ) {
+      console.error('Error requesting money:', error.message);
+      throw new Error(error.message);
+    }
+  };

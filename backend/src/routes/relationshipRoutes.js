@@ -10,13 +10,10 @@ const {
     getAllFriendRequestsReceived,
     getAllFriendRequestsSent,
     getBlockedRelationships,
-    sendMoney
-} = require('../controllers/relationshipController');
-
-const {
+    sendMoney,
     requestMoney,
     respondToMoneyRequest
-} = require('../controllers/moneyController'); // Ensure this path is correct
+} = require('../controllers/relationshipController');
 
 const relationshipRouter = express.Router();
 
@@ -47,9 +44,9 @@ relationshipRouter.get('/blocked/:userId', getBlockedRelationships);
 relationshipRouter.post('/sendMoney', sendMoney);
 
 // Route to request money
-relationshipRouter.post('/money/request', requestMoney);
+relationshipRouter.post('/requestMoney', requestMoney);
 
 // Route to respond to money request
-relationshipRouter.post('/money/respond', respondToMoneyRequest);
+relationshipRouter.post('/respondToRequest', respondToMoneyRequest);
 
 module.exports = relationshipRouter;

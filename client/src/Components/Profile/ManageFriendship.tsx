@@ -25,7 +25,7 @@ import {
 } from './relationshipUtils'; // Adjust the path if needed
 import {SegmentControl} from './SegmentControl';
 import SendMoney from './SendMoney'; // Import the SendMoney component
-
+import RequestMoney from './RequestMoneyModal';
 import {useAppDispatch, useAppSelector} from '../../Redux/Store/hooks';
 
 const options = ['Add Friends', 'Your Friends', 'Blocked Users'];
@@ -390,6 +390,16 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
           }} // Close the SendMoney component
         />
       )}
+
+      {selectedFriend &&(
+        <RequestMoney
+        friendUsername={selectedFriend.username}
+        onClose={()=>{
+          setSelectedFriend(null);
+        }}
+        />
+      )}
+
     </View>
   );
 }
@@ -413,6 +423,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 50,
+
     borderWidth: 1,
     borderColor: '#DDD',
     borderRadius: 10,

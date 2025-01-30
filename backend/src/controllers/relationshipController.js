@@ -255,6 +255,142 @@ const sendMoney = async (req, res) => {
     }
 };
 
+// const requestMoney = async (req, res) => {
+//     const { senderUsername, receiverUsername, amount } = req.body;
+//     console.log('in backend and printing received data')
+//     console.log('Received:', { senderUsername, receiverUsername, amount }); // Debug log
+
+
+//     try {
+//         // Fetch receiver by username
+//         const receiver = await User.findOne({ username: receiverUsername });
+
+//         if (!receiver) {
+//             return res.status(404).json({ message: "Receiver not found" });
+//         }
+
+//         // Check if they are friends
+//         const existingFriendship = await Relationship.findOne({
+//             $or: [
+//                 { requester: senderUsername, recipient: receiver._id },
+//                 { requester: receiver._id, recipient: senderUsername }
+//             ]
+//         });
+
+//         if (!existingFriendship) {
+//             return res.status(403).json({ message: "Users are not connected as friends" });
+//         }
+
+//         // Create money request
+//         const transaction = new Transaction({
+//             sender_username: senderUsername,
+//             receiver_username: receiverUsername,
+//             amount,
+//             status: 'pending'
+//         });
+
+//         await transaction.save();
+
+//         res.status(201).json({ message: "Money request sent successfully" });
+//     } catch (error) {
+//         res.status(500).json({ message: "Error processing request", error: error.message });
+//     }
+// };
+
+const requestMoney = async (req, res) => {
+    const { senderUsername, receiverUsername, amount } = req.body;
+    console.log('In backend - received data:', { senderUsername, receiverUsername, amount });
+
+    try {
+        // Fetch sender and receiver by username
+        const sender = await User.findOne({ username: senderUsername });
+        const receiver = await User.findOne({ username: receiverUsername });
+
+        if (!sender) {
+            return res.status(404).json({ message: "Sender not found" });
+        }
+        if (!receiver) {
+            return res.status(404).json({ message: "Receiver not found" });
+        }
+
+        console.log("Sender ID:", sender._id);
+        console.log("Receiver ID:", receiver._id);
+
+        // Check if they are friends
+        const existingFriendship = await Relationship.findOne({
+            $or: [
+                { requester: sender._id, recipient: receiver._id },
+                { requester: receiver._id, recipient: sender._id }
+            ]
+        });
+
+        if (!existingFriendship) {
+            return res.status(403).json({ message: "Users are not connected as friends" });
+        }
+
+        // Create money request
+        const transaction = new Transaction({
+            sender_username: senderUsername,
+            receiver_username: receiverUsername,
+            amount,
+            status: 'pending'
+        });
+
+        await transaction.save();
+
+        res.status(201).json({ message: "Money request sent successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error processing request", error: error.message });
+    }
+};
+
+// Respond to Money Request API
+const respondToMoneyRequest = async (req, res) => {
+    const { transactionId, response } = req.body;
+
+    try {
+        const transaction = await Transaction.findById(transactionId);
+
+        if (!transaction) {
+            return res.status(404).json({ message: "Transaction not found" });
+        }
+
+        if (response === "declined") {
+            transaction.status = "declined";
+            await transaction.save();
+            return res.status(200).json({ message: "Money request declined" });
+        }
+
+        // Check balance of the receiver
+        const receiver = await User.findOne({ username: transaction.receiver_username });
+
+        if (!receiver || receiver.balance < transaction.amount) {
+            return res.status(400).json({ message: "Insufficient balance" });
+        }
+
+        // Deduct the amount from the receiver
+        receiver.balance -= transaction.amount;
+        await receiver.save();
+
+        // Add the amount to the sender
+        const sender = await User.findOne({ username: transaction.sender_username });
+        if (!sender) {
+            return res.status(404).json({ message: "Sender not found" });
+        }
+
+        sender.balance += transaction.amount;
+        await sender.save();
+
+        // Update the transaction status
+        transaction.status = "approved";
+        await transaction.save();
+
+        res.status(200).json({ message: "Money request approved successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Error processing request", error: error.message });
+    }
+};
+
 
 module.exports = {
     requestRelationship,
@@ -265,5 +401,7 @@ module.exports = {
     getAllFriendRequestsReceived,
     getAllFriendRequestsSent,
     getBlockedRelationships,
-    sendMoney
+    sendMoney,
+    respondToMoneyRequest,
+    requestMoney
 }
