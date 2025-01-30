@@ -14,7 +14,8 @@ const {
     requestMoney,
     respondToMoneyRequest,
     getMoneyRequests,
-    getTransactionHistory
+    getTransactionHistory,
+    getSentMoneyRequests
 } = require('../controllers/relationshipController');
 
 const relationshipRouter = express.Router();
@@ -53,5 +54,6 @@ relationshipRouter.post('/requestMoney', requestMoney);
 relationshipRouter.post('/respondToRequest', respondToMoneyRequest);
 
 relationshipRouter.post('/getMoneyRequests', getMoneyRequests);
+relationshipRouter.post('/getSentMoneyRequests', getSentMoneyRequests);
 
 module.exports = relationshipRouter;

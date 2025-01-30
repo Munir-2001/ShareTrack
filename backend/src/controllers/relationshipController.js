@@ -349,6 +349,7 @@ const getMoneyRequests = async (req, res) => {
     try {
         const requests = await Transaction.find({ receiver_username: username, status: 'pending' });
         res.status(200).json(requests);
+        console.log('the getmoneyrequests are'+requests)
     } catch (error) {
         res.status(500).json({ message: "Error fetching requests", error: error.message });
     }
@@ -413,6 +414,17 @@ const respondToMoneyRequest = async (req, res) => {
         res.status(500).json({ message: "Error processing request", error: error.message });
     }
 };
+const getSentMoneyRequests = async (req, res) => {
+    const { username } = req.body;
+
+    try {
+        const requests = await Transaction.find({ sender_username: username, status: 'pending' });
+        res.status(200).json(requests);
+        console.log('requests are'+requests)
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching sent requests", error: error.message });
+    }
+};
 
 
 module.exports = {
@@ -428,5 +440,6 @@ module.exports = {
     respondToMoneyRequest,
     requestMoney,
     getMoneyRequests,
-    getTransactionHistory
+    getTransactionHistory,
+    getSentMoneyRequests
 }
