@@ -13,7 +13,8 @@ const {
     sendMoney,
     requestMoney,
     respondToMoneyRequest,
-    getMoneyRequests
+    getMoneyRequests,
+    getTransactionHistory
 } = require('../controllers/relationshipController');
 
 const relationshipRouter = express.Router();
@@ -32,6 +33,7 @@ relationshipRouter.put('/block', blockRelationship);
 
 // Route to get all friends of a user
 relationshipRouter.get('/friends/:userId', getAllFriends);
+relationshipRouter.post('/getTransactionHistory', getTransactionHistory);
 
 // Route to get all friend requests received by a user
 relationshipRouter.get('/requests/received/:userId', getAllFriendRequestsReceived);

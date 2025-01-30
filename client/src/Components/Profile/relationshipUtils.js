@@ -1,7 +1,28 @@
 import { API_URL } from "../../constants";
 
 // Functions to make API calls to the server to get relationship data
+export const getTransactionHistory = async (username) => {
+  try {
+    const response = await fetch(`${API_URL}/api/relationship/getTransactionHistory`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username }),
+    });
 
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch transaction history');
+    }
+
+    return data; // Return transactions array
+  } catch (error) {
+    console.error('Error fetching transaction history:', error);
+    return [];
+  }
+};
 // Get all friends for a user
 export const getFriends = async (userId) => {
     try {

@@ -353,6 +353,19 @@ const getMoneyRequests = async (req, res) => {
         res.status(500).json({ message: "Error fetching requests", error: error.message });
     }
 };
+const getTransactionHistory = async (req, res) => {
+    const { username } = req.body;
+
+    try {
+        const transactions = await Transaction.find({
+            $or: [{ sender_username: username }, { receiver_username: username }],
+        }).sort({ createdAt: -1 });
+
+        res.status(200).json(transactions);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching transaction history", error: error.message });
+    }
+};
 
 // Respond to Money Request API
 const respondToMoneyRequest = async (req, res) => {
@@ -414,5 +427,6 @@ module.exports = {
     sendMoney,
     respondToMoneyRequest,
     requestMoney,
-    getMoneyRequests
+    getMoneyRequests,
+    getTransactionHistory
 }

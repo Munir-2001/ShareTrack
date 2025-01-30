@@ -41,7 +41,9 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
 
   const [userState, setUserState] = useState(user);
   const [photo, setPhoto] = useState<any | null>(null);
-
+  const gotoPendingRequests = () => {
+    navigation.navigate('PendingRequestsScreen');
+  };
 
   useEffect(() => {
     setUserState(user);
@@ -103,6 +105,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     }
   };
 
+  
   const uploadImage = async () => {
     if (!photo) {
       Alert.alert('No Image Selected', 'Please select an image first.');
@@ -153,6 +156,10 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
 
   const gotoConnections = () => {
     navigation.navigate('CONNECTIONS');
+  };
+  const gotoTransactionHistory = () => {
+    console.log('Navigating to TransactionHistoryScreen...');
+    navigation.navigate('TransactionHistoryScreen');
   };
   const openModal = () => {
     setModalVisible(true);
@@ -298,9 +305,9 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
                   <Icon name="analytics" size={24} color="#1E2A78" />
                   <Text style={styles.itemText}>Insights</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.item}>
+                <TouchableOpacity style={styles.item} onPress={gotoTransactionHistory}>
                   <Icon name="time" size={24} color="#1E2A78" />
-                  <Text style={styles.itemText}>History</Text>
+                  <Text style={styles.itemText}>Transaction History</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.row}>
@@ -308,7 +315,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
                   <Icon name="calendar" size={24} color="#1E2A78" />
                   <Text style={styles.itemText}>Upcoming Transactions</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.item}>
+                <TouchableOpacity style={styles.item} onPress={gotoPendingRequests}>
                   <Icon name="mail" size={24} color="#1E2A78" />
                   <Text style={styles.itemText}>Pending Requests</Text>
                 </TouchableOpacity>

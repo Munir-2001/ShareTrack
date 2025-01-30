@@ -14,7 +14,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ConnectionScreen from './ManageFriendship';
 import ProfileScreen from './ManageProfile';
 import UserProfile from './UserProfile';
-
+import PendingRequestsScreen from './PendingRequestsScreen';
+import TransactionHistoryScreen from './TransactionHistoryScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -36,6 +37,12 @@ export default function Dashboard() {
                     {(props) => <ConnectionScreen {...props} />}
                 </Stack.Screen>
                 <Stack.Screen name="UserProfile" component={UserProfile} />
+                <Stack.Screen name="PendingRequestsScreen">
+                    {(props) => <PendingRequestsScreen {...props} />}
+                </Stack.Screen>
+                <Stack.Screen name="TransactionHistoryScreen">
+                    {(props) => <TransactionHistoryScreen {...props} />}
+                </Stack.Screen>
             </Stack.Navigator>
         </>
 
