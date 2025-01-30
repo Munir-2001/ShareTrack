@@ -1,6 +1,6 @@
 const Relationship = require('../models/Relationship');
 const User = require('../models/User');
-
+const Transaction = require('../models/Transaction');
 //CRUD, also get details for the other user when he is a receiver or requester
 
 const requestRelationship = async (req, res) => {
@@ -237,6 +237,17 @@ const sendMoney = async (req, res) => {
 
         await sender.save();
         await receiver.save();
+
+        const transaction = new Transaction({
+            sender_username: senderUsername,
+            receiver_username: receiverUsername,
+            amount,
+            status: 'transferred'
+        });
+
+        await transaction.save(); // Save
+        
+        console.log('added in transaction table as well.' + transaction)
 
         res.status(200).json({ message: 'Money sent successfully' });
     } catch (error) {

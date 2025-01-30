@@ -13,6 +13,11 @@ const {
     sendMoney
 } = require('../controllers/relationshipController');
 
+const {
+    requestMoney,
+    respondToMoneyRequest
+} = require('../controllers/moneyController'); // Ensure this path is correct
+
 const relationshipRouter = express.Router();
 
 // Route to make a relationship request
@@ -41,6 +46,10 @@ relationshipRouter.get('/blocked/:userId', getBlockedRelationships);
 
 relationshipRouter.post('/sendMoney', sendMoney);
 
+// Route to request money
+relationshipRouter.post('/money/request', requestMoney);
 
+// Route to respond to money request
+relationshipRouter.post('/money/respond', respondToMoneyRequest);
 
 module.exports = relationshipRouter;
