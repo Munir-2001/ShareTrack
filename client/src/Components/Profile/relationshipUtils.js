@@ -251,3 +251,26 @@ export const requestMoney = async (senderUsername, receiverUsername, amount) => 
       throw new Error(error.message);
     }
   };
+
+  export const getRequestsForLending = async (username) => {
+    try {
+      const response = await fetch(`${API_URL}/api/relationship/getMoneyRequests`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch money requests.');
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching money requests:', error.message);
+      return [];
+    }
+  };
+  

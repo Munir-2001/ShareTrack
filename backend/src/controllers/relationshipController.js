@@ -343,6 +343,16 @@ const requestMoney = async (req, res) => {
         res.status(500).json({ message: "Error processing request", error: error.message });
     }
 };
+const getMoneyRequests = async (req, res) => {
+    const { username } = req.body;
+
+    try {
+        const requests = await Transaction.find({ receiver_username: username, status: 'pending' });
+        res.status(200).json(requests);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching requests", error: error.message });
+    }
+};
 
 // Respond to Money Request API
 const respondToMoneyRequest = async (req, res) => {
@@ -403,5 +413,6 @@ module.exports = {
     getBlockedRelationships,
     sendMoney,
     respondToMoneyRequest,
-    requestMoney
+    requestMoney,
+    getMoneyRequests
 }

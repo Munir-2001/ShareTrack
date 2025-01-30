@@ -12,7 +12,8 @@ const {
     getBlockedRelationships,
     sendMoney,
     requestMoney,
-    respondToMoneyRequest
+    respondToMoneyRequest,
+    getMoneyRequests
 } = require('../controllers/relationshipController');
 
 const relationshipRouter = express.Router();
@@ -48,5 +49,7 @@ relationshipRouter.post('/requestMoney', requestMoney);
 
 // Route to respond to money request
 relationshipRouter.post('/respondToRequest', respondToMoneyRequest);
+
+relationshipRouter.post('/getMoneyRequests', getMoneyRequests);
 
 module.exports = relationshipRouter;
