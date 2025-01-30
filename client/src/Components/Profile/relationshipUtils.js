@@ -294,4 +294,23 @@ export const requestMoney = async (senderUsername, receiverUsername, amount) => 
       return [];
     }
   };
+
+// Function to update user details
+export const updateUserDetails = async ({ username, phone, email }) => {
+    const response = await fetch(`${API_URL}/api/auth/updateDetails`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            // Include any necessary authentication headers here
+        },
+        body: JSON.stringify({ username, phone, email }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+    }
+
+    return await response.json(); // Return the updated user details
+};
   

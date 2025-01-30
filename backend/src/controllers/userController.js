@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const uploadToStorage = require('../config/storage');
+const bcrypt = require('bcrypt');
 
 
 // Register a new user, ensuring no repeated email, username, or phone
@@ -123,4 +124,38 @@ const updatePhoto = async (req, res) => {
     }
 }
 
-module.exports = { createUser, loginUser, updateUser, updatePhoto };
+// Update user details
+const updateUserDetails = async (req, res) => {
+    try {
+        const { username, phone, email, password } = req.body; // Include password if updating
+        const userId = req.user.id; // Assuming you have user ID from the token
+
+        // Find the user and update their details
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update user details
+        user.username = username || user.username;
+        user.phone = phone || user.phone;
+        user.email = email || user.email;
+
+        // If a new password is provided, hash it
+        if (password) {
+            user.password = await bcrypt.hash(password, 10); // Hash the new password
+        }
+
+        await user.save();
+
+        // Remove password from the response
+        const userResponse = user.toObject();
+        delete userResponse.password;
+
+        res.status(200).json(userResponse);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};
+
+module.exports = { createUser, loginUser, updateUser, updatePhoto, updateUserDetails };

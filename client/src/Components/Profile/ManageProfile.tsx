@@ -44,7 +44,10 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const gotoPendingRequests = () => {
     navigation.navigate('PendingRequestsScreen');
   };
+  const goToAccountSettings = () =>{
+    navigation.navigate('AccountSettingsScreen');
 
+  }
   useEffect(() => {
     setUserState(user);
   }, [user]);
@@ -321,7 +324,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
                 </TouchableOpacity>
               </View>
               <View>
-                <TouchableOpacity style={styles.item}>
+                <TouchableOpacity style={styles.item} onPress={goToAccountSettings}>
                   <Icon name="settings" size={24} color="#1E2A78" />
                   <Text style={styles.itemText}>Account Settings</Text>
                 </TouchableOpacity>

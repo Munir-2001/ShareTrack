@@ -16,6 +16,7 @@ import ProfileScreen from './ManageProfile';
 import UserProfile from './UserProfile';
 import PendingRequestsScreen from './PendingRequestsScreen';
 import TransactionHistoryScreen from './TransactionHistoryScreen';
+import AccountSettingsScreen from './AccountSettingsScreen'
 
 
 const Stack = createNativeStackNavigator();
@@ -42,6 +43,9 @@ export default function Dashboard() {
                 </Stack.Screen>
                 <Stack.Screen name="TransactionHistoryScreen">
                     {(props) => <TransactionHistoryScreen {...props} />}
+                </Stack.Screen>
+                <Stack.Screen name="AccountSettingsScreen">
+                    {(props) => <AccountSettingsScreen {...props} />}
                 </Stack.Screen>
             </Stack.Navigator>
         </>

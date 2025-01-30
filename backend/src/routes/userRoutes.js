@@ -2,7 +2,7 @@
 const express = require('express');
 const multer = require("multer");
 
-const { createUser, loginUser, updateUser, updatePhoto } = require('../controllers/userController');
+const { createUser, loginUser, updateUser, updatePhoto, updateUserDetails } = require('../controllers/userController');
 
 const userRouter = express.Router();
 
@@ -20,5 +20,8 @@ userRouter.put('/update', updateUser);
 
 //Route to update a user's photo
 userRouter.post('/photo', upload.single("file"), updatePhoto);
+
+// Route to update user details
+userRouter.put('/updateDetails', updateUserDetails);
 
 module.exports = userRouter;
