@@ -16,30 +16,46 @@ interface Transaction {
   receiver_username: string;
   amount: number;
   status: string;
-  timestamp: string;
+  created_at: string;
 }
+import { getTransactionHistory } from './relationshipUtils';
 
 // Function to format timestamp into human-readable format
 const formatDate = (timestamp: string) => {
-  try {
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return 'Invalid Date';
+  if (!timestamp) return "N/A";
 
-    return date.toLocaleString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+  try {
+    // Ensure the timestamp is in a valid ISO 8601 format
+    let date = new Date(timestamp);
+
+    // If date is still invalid, attempt manual conversion
+    if (isNaN(date.getTime())) {
+      console.warn("⚠️ Invalid date detected, attempting manual fix:", timestamp);
+      date = new Date(timestamp.replace(" ", "T") + "Z"); // Convert MySQL format to ISO
+    }
+
+    if (isNaN(date.getTime())) {
+      console.error("❌ formatDate: Unable to parse date:", timestamp);
+      return "Invalid Date";
+    }
+
+    return date.toLocaleString("en-US", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
       hour12: true,
     });
   } catch (error) {
-    console.error('Date formatting error:', error);
-    return 'N/A';
+    console.error("❌ formatDate: Error parsing date:", error);
+    return "Invalid Date";
   }
 };
+
+
 
 const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
   const user = useAppSelector((state: { auth: any }) => state.auth.user);
@@ -52,9 +68,9 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
     const fetchTransactionHistory = async () => {
       setLoading(true);
       try {
-        // const history = await getTransactionHistory(user.username);
-        setTransactions(transactions);
-        setFilteredTransactions(transactions);
+         const history = await getTransactionHistory(user.username);
+        setTransactions(history);
+        setFilteredTransactions(history);
       } catch (error) {
         console.error('Error fetching transaction history:', error);
       }
@@ -128,7 +144,7 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
                     : `Received $${item.amount} from ${item.sender_username}`}
                 </Text>
                 <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
-                <Text style={styles.dateText}>{formatDate(item.timestamp)}</Text>
+                <Text style={styles.dateText}>{formatDate(item.created_at)}</Text>
               </View>
             );
           }}

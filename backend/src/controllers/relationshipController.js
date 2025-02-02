@@ -183,6 +183,40 @@ const sendMoney = async (req, res) => {
 };
 
 // Get transaction history
+// const getTransactionHistory = async (req, res) => {
+//     try {
+//         const { username } = req.body; // Fix: Accept username instead of userId
+
+//         if (!username) {
+//             return res.status(400).json({ message: "Username is required" });
+//         }
+
+//         // Get userId from username
+//         const { data: user, error: userError } = await supabase
+//             .from("users")
+//             .select("id")
+//             .eq("username", username)
+//             .single();
+
+//         if (!user || userError) {
+//             return res.status(404).json({ message: "User not found" });
+//         }
+
+//         const userId = user.id; // Convert username to userId
+
+//         const { data: transactions, error } = await supabase
+//             .from("transactions")
+//             .select("*")
+//             .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+//             .order("created_at", { ascending: false });
+
+//         if (error) throw error;
+
+//         res.status(200).json(transactions);
+//     } catch (error) {
+//         res.status(500).json({ message: "Error fetching transaction history", error: error.message });
+//     }
+// };
 const getTransactionHistory = async (req, res) => {
     try {
         const { username } = req.body; // Fix: Accept username instead of userId
@@ -204,16 +238,47 @@ const getTransactionHistory = async (req, res) => {
 
         const userId = user.id; // Convert username to userId
 
+        // Fetch transactions
         const { data: transactions, error } = await supabase
             .from("transactions")
-            .select("*")
+            .select("id, sender_id, receiver_id, amount, status, created_at")
             .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
             .order("created_at", { ascending: false });
 
         if (error) throw error;
 
-        res.status(200).json(transactions);
+        if (transactions.length === 0) {
+            return res.status(200).json([]); // ✅ Return an empty array instead of an error
+        }
+
+        // Fetch sender and receiver usernames
+        const userIds = [...new Set([...transactions.map(t => t.sender_id), ...transactions.map(t => t.receiver_id)])];
+        
+        const { data: users, error: usersError } = await supabase
+            .from("users")
+            .select("id, username")
+            .in("id", userIds);
+
+        if (usersError) {
+            console.error("❌ Error fetching usernames:", usersError);
+            return res.status(500).json({ message: "Error fetching usernames", error: usersError.message });
+        }
+
+        // Map transactions to include usernames
+        const transactionsWithNames = transactions.map(transaction => {
+            const sender = users.find(u => u.id === transaction.sender_id);
+            const receiver = users.find(u => u.id === transaction.receiver_id);
+            return {
+                ...transaction,
+                sender_username: sender ? sender.username : "Unknown User",
+                receiver_username: receiver ? receiver.username : "Unknown User"
+            };
+        });
+
+        console.log("✅ Returning transaction history:", transactionsWithNames);
+        res.status(200).json(transactionsWithNames);
     } catch (error) {
+        console.error("❌ Error fetching transaction history:", error.message);
         res.status(500).json({ message: "Error fetching transaction history", error: error.message });
     }
 };
