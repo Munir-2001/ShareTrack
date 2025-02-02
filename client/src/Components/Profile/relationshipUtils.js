@@ -127,6 +127,7 @@ export const requestFriend = async (userId, friendUsername) => {
             credentials: "include", // Include cookies for session authentication if required
             body: JSON.stringify({ requester: userId, recipeintUsername: friendUsername }),
         });
+        console.log('backend response was'+response)
 
         if (!response.ok) {
             const error = await response.json();

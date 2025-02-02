@@ -357,4 +357,66 @@ relationshipRouter.post("/getMoneyRequests", getMoneyRequests);
 
 relationshipRouter.post("/getSentMoneyRequests", getSentMoneyRequests);
 
+
+/**
+ * @swagger
+ * /api/relationship/getTransactionHistory:
+ *   post:
+ *     summary: Retrieve the transaction history for a user
+ *     description: Fetches the list of all transactions related to a specific user, including sent and received money requests.
+ *     tags:
+ *       - Transactions
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: The unique identifier of the user whose transaction history is being requested.
+ *             required:
+ *               - userId
+ *     responses:
+ *       "200":
+ *         description: Successfully retrieved transaction history
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 transactions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       transactionId:
+ *                         type: string
+ *                         description: Unique identifier for the transaction
+ *                       senderUsername:
+ *                         type: string
+ *                         description: The username of the person who sent the money
+ *                       receiverUsername:
+ *                         type: string
+ *                         description: The username of the person who received the money
+ *                       amount:
+ *                         type: number
+ *                         format: float
+ *                         description: The amount of money involved in the transaction
+ *                       status:
+ *                         type: string
+ *                         enum: [pending, completed, failed]
+ *                         description: The current status of the transaction
+ *                       timestamp:
+ *                         type: string
+ *                         format: date-time
+ *                         description: The date and time when the transaction was created
+ *       "400":
+ *         description: Bad request, missing or invalid userId
+ *       "500":
+ *         description: Internal server error
+ */
+ relationshipRouter.post('/getTransactionHistory', getTransactionHistory);
+
 module.exports = relationshipRouter;
