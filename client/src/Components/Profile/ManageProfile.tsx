@@ -34,7 +34,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((state: { auth: any }) => state.auth.user);
-  const [balance, setBalance] = useState(user.balance); // Initialize balance from user data
+  const [balance, setBalance] = useState<number | null>(null);
   // const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
   const [modalVisible, setModalVisible] = useState(false);
   const [adjustmentVisible, setAdjustmentVisible] = useState(false);
@@ -50,6 +50,33 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   }
   useEffect(() => {
     setUserState(user);
+    if (user && user.id) {
+      const fetchUserBalance = async () => {
+        try {
+          console.log('user id defined is '+ user.userId)
+          const response = await fetch(`${API_URL}/api/relationship/getUserBalance`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: user.username }), // Fix: Send username instead of userId
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch user balance');
+          }
+
+          const data = await response.json();
+          setBalance(data.balance); // Set the balance state
+        } catch (error) {
+          console.error('Error fetching user balance:', error);
+        }
+      };
+
+      fetchUserBalance();
+    } else {
+      console.error('User ID is not available');
+    }
   }, [user]);
 
   const pickImage = async () => {

@@ -299,14 +299,15 @@ import {
 } from 'react-native';
 import { useAppSelector } from '../../Redux/Store/hooks';
 import { API_URL } from '../../constants';
+import { respondToMoneyRequest } from "../../Components/Profile/relationshipUtils"; // Import API call
 
 interface MoneyRequest {
-  _id: string;
+  id: string;
   sender_username: string;
   receiver_username: string;
   amount: number;
   status: string;
-  timestamp: string; // Added timestamp
+  created_at: string; // Added timestamp
 }
 
 const PendingRequestsScreen = ({ navigation }: { navigation: any }) => {
@@ -320,25 +321,79 @@ const PendingRequestsScreen = ({ navigation }: { navigation: any }) => {
     fetchPendingRequests();
   }, []);
 
+  const handleApproveRequest = async (transactionId: string) => {
+    try {
+      console.log("Approving request for transactionId:", transactionId);
+      const response = await respondToMoneyRequest(transactionId, "approved");
+      if(response!=null)
+      Alert.alert("Success", "Request approved successfully!");
+
+      fetchPendingRequests(); // Refresh the request list
+    } catch (error:any) {
+      Alert.alert("Error", error.message || "Failed to approve request");
+    }
+  };
+  
+  const handleDeclineRequest = async (transactionId: string) => {
+    try {
+      console.log("Declining request for transactionId:", transactionId);
+      const response = await respondToMoneyRequest(transactionId, "declined");
+      if(response!=null)
+      Alert.alert("Success", "Request declined successfully!");
+      fetchPendingRequests(); // Refresh the request list
+    } catch (error:any) {
+      Alert.alert("Error", error.message || "Failed to decline request");
+    }
+  };
+
   // Fetch pending money requests from the backend
+  // const fetchPendingRequests = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const incomingResponse = await fetch(`${API_URL}/api/relationship/getMoneyRequests`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ username: user.username }),
+  //     });
+
+  //     const outgoingResponse = await fetch(`${API_URL}/api/relationship/getSentMoneyRequests`, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ username: user.username }),
+  //     });
+
+  //     const incomingData = await incomingResponse.json();
+  //     const outgoingData = await outgoingResponse.json();
+
+  //     if (incomingResponse.ok) setIncomingRequests(incomingData);
+  //     if (outgoingResponse.ok) setOutgoingRequests(outgoingData);
+  //   } catch (error) {
+  //     Alert.alert('Error', 'Something went wrong while fetching requests.');
+  //   }
+  //   setLoading(false);
+  // };
+
   const fetchPendingRequests = async () => {
     setLoading(true);
     try {
       const incomingResponse = await fetch(`${API_URL}/api/relationship/getMoneyRequests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user.username }),
+        body: JSON.stringify({ username: user.username }), // ✅ Fix: Ensure username is sent
       });
-
+  
       const outgoingResponse = await fetch(`${API_URL}/api/relationship/getSentMoneyRequests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user.username }),
+        body: JSON.stringify({ username: user.username }), // ✅ Fix: Ensure username is sent
       });
-
+  
       const incomingData = await incomingResponse.json();
       const outgoingData = await outgoingResponse.json();
-
+  
+      console.log("Incoming Requests:", incomingData); // Debugging logs
+      console.log("Outgoing Requests:", outgoingData); // Debugging logs
+  
       if (incomingResponse.ok) setIncomingRequests(incomingData);
       if (outgoingResponse.ok) setOutgoingRequests(outgoingData);
     } catch (error) {
@@ -346,22 +401,70 @@ const PendingRequestsScreen = ({ navigation }: { navigation: any }) => {
     }
     setLoading(false);
   };
+  
 
   // Date Formatting Function
+  // const formatDate = (timestamp: string) => {
+  //   if (!timestamp) return 'N/A';
+  //   const date = new Date(timestamp);
+  //   if (isNaN(date.getTime())) return 'Invalid Date';
+  //   return date.toLocaleDateString('en-US', {
+  //     weekday: 'short',
+  //     year: 'numeric',
+  //     month: 'short',
+  //     day: 'numeric',
+  //     hour: '2-digit',
+  //     minute: '2-digit',
+  //     hour12: true,
+  //   });
+  // };
+  // const formatDate = (timestamp: string) => {
+  //   if (!timestamp) return 'N/A';
+  
+  //   // Ensure the timestamp is in a valid format
+  //   const formattedTimestamp = timestamp.replace(" ", "T") + "Z"; // Convert to ISO format
+  //   const date = new Date(formattedTimestamp);
+  
+  //   if (isNaN(date.getTime())) return 'Invalid Date';
+  
+  //   return date.toLocaleDateString('en-US', {
+  //     weekday: 'short',
+  //     year: 'numeric',
+  //     month: 'short',
+  //     day: 'numeric',
+  //     hour: '2-digit',
+  //     minute: '2-digit',
+  //     hour12: true,
+  //   });
+  // };
   const formatDate = (timestamp: string) => {
-    if (!timestamp) return 'N/A';
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return 'Invalid Date';
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
+    if (!timestamp) return "N/A";
+
+    try {
+        // Ensure timestamp is a valid ISO 8601 string
+        const date = new Date(timestamp);
+
+        if (isNaN(date.getTime())) {
+            console.error("❌ formatDate: Invalid date format:", timestamp);
+            return "Invalid Date";
+        }
+
+        return date.toLocaleDateString("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        });
+    } catch (error) {
+        console.error(" formatDate: Error parsing date:", error);
+        return "Invalid Date";
+    }
+};
+
+  
 
   return (
     <View style={styles.container}>
@@ -386,23 +489,30 @@ const PendingRequestsScreen = ({ navigation }: { navigation: any }) => {
           ) : (
             <FlatList
               data={incomingRequests}
-              keyExtractor={(item) => item._id}
+              keyExtractor={(item, index) => item.id?.toString() || index.toString()} // ✅ Ensures a unique key
               renderItem={({ item }) => (
                 <View style={styles.listItem}>
                   <Text style={styles.requestText}>
                     {item.sender_username} requested ${item.amount}
                   </Text>
-                  <Text style={styles.timestampText}>Requested on: {formatDate(item.timestamp)}</Text>
+                  <Text style={styles.timestampText}>Requested on: {formatDate(item.created_at)}</Text>
                   <View style={styles.buttonContainer}>
                     <Pressable
                       style={styles.approveButton}
-                      onPress={() => Alert.alert('Approve', `Approved request of $${item.amount}`)}
+                      // onPress={() => Alert.alert('Approve', `Approved request of $${item.amount}`)}
+                      onPress={() => 
+                        handleApproveRequest(item.id)
+                      }
+            
+
                     >
                       <Text style={styles.buttonText}>Approve</Text>
                     </Pressable>
                     <Pressable
                       style={styles.declineButton}
-                      onPress={() => Alert.alert('Decline', `Declined request of $${item.amount}`)}
+                      // onPress={() => Alert.alert('Decline', `Declined request of $${item.amount}`)}
+                      onPress={() => handleDeclineRequest(item.id)}
+
                     >
                       <Text style={styles.buttonText}>Decline</Text>
                     </Pressable>
@@ -419,13 +529,13 @@ const PendingRequestsScreen = ({ navigation }: { navigation: any }) => {
           ) : (
             <FlatList
               data={outgoingRequests}
-              keyExtractor={(item) => item._id}
+              keyExtractor={(item, index) => item.id?.toString() || index.toString()} // ✅ Ensures a unique key
               renderItem={({ item }) => (
                 <View style={styles.listItemOutgoing}>
                   <Text style={styles.requestText}>
                     You requested ${item.amount} from {item.receiver_username}
                   </Text>
-                  <Text style={styles.timestampText}>Sent on: {formatDate(item.timestamp)}</Text>
+                  <Text style={styles.timestampText}>Sent on: {formatDate(item.created_at)}</Text>
                 </View>
               )}
             />

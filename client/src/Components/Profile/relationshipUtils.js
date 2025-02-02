@@ -289,13 +289,41 @@ export const requestMoney = async (senderUsername, receiverUsername, amount) => 
       }
   
       const data = await response.json();
+      console.log('data for the getrequests for lending' + data)
       return data;
     } catch (error) {
       console.error('Error fetching money requests:', error.message);
       return [];
     }
   };
-
+  export const respondToMoneyRequest = async (transactionId, response) => {
+    try {
+      const requestBody = {
+        transactionId,
+        response, // "approved" or "declined"
+      };
+  
+      const fetchResponse = await fetch(`${API_URL}/api/relationship/respondToRequest`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+  
+      const responseData = await fetchResponse.json();
+  
+      if (!fetchResponse.ok) {
+        throw new Error(responseData.message || "Failed to respond to money request.");
+      }
+  
+      return responseData;
+    } catch (error) {
+      console.error("Error responding to money request:", error.message);
+      throw new Error(error.message);
+    }
+  };
+  
 // Function to update user details
 export const updateUserDetails = async ({ username, phone, email }) => {
     const response = await fetch(`${API_URL}/api/auth/updateDetails`, {

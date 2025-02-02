@@ -73,7 +73,8 @@ const {
     respondToMoneyRequest,
     getMoneyRequests,
     getTransactionHistory,
-    getSentMoneyRequests
+    getSentMoneyRequests,
+    getUserBalance
 } = require("../controllers/relationshipController");
 
 const relationshipRouter = express.Router();
@@ -418,5 +419,42 @@ relationshipRouter.post("/getSentMoneyRequests", getSentMoneyRequests);
  *         description: Internal server error
  */
  relationshipRouter.post('/getTransactionHistory', getTransactionHistory);
+
+/**
+ * @swagger
+ * /api/relationship/getUserBalance:
+ *   post:
+ *     summary: Retrieve the balance of a user
+ *     tags:
+ *       - Transactions
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: The unique identifier of the user whose balance is being requested.
+ *             required:
+ *               - userId
+ *     responses:
+ *       "200":
+ *         description: Successfully retrieved user balance
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 balance:
+ *                   type: number
+ *                   description: The current balance of the user
+ *       "400":
+ *         description: Bad request, missing or invalid userId
+ *       "500":
+ *         description: Internal server error
+ */
+relationshipRouter.post('/getUserBalance', getUserBalance);
 
 module.exports = relationshipRouter;

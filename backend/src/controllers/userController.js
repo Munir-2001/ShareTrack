@@ -200,6 +200,8 @@ const createUser = async (req, res) => {
   }
 };
 
+
+
 // Log in user by comparing hashed passwords
 const loginUser = async (req, res) => {
   try {
@@ -208,7 +210,7 @@ const loginUser = async (req, res) => {
     // Fetch user
     const { data: user, error } = await supabase
       .from("users")
-      .select("id, username, phone, email, password")
+      .select("id, username, phone, email, password","balance")
       .eq("email", email)
       .single();
 
