@@ -51,14 +51,35 @@ export const getTransactionHistory = async (username) => {
   };
   
 // Get all friends for a user
+// export const getFriends = async (userId) => {
+//     try {
+//         const response = await fetch(`${API_URL}/api/relationship/friends/${userId}`, {
+//             method: "GET",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             credentials: "include", // Include cookies for session authentication if required
+//         });
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message);
+//         }
+
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
 export const getFriends = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/friends/${userId}`, {
-            method: "GET",
+        const response = await fetch(`${API_URL}/api/relationship/friends`, {  // ✅ FIXED: Using POST instead of GET
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for session authentication if required
+            body: JSON.stringify({  }),  // ✅ FIXED: Sending username in body
         });
 
         if (!response.ok) {
@@ -66,22 +87,43 @@ export const getFriends = async (userId) => {
             throw new Error(error.message);
         }
 
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
+        console.error("❌ getFriends: Error fetching friends:", error.message);
         throw error;
     }
 };
 
 // Get all friend requests received for a user
+// export const getFriendRequestsReceived = async (userId) => {
+//     try {
+//         const response = await fetch(`${API_URL}/api/relationship/requests/received/${userId}`, {
+//             method: "GET",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             credentials: "include", // Include cookies for session authentication if required
+//         });
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message);
+//         }
+
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
 export const getFriendRequestsReceived = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/requests/received/${userId}`, {
-            method: "GET",
+        const response = await fetch(`${API_URL}/api/relationship/requests/received`, {  // ✅ FIXED: Using POST instead of GET
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for session authentication if required
+            body: JSON.stringify({ userId }),  // ✅ FIXED: Sending username in body
         });
 
         if (!response.ok) {
@@ -89,22 +131,21 @@ export const getFriendRequestsReceived = async (userId) => {
             throw new Error(error.message);
         }
 
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
+        console.error("❌ getFriendRequestsReceived: Error fetching requests:", error.message);
         throw error;
     }
 };
 
-// Get all friend requests sent by a user
 export const getFriendRequestsSent = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/requests/sent/${userId}`, {
-            method: "GET",
+        const response = await fetch(`${API_URL}/api/relationship/requests/sent`, {  // ✅ FIXED: Using POST instead of GET
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for session authentication if required
+            body: JSON.stringify({ userId }),  // ✅ FIXED: Sending username in body
         });
 
         if (!response.ok) {
@@ -112,22 +153,21 @@ export const getFriendRequestsSent = async (userId) => {
             throw new Error(error.message);
         }
 
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
+        console.error("❌ getFriendRequestsSent: Error fetching requests:", error.message);
         throw error;
     }
 };
 
-// Get all blocked friends for a user
 export const getBlockedUsers = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/blocked/${userId}`, {
-            method: "GET",
+        const response = await fetch(`${API_URL}/api/relationship/blocked`, {  // ✅ FIXED: Using POST instead of GET
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for session authentication if required
+            body: JSON.stringify({ userId }),  // ✅ FIXED: Sending username in body
         });
 
         if (!response.ok) {
@@ -135,36 +175,178 @@ export const getBlockedUsers = async (userId) => {
             throw new Error(error.message);
         }
 
-        const data = await response.json();
-        return data;
-    }
-    catch (error) {
+        return await response.json();
+    } catch (error) {
+        console.error("❌ getBlockedUsers: Error fetching blocked users:", error.message);
         throw error;
     }
 };
 
+
+// // Get all friend requests sent by a user
+// export const getFriendRequestsSent = async (userId) => {
+//     try {
+//         const response = await fetch(`${API_URL}/api/relationship/requests/sent/${userId}`, {
+//             method: "GET",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             credentials: "include", // Include cookies for session authentication if required
+//         });
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message);
+//         }
+
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
+
+// // Get all blocked friends for a user
+// export const getBlockedUsers = async (userId) => {
+//     try {
+//         const response = await fetch(`${API_URL}/api/relationship/blocked/${userId}`, {
+//             method: "GET",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             credentials: "include", // Include cookies for session authentication if required
+//         });
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message);
+//         }
+
+//         const data = await response.json();
+//         return data;
+//     }
+//     catch (error) {
+//         throw error;
+//     }
+// };
+
 // Make a friend request
-export const requestFriend = async (userId, friendUsername) => {
+// export const requestFriend = async (userId, friendUsername) => {
+//     try {
+//         const response = await fetch(`${API_URL}/api/relationship/request`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             credentials: "include", // Include cookies for session authentication if required
+//             body: JSON.stringify({ requester: userId, recipeintUsername: friendUsername }),
+//         });
+//         console.log('backend response was'+response)
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message);
+//         }
+
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
+// export const requestFriend = async (userId, recipientUsername) => {
+//     try {
+//         if (!userId || !recipientUsername) {
+//             console.error("❌ requestFriend: Missing userId or recipientUsername", { userId, recipientUsername });
+//             throw new Error("User ID and recipient username are required");
+//         }
+
+//         console.log("✅ requestFriend: Sending request with", { userId, recipientUsername });
+
+//         const response = await fetch(`${API_URL}/api/relationship/request`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             credentials: "include",
+//             body: JSON.stringify({ requesterId: userId, recipientUsername }), // ✅ Ensure correct keys
+//         });
+
+//         const data = await response.json();
+//         console.log("✅ requestFriend: API Response", data);
+
+//         if (!response.ok) {
+//             console.error("❌ API Error:", data.message);
+//             throw new Error(data.message);
+//         }
+
+//         return data;
+//     } catch (error) {
+//         console.error("❌ requestFriend: Error sending request:", error.message);
+//         throw new Error(error.message);
+//     }
+// };
+// export const requestFriend = async (userId, recipientUsername) => {
+//     try {
+//         if (!userId || !recipientUsername) {
+//             console.error("❌ requestFriend: Missing userId or recipientUsername", { userId, recipientUsername });
+//             throw new Error("User ID and recipient username are required");
+//         }
+
+//         console.log("✅ requestFriend: Sending request with", { userId, recipientUsername });
+
+//         const response = await fetch(`${API_URL}/api/relationship/request`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             credentials: "include",
+//             body: JSON.stringify({ requesterId: userId, recipientUsername }), // ✅ Ensure correct keys
+//         });
+
+//         const data = await response.json();
+//         console.log("✅ requestFriend: API Response", data);
+
+//         if (!response.ok) {
+//             console.error("❌ API Error:", data.message);
+//             throw new Error(data.message);
+//         }
+
+//         return data;
+//     } catch (error) {
+//         console.error("❌ requestFriend: Error sending request:", error.message);
+//         throw new Error(error.message);
+//     }
+// };
+export const requestFriend = async (userId, recipientUsername) => {
     try {
+        if (!userId || !recipientUsername) {
+            console.error("❌ requestFriend: Missing userId or recipientUsername", { userId, recipientUsername });
+            throw new Error("User ID and recipient username are required");
+        }
+
+        console.log("✅ requestFriend: Sending request with", { userId, recipientUsername });
+
         const response = await fetch(`${API_URL}/api/relationship/request`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for session authentication if required
-            body: JSON.stringify({ requester: userId, recipeintUsername: friendUsername }),
+            body: JSON.stringify({ requesterId: userId, recipientUsername }), // ✅ FIXED: Correct field names
         });
-        console.log('backend response was'+response)
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message);
-        }
 
         const data = await response.json();
+        console.log("✅ requestFriend: API Response", data);
+
+        if (!response.ok) {
+            console.error("❌ API Error:", data.message);
+            throw new Error(data.message);
+        }
+
         return data;
     } catch (error) {
-        throw error;
+        console.error("❌ requestFriend: Error sending request:", error.message);
+        throw new Error(error.message);
     }
 };
 

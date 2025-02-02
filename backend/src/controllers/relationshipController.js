@@ -1,14 +1,79 @@
 const { supabase } = require("../config/db");
 debugger;
 // Request a new relationship (friend request)
+// const requestRelationship = async (req, res) => {
+//     try {
+//         const { requesterId, recipientUsername } = req.body;
+//         console.log('requested if and recipient username was '+ 
+//             requesterId
+//             +
+//             'and name is ' + recipientUsername
+//         )
+//         // Check if recipient exists
+//         const { data: recipient, error: recipientError } = await supabase
+//             .from("users")
+//             .select("id")
+//             .eq("username", recipientUsername)
+//             .single();
+
+//             console.log('supabase response was on checking if recipient exists'+data)
+
+//         if (!recipient || recipientError) {
+//             return res.status(400).json({ message: "Recipient user does not exist" });
+//         }
+
+//         if (requesterId === recipient.id) {
+//             return res.status(400).json({ message: "You cannot send a friend request to yourself!" });
+//         }
+
+//         // Check if relationship already exists
+//         const { data: existingRelationship } = await supabase
+//             .from("relationships")
+//             .select("*")
+//             .or(`(requester_id.eq.${requesterId},recipient_id.eq.${recipient.id}),(requester_id.eq.${recipient.id},recipient_id.eq.${requesterId})`)
+//             .single();
+
+//             console.log('supabase response was on checking if relationship exists'+data)
+
+
+//         if (existingRelationship) {
+//             switch (existingRelationship.status) {
+//                 case 0:
+//                     return res.status(400).json({ message: existingRelationship.requester_id === requesterId ? "Friend request already sent!" : "Friend request pending!" });
+//                 case 1:
+//                     return res.status(400).json({ message: "Friend already exists!" });
+//                 case 2:
+                    
+//                 case 3:
+//                     return res.status(400).json({ message: existingRelationship.requester_id === requesterId ? "User has blocked you!" : "You have blocked this user!" });
+//             }
+//         }
+
+//         // Create new relationship request
+//         const { data, error } = await supabase
+//             .from("relationships")
+//             .insert([{ requester_id: requesterId, recipient_id: recipient.id, status: 0 }]);
+
+
+
+//         if (error) throw error;
+
+//         res.status(201).json({ message: "Friend request sent successfully", data });
+//     } catch (err) {
+//         res.status(400).json({ message: err.message });
+//     }
+// };
 const requestRelationship = async (req, res) => {
     try {
         const { requesterId, recipientUsername } = req.body;
-        console.log('requested if and recipient username was '+ 
-            requesterId
-            +
-            'and name is ' + recipientUsername
-        )
+
+        console.log(`✅ requestRelationship: Received request with`, { requesterId, recipientUsername });
+
+        if (!requesterId || !recipientUsername) {
+            console.error("❌ Missing requesterId or recipientUsername");
+            return res.status(400).json({ message: "Requester ID and recipient username are required" });
+        }
+
         // Check if recipient exists
         const { data: recipient, error: recipientError } = await supabase
             .from("users")
@@ -16,12 +81,14 @@ const requestRelationship = async (req, res) => {
             .eq("username", recipientUsername)
             .single();
 
-            console.log('supabase response was on checking if recipient exists'+data)
+        console.log("✅ Supabase response for recipient check:", recipient);
 
         if (!recipient || recipientError) {
+            console.error("❌ Recipient user does not exist:", recipientUsername);
             return res.status(400).json({ message: "Recipient user does not exist" });
         }
 
+        // Prevent self-requests
         if (requesterId === recipient.id) {
             return res.status(400).json({ message: "You cannot send a friend request to yourself!" });
         }
@@ -30,11 +97,10 @@ const requestRelationship = async (req, res) => {
         const { data: existingRelationship } = await supabase
             .from("relationships")
             .select("*")
-            .or(`(requester_id.eq.${requesterId},recipient_id.eq.${recipient.id}),(requester_id.eq.${recipient.id},recipient_id.eq.${requesterId})`)
+            .or(`(requester_id.eq.${requesterId},recipient_id.eq.${recipient.id}),(requester_id.eq.${recipient.id},requester_id.eq.${requesterId})`)
             .single();
 
-            console.log('supabase response was on checking if relationship exists'+data)
-
+        console.log("✅ Supabase response for relationship check:", existingRelationship);
 
         if (existingRelationship) {
             switch (existingRelationship.status) {
@@ -43,7 +109,6 @@ const requestRelationship = async (req, res) => {
                 case 1:
                     return res.status(400).json({ message: "Friend already exists!" });
                 case 2:
-                    
                 case 3:
                     return res.status(400).json({ message: existingRelationship.requester_id === requesterId ? "User has blocked you!" : "You have blocked this user!" });
             }
@@ -54,13 +119,16 @@ const requestRelationship = async (req, res) => {
             .from("relationships")
             .insert([{ requester_id: requesterId, recipient_id: recipient.id, status: 0 }]);
 
+        if (error) {
+            console.error("❌ Error inserting relationship:", error);
+            throw error;
+        }
 
-
-        if (error) throw error;
-
+        console.log("✅ Friend request successfully created");
         res.status(201).json({ message: "Friend request sent successfully", data });
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        console.error("❌ requestRelationship: Unexpected error:", err.message);
+        res.status(500).json({ message: "Internal server error", error: err.message });
     }
 };
 
@@ -511,163 +579,234 @@ const getSentMoneyRequests = async (req, res) => {
 
 
 // Get all friends of a user
+// const getAllFriends = async (req, res) => {
+//     try {
+//         const { username } = req.body; // Fix: Accept username
+
+//         if (!username) {
+//             return res.status(400).json({ message: "Username is required" });
+//         }
+
+//         // Convert username to userId
+//         const { data: user, error: userError } = await supabase
+//             .from("users")
+//             .select("id")
+//             .eq("username", username)
+//             .single();
+
+//         if (!user || userError) {
+//             return res.status(404).json({ message: "User not found" });
+//         }
+
+//         const userId = user.id;
+
+//         // Get all friends
+//         const { data: relationships, error } = await supabase
+//             .from("relationships")
+//             .select("*")
+//             .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+//             .eq("status", 1);
+
+//         if (error) throw error;
+
+//         const friends = await Promise.all(
+//             relationships.map(async (relationship) => {
+//                 const friendId = relationship.requester_id === userId ? relationship.recipient_id : relationship.requester_id;
+//                 const { data: friend } = await supabase
+//                     .from("users")
+//                     .select("id, username, email, phone")
+//                     .eq("id", friendId)
+//                     .single();
+//                 return { ...friend, relationship };
+//             })
+//         );
+
+//         res.status(200).json(friends);
+//     } catch (err) {
+//         res.status(500).json({ message: err.message });
+//     }
+// };
+
+// // Get all friend requests received
+// const getAllFriendRequestsReceived = async (req, res) => {
+//     try {
+//         const { username } = req.body; // Fix: Accept username
+
+//         if (!username) {
+//             return res.status(400).json({ message: "Username is required" });
+//         }
+
+//         // Convert username to userId
+//         const { data: user, error: userError } = await supabase
+//             .from("users")
+//             .select("id")
+//             .eq("username", username)
+//             .single();
+
+//         if (!user || userError) {
+//             return res.status(404).json({ message: "User not found" });
+//         }
+
+//         const userId = user.id;
+
+//         // Fetch friend requests received
+//         const { data: requests, error } = await supabase
+//             .from("relationships")
+//             .select("*")
+//             .eq("recipient_id", userId)
+//             .eq("status", 0);
+
+//         if (error) throw error;
+
+//         res.status(200).json(requests);
+//     } catch (err) {
+//         res.status(500).json({ message: err.message });
+//     }
+// };
+
+// // Get all friend requests sent
+// const getAllFriendRequestsSent = async (req, res) => {
+//     try {
+//         const { username } = req.body; // Fix: Accept username
+
+//         if (!username) {
+//             return res.status(400).json({ message: "Username is required" });
+//         }
+
+//         // Convert username to userId
+//         const { data: user, error: userError } = await supabase
+//             .from("users")
+//             .select("id")
+//             .eq("username", username)
+//             .single();
+
+//         if (!user || userError) {
+//             return res.status(404).json({ message: "User not found" });
+//         }
+
+//         const userId = user.id;
+
+//         // Fetch friend requests sent
+//         const { data: requests, error } = await supabase
+//             .from("relationships")
+//             .select("*")
+//             .eq("requester_id", userId)
+//             .eq("status", 0);
+
+//         if (error) throw error;
+
+//         res.status(200).json(requests);
+//     } catch (err) {
+//         res.status(500).json({ message: err.message });
+//     }
+// };
+
+// // Get all blocked users
+// const getBlockedRelationships = async (req, res) => {
+//     try {
+//         const { username } = req.body; // Fix: Accept username
+
+//         if (!username) {
+//             return res.status(400).json({ message: "Username is required" });
+//         }
+
+//         // Convert username to userId
+//         const { data: user, error: userError } = await supabase
+//             .from("users")
+//             .select("id")
+//             .eq("username", username)
+//             .single();
+
+//         if (!user || userError) {
+//             return res.status(404).json({ message: "User not found" });
+//         }
+
+//         const userId = user.id;
+
+//         // Fetch blocked relationships
+//         const { data: blockedRelationships, error } = await supabase
+//             .from("relationships")
+//             .select("*")
+//             .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+//             .or("status.eq.2,status.eq.3");
+
+//         if (error) throw error;
+
+//         res.status(200).json(blockedRelationships);
+//     } catch (err) {
+//         res.status(500).json({ message: err.message });
+//     }
+// };
 const getAllFriends = async (req, res) => {
-    try {
-        const { username } = req.body; // Fix: Accept username
+    const { userId } = req.body;
 
-        if (!username) {
-            return res.status(400).json({ message: "Username is required" });
-        }
-
-        // Convert username to userId
-        const { data: user, error: userError } = await supabase
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single();
-
-        if (!user || userError) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const userId = user.id;
-
-        // Get all friends
-        const { data: relationships, error } = await supabase
-            .from("relationships")
-            .select("*")
-            .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
-            .eq("status", 1);
-
-        if (error) throw error;
-
-        const friends = await Promise.all(
-            relationships.map(async (relationship) => {
-                const friendId = relationship.requester_id === userId ? relationship.recipient_id : relationship.requester_id;
-                const { data: friend } = await supabase
-                    .from("users")
-                    .select("id, username, email, phone")
-                    .eq("id", friendId)
-                    .single();
-                return { ...friend, relationship };
-            })
-        );
-
-        res.status(200).json(friends);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
     }
+
+    const { data: relationships, error } = await supabase
+        .from("relationships")
+        .select("*")
+        .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+        .eq("status", 1);
+
+    if (error) throw error;
+
+    res.status(200).json(relationships);
 };
 
-// Get all friend requests received
 const getAllFriendRequestsReceived = async (req, res) => {
-    try {
-        const { username } = req.body; // Fix: Accept username
+    const { userId } = req.body;
 
-        if (!username) {
-            return res.status(400).json({ message: "Username is required" });
-        }
-
-        // Convert username to userId
-        const { data: user, error: userError } = await supabase
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single();
-
-        if (!user || userError) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const userId = user.id;
-
-        // Fetch friend requests received
-        const { data: requests, error } = await supabase
-            .from("relationships")
-            .select("*")
-            .eq("recipient_id", userId)
-            .eq("status", 0);
-
-        if (error) throw error;
-
-        res.status(200).json(requests);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
     }
+
+    const { data: requests, error } = await supabase
+        .from("relationships")
+        .select("*")
+        .eq("recipient_id", userId)
+        .eq("status", 0);
+
+    if (error) throw error;
+
+    res.status(200).json(requests);
 };
 
-// Get all friend requests sent
 const getAllFriendRequestsSent = async (req, res) => {
-    try {
-        const { username } = req.body; // Fix: Accept username
+    const { userId } = req.body;
 
-        if (!username) {
-            return res.status(400).json({ message: "Username is required" });
-        }
-
-        // Convert username to userId
-        const { data: user, error: userError } = await supabase
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single();
-
-        if (!user || userError) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const userId = user.id;
-
-        // Fetch friend requests sent
-        const { data: requests, error } = await supabase
-            .from("relationships")
-            .select("*")
-            .eq("requester_id", userId)
-            .eq("status", 0);
-
-        if (error) throw error;
-
-        res.status(200).json(requests);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
     }
+
+    const { data: requests, error } = await supabase
+        .from("relationships")
+        .select("*")
+        .eq("requester_id", userId)
+        .eq("status", 0);
+
+    if (error) throw error;
+
+    res.status(200).json(requests);
 };
 
-// Get all blocked users
 const getBlockedRelationships = async (req, res) => {
-    try {
-        const { username } = req.body; // Fix: Accept username
+    const { userId } = req.body;
 
-        if (!username) {
-            return res.status(400).json({ message: "Username is required" });
-        }
-
-        // Convert username to userId
-        const { data: user, error: userError } = await supabase
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single();
-
-        if (!user || userError) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const userId = user.id;
-
-        // Fetch blocked relationships
-        const { data: blockedRelationships, error } = await supabase
-            .from("relationships")
-            .select("*")
-            .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
-            .or("status.eq.2,status.eq.3");
-
-        if (error) throw error;
-
-        res.status(200).json(blockedRelationships);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
     }
+
+    const { data: blockedRelationships, error } = await supabase
+        .from("relationships")
+        .select("*")
+        .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+        .or("status.eq.2,status.eq.3");
+
+    if (error) throw error;
+
+    res.status(200).json(blockedRelationships);
 };
 
 // Request money from another user

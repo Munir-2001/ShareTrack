@@ -43,7 +43,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
   // const dispatch = useAppDispatch();
   const user = useAppSelector((state: {auth: any}) => state.auth.user);
   const isAuth = useAppSelector((state: {auth: any}) => state.auth.isAuth);
-  const [userId, setUserId] = useState(user._id || null); // Replace with dynamic user ID
+  const [userId, setUserId] = useState(user.id || null); // Replace with dynamic user ID
   const [friends, setFriends] = useState<User[]>([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [showMoneyRequests, setShowMoneyRequests] = useState(false);
@@ -60,19 +60,56 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
 
   const filteredData = filter === 'Received' ? pendingRequests : sentRequests;
 
+  // const fetchMoneyRequests = async () => {
+  //   const requests = await getRequestsForLending(user.username);
+  //   setMoneyRequests(requests);
+  // };
   const fetchMoneyRequests = async () => {
-    const requests = await getRequestsForLending(user.username);
-    setMoneyRequests(requests);
+    try {
+      if (!user || !user.username) {
+        throw new Error("User information is missing.");
+      }
+  
+      const requests = await getRequestsForLending(user.username);
+      setMoneyRequests(requests || []);
+    } catch (error) {
+      console.error("❌ Error fetching money requests:", error);
+      Alert.alert("Error", "Failed to load money requests.");
+    }
   };
+  
+
+  // useEffect(() => {
+  //   setUserId(user?._id || null);
+  // }, [user]);
 
   useEffect(() => {
-    setUserId(user?._id || null);
+    if (user && user.id) {  // ✅ Fix: Use `user.id` instead of `user._id`
+      console.log("✅ Setting userId:", user.id);
+      setUserId(user.id);
+    } else {
+      console.warn("❌ userId is undefined, user object:", user);
+    }
   }, [user]);
+  
 
-  const toggleMoneyRequests = () => {
-    setShowMoneyRequests(!showMoneyRequests);
-    if (!showMoneyRequests) fetchMoneyRequests();
-  };
+  useEffect(() => {
+    if (isAuth && userId) {
+      fetchData();
+    }
+  }, [userId, selectedOption, blockedUsers, friends, pendingRequests, sentRequests]);
+
+
+ const toggleMoneyRequests = () => {
+  if (!showMoneyRequests) {
+    if (user && user.username) {
+      fetchMoneyRequests();
+    } else {
+      Alert.alert("Error", "User information is not available.");
+    }
+  }
+  setShowMoneyRequests(!showMoneyRequests);
+};
 
   useEffect(() => {
     if (isAuth) {
@@ -89,21 +126,66 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
 
   
 
+  // const fetchData = async () => {
+  //   try {
+  //     const friendsData = await getFriends(userId);
+  //     const pendingRequestsData = await getFriendRequestsReceived(userId);
+  //     const sentRequestsData = await getFriendRequestsSent(userId);
+  //     const blockedUsersData = await getBlockedUsers(userId);
+
+  //     setFriends(friendsData);
+  //     setPendingRequests(pendingRequestsData);
+  //     setSentRequests(sentRequestsData);
+  //     setBlockedUsers(blockedUsersData);
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error);
+  //   }
+  // };
+  
+  // const fetchData = async () => {
+  //   try {
+  //     if (!userId) return;
+      
+  //     const friendsData = await getFriends(userId);
+  //     const pendingRequestsData = await getFriendRequestsReceived(userId);
+  //     const sentRequestsData = await getFriendRequestsSent(userId);
+  //     const blockedUsersData = await getBlockedUsers(userId);
+  
+  //     setFriends(friendsData || []);
+  //     setPendingRequests(pendingRequestsData || []);
+  //     setSentRequests(sentRequestsData || []);
+  //     setBlockedUsers(blockedUsersData || []);
+  //   } catch (error) {
+  //     console.error("❌ Error fetching data:", error);
+  //     Alert.alert("Error", "Failed to fetch friendship data.");
+  //   }
+  // };
   const fetchData = async () => {
+    if (!userId) {
+      console.warn("❌ fetchData(): userId is undefined, skipping API calls");
+      return;
+    }
+  
     try {
+      console.log("✅ Fetching data for userId:", userId);
       const friendsData = await getFriends(userId);
       const pendingRequestsData = await getFriendRequestsReceived(userId);
       const sentRequestsData = await getFriendRequestsSent(userId);
       const blockedUsersData = await getBlockedUsers(userId);
-
-      setFriends(friendsData);
-      setPendingRequests(pendingRequestsData);
-      setSentRequests(sentRequestsData);
-      setBlockedUsers(blockedUsersData);
+  
+      setFriends(friendsData || []);
+      setPendingRequests(pendingRequestsData || []);
+      setSentRequests(sentRequestsData || []);
+      setBlockedUsers(blockedUsersData || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("❌ fetchData(): Error fetching data:", error);
+      Alert.alert("Error", "Failed to fetch friendship data.");
     }
   };
+  
+  
+  
+  
   useEffect(() => {
     if (searchQuery) {
       const filtered = friends.filter((friend) =>
@@ -137,12 +219,19 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
     navigation.navigate('PROFILE');
   };
 
-  const openModal = (friend:User) => {
+  // const openModal = (friend:User) => {
+  //   setSelectedFriend(friend);
+  //   setModalVisible(true);
+  //   console.log('open modal');
+  // };
+
+  const openModal = (friend: User) => {
+    if (!friend) return;
     setSelectedFriend(friend);
     setModalVisible(true);
-    console.log('open modal');
+    console.log("✅ Opened modal for:", friend.username);
   };
-
+  
   const closeModal = ():void => {
     console.log('Closing Modal'); // Add this log
     setSelectedFriend(null);
@@ -186,7 +275,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
 
           <FlatList
             data={filteredFriends}
-            keyExtractor={(item: any) => item.relationship._id.toString()}
+            keyExtractor={(item:any ) => item.relationship._id.toString()}
             renderItem={({item}) => (
               <View style={styles.listElement}>
                 {/* Profile picture */}
@@ -407,14 +496,24 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
         />
       )}
 
-      {selectedFriend &&(
+      {/* {selectedFriend &&(
         <RequestMoney
         friendUsername={selectedFriend.username}
         onClose={()=>{
           setSelectedFriend(null);
         }}
         />
-      )}
+      )} */}
+      {selectedFriend && showMoneyRequests && (
+  <RequestMoney
+    friendUsername={selectedFriend.username}
+    onClose={() => {
+      setSelectedFriend(null);
+      setShowMoneyRequests(false);
+    }}
+  />
+)}
+
 
     </View>
   );

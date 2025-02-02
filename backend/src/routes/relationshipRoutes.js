@@ -196,64 +196,203 @@ relationshipRouter.put("/block", blockRelationship);
  *       200:
  *         description: List of friends
  */
-relationshipRouter.get("/friends/:userId", getAllFriends);
+relationshipRouter.post("/friends", getAllFriends); // ✅ Now accepts username in body
 
 /**
  * @swagger
- * /api/relationship/requests/received/{userId}:
- *   get:
+ * /api/relationship/friends:
+ *   post:
+ *     summary: Get all friends of a user
+ *     description: Fetches the list of all friends for a given user.
+ *     tags:
+ *       - Relationships
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: The unique identifier of the user whose friends list is requested.
+ *             required:
+ *               - userId
+ *     responses:
+ *       "200":
+ *         description: List of friends retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Unique identifier of the friend
+ *                   username:
+ *                     type: string
+ *                     description: Username of the friend
+ *                   email:
+ *                     type: string
+ *                     description: Email of the friend
+ *                   phone:
+ *                     type: string
+ *                     description: Phone number of the friend
+ *       "400":
+ *         description: Missing or invalid userId
+ *       "500":
+ *         description: Internal server error
+ */
+relationshipRouter.post("/friends", getAllFriends);
+
+/**
+ * @swagger
+ * /api/relationship/requests/received:
+ *   post:
  *     summary: Get all friend requests received
+ *     description: Fetches all pending friend requests received by a user.
  *     tags:
  *       - Relationships
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: The unique identifier of the user whose received friend requests are being fetched.
+ *             required:
+ *               - userId
  *     responses:
- *       200:
- *         description: List of friend requests received
+ *       "200":
+ *         description: List of received friend requests retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Unique identifier of the friend request
+ *                   requester_id:
+ *                     type: integer
+ *                     description: ID of the user who sent the friend request
+ *                   recipient_id:
+ *                     type: integer
+ *                     description: ID of the user receiving the friend request
+ *                   status:
+ *                     type: integer
+ *                     description: Status of the request (0 = Pending)
+ *       "400":
+ *         description: Missing or invalid userId
+ *       "500":
+ *         description: Internal server error
  */
-relationshipRouter.get("/requests/received/:userId", getAllFriendRequestsReceived);
+relationshipRouter.post("/requests/received", getAllFriendRequestsReceived);
 
 /**
  * @swagger
- * /api/relationship/requests/sent/{userId}:
- *   get:
+ * /api/relationship/requests/sent:
+ *   post:
  *     summary: Get all friend requests sent
+ *     description: Fetches all pending friend requests sent by a user.
  *     tags:
  *       - Relationships
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: The unique identifier of the user whose sent friend requests are being fetched.
+ *             required:
+ *               - userId
  *     responses:
- *       200:
- *         description: List of friend requests sent
+ *       "200":
+ *         description: List of sent friend requests retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Unique identifier of the friend request
+ *                   requester_id:
+ *                     type: integer
+ *                     description: ID of the user who sent the friend request
+ *                   recipient_id:
+ *                     type: integer
+ *                     description: ID of the user receiving the friend request
+ *                   status:
+ *                     type: integer
+ *                     description: Status of the request (0 = Pending)
+ *       "400":
+ *         description: Missing or invalid userId
+ *       "500":
+ *         description: Internal server error
  */
-relationshipRouter.get("/requests/sent/:userId", getAllFriendRequestsSent);
+relationshipRouter.post("/requests/sent", getAllFriendRequestsSent);
 
 /**
  * @swagger
- * /api/relationship/blocked/{userId}:
- *   get:
+ * /api/relationship/blocked:
+ *   post:
  *     summary: Get all blocked users
+ *     description: Fetches all users that the given user has blocked.
  *     tags:
  *       - Relationships
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: The unique identifier of the user whose blocked list is requested.
+ *             required:
+ *               - userId
  *     responses:
- *       200:
- *         description: List of blocked users
+ *       "200":
+ *         description: List of blocked users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Unique identifier of the blocked relationship
+ *                   requester_id:
+ *                     type: integer
+ *                     description: ID of the user who initiated the block
+ *                   recipient_id:
+ *                     type: integer
+ *                     description: ID of the user who was blocked
+ *                   status:
+ *                     type: integer
+ *                     description: Status of the relationship (2 or 3 = Blocked)
+ *       "400":
+ *         description: Missing or invalid userId
+ *       "500":
+ *         description: Internal server error
  */
-relationshipRouter.get("/blocked/:userId", getBlockedRelationships);
+relationshipRouter.post("/blocked", getBlockedRelationships);
 
 /**
  * @swagger
