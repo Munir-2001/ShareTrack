@@ -53,12 +53,12 @@ export const getTransactionHistory = async (username) => {
 // Get all friends for a user
 export const getFriends = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/friends/${userId}`, {
-            method: "GET",
+        const response = await fetch(`${API_URL}/api/relationship/friends`, {  // ✅ Changed from GET to POST
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for session authentication if required
+            body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
         });
 
         if (!response.ok) {
@@ -66,9 +66,9 @@ export const getFriends = async (userId) => {
             throw new Error(error.message);
         }
 
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
+        console.error("❌ getFriends: Error fetching friends:", error.message);
         throw error;
     }
 };
@@ -76,12 +76,12 @@ export const getFriends = async (userId) => {
 // Get all friend requests received for a user
 export const getFriendRequestsReceived = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/requests/received/${userId}`, {
-            method: "GET",
+        const response = await fetch(`${API_URL}/api/relationship/requests/received`, {  // ✅ Changed from GET to POST
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for session authentication if required
+            body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
         });
 
         if (!response.ok) {
@@ -89,9 +89,9 @@ export const getFriendRequestsReceived = async (userId) => {
             throw new Error(error.message);
         }
 
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
+        console.error("❌ getFriendRequestsReceived: Error fetching requests:", error.message);
         throw error;
     }
 };
@@ -99,12 +99,12 @@ export const getFriendRequestsReceived = async (userId) => {
 // Get all friend requests sent by a user
 export const getFriendRequestsSent = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/requests/sent/${userId}`, {
-            method: "GET",
+        const response = await fetch(`${API_URL}/api/relationship/requests/sent`, {  // ✅ Changed from GET to POST
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for session authentication if required
+            body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
         });
 
         if (!response.ok) {
@@ -112,22 +112,22 @@ export const getFriendRequestsSent = async (userId) => {
             throw new Error(error.message);
         }
 
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (error) {
+        console.error("❌ getFriendRequestsSent: Error fetching requests:", error.message);
         throw error;
     }
 };
 
-// Get all blocked friends for a user
+// Get all blocked users for a user
 export const getBlockedUsers = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/blocked/${userId}`, {
-            method: "GET",
+        const response = await fetch(`${API_URL}/api/relationship/blocked`, {  // ✅ Changed from GET to POST
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for session authentication if required
+            body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
         });
 
         if (!response.ok) {
@@ -135,13 +135,13 @@ export const getBlockedUsers = async (userId) => {
             throw new Error(error.message);
         }
 
-        const data = await response.json();
-        return data;
-    }
-    catch (error) {
+        return await response.json();
+    } catch (error) {
+        console.error("❌ getBlockedUsers: Error fetching blocked users:", error.message);
         throw error;
     }
 };
+
 
 // Make a friend request
 export const requestFriend = async (userId, friendUsername) => {
@@ -241,6 +241,30 @@ export const blockFriend = async (relationshipId, blockerId) => {
     }
 };
 
+// export const sendMoney = async (senderUsername, receiverUsername, amount) => {
+//     try {
+//         const response = await fetch(`${API_URL}/api/relationship/sendMoney`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({ senderUsername, receiverUsername, amount }),
+//         });
+
+//         const responseData = await response.json();
+
+//         if (!response.ok) {
+//             throw new Error(responseData.message || "Failed to send money.");
+//         }
+
+//         return responseData; // Returns { message: 'Money sent successfully' }
+//     } catch (error) {
+//         console.error("Error sending money:", error.message);
+//         throw new Error(error.message);
+//     }
+
+    
+// };
 export const sendMoney = async (senderUsername, receiverUsername, amount) => {
     try {
         const response = await fetch(`${API_URL}/api/relationship/sendMoney`, {
@@ -248,7 +272,7 @@ export const sendMoney = async (senderUsername, receiverUsername, amount) => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ senderUsername, receiverUsername, amount }),
+            body: JSON.stringify({ senderUsername, receiverUsername, amount }), // ✅ Send user IDs instead of usernames
         });
 
         const responseData = await response.json();
@@ -262,8 +286,6 @@ export const sendMoney = async (senderUsername, receiverUsername, amount) => {
         console.error("Error sending money:", error.message);
         throw new Error(error.message);
     }
-
-    
 };
 
 

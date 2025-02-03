@@ -178,82 +178,134 @@ relationshipRouter.delete("/delete", deleteRelationship);
  *         description: Relationship not found
  */
 relationshipRouter.put("/block", blockRelationship);
-
 /**
  * @swagger
- * /api/relationship/friends/{userId}:
- *   get:
+ * /api/relationship/friends:
+ *   post:
  *     summary: Get all friends of a user
  *     tags:
  *       - Relationships
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: The unique identifier of the user whose friends are being retrieved.
+ *             required:
+ *               - userId
  *     responses:
  *       200:
- *         description: List of friends
+ *         description: List of friends retrieved successfully
  */
-relationshipRouter.get("/friends/:userId", getAllFriends);
+relationshipRouter.post("/friends", getAllFriends);
 
 /**
  * @swagger
- * /api/relationship/requests/received/{userId}:
- *   get:
- *     summary: Get all friend requests received
+ * /api/relationship/requests/received:
+ *   post:
+ *     summary: Get all friend requests received by a user
  *     tags:
  *       - Relationships
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: The unique identifier of the user whose received friend requests are being retrieved.
+ *             required:
+ *               - userId
  *     responses:
  *       200:
- *         description: List of friend requests received
+ *         description: List of received friend requests retrieved successfully
  */
-relationshipRouter.get("/requests/received/:userId", getAllFriendRequestsReceived);
+relationshipRouter.post("/requests/received", getAllFriendRequestsReceived);
 
 /**
  * @swagger
- * /api/relationship/requests/sent/{userId}:
- *   get:
- *     summary: Get all friend requests sent
+ * /api/relationship/requests/sent:
+ *   post:
+ *     summary: Get all friend requests sent by a user
  *     tags:
  *       - Relationships
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: The unique identifier of the user whose sent friend requests are being retrieved.
+ *             required:
+ *               - userId
  *     responses:
  *       200:
- *         description: List of friend requests sent
+ *         description: List of sent friend requests retrieved successfully
  */
-relationshipRouter.get("/requests/sent/:userId", getAllFriendRequestsSent);
+relationshipRouter.post("/requests/sent", getAllFriendRequestsSent);
 
 /**
  * @swagger
- * /api/relationship/blocked/{userId}:
- *   get:
- *     summary: Get all blocked users
+ * /api/relationship/blocked:
+ *   post:
+ *     summary: Get all blocked users for a user
  *     tags:
  *       - Relationships
- *     parameters:
- *       - in: path
- *         name: userId
- *         required: true
- *         schema:
- *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: The unique identifier of the user whose blocked relationships are being retrieved.
+ *             required:
+ *               - userId
  *     responses:
  *       200:
- *         description: List of blocked users
+ *         description: List of blocked users retrieved successfully
  */
-relationshipRouter.get("/blocked/:userId", getBlockedRelationships);
+relationshipRouter.post("/blocked", getBlockedRelationships);
+
+
+// /**
+//  * @swagger
+//  * /api/relationship/sendMoney:
+//  *   post:
+//  *     summary: Send money to another user
+//  *     tags:
+//  *       - Transactions
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               senderId:
+//  *                 type: integer
+//  *               receiverId:
+//  *                 type: integer
+//  *               amount:
+//  *                 type: number
+//  *     responses:
+//  *       200:
+//  *         description: Money sent successfully
+//  *       400:
+//  *         description: Insufficient balance
+//  */
+// relationshipRouter.post("/sendMoney", sendMoney);
 
 /**
  * @swagger
@@ -269,17 +321,22 @@ relationshipRouter.get("/blocked/:userId", getBlockedRelationships);
  *           schema:
  *             type: object
  *             properties:
- *               senderId:
- *                 type: integer
- *               receiverId:
- *                 type: integer
+ *               senderUsername:
+ *                 type: string
+ *                 description: Username of the sender
+ *               receiverUsername:
+ *                 type: string
+ *                 description: Username of the receiver
  *               amount:
  *                 type: number
+ *                 description: Amount to send
  *     responses:
  *       200:
  *         description: Money sent successfully
  *       400:
- *         description: Insufficient balance
+ *         description: Insufficient balance or missing fields
+ *       404:
+ *         description: Sender or receiver not found
  */
 relationshipRouter.post("/sendMoney", sendMoney);
 

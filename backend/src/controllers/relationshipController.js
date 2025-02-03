@@ -130,37 +130,100 @@ const blockRelationship = async (req, res) => {
     }
 };
 
-// Send money
+// // Send money
+// const sendMoney = async (req, res) => {
+//     try {
+//         const { senderUsername, receiverUsername, amount } = req.body; // Fix: Accept usernames
+
+//         if (!senderUsername || !receiverUsername || !amount) {
+//             return res.status(400).json({ message: "Missing required fields" });
+//         }
+
+//         // Fetch sender & receiver IDs
+//         const { data: sender, error: senderError } = await supabase
+//             .from("users")
+//             .select("id, balance")
+//             .eq("username", senderUsername)
+//             .single();
+
+//         const { data: receiver, error: receiverError } = await supabase
+//             .from("users")
+//             .select("id,balance")
+//             .eq("username", receiverUsername)
+//             .single();
+
+//         if (!sender || senderError) return res.status(404).json({ message: "Sender not found" });
+//         if (!receiver || receiverError) return res.status(404).json({ message: "Receiver not found" });
+
+//         if (sender.balance < amount) {
+//             console.log('sender baalnce was' + sender.balance)
+//             return res.status(400).json({ message: "Insufficient balance" });
+//         }
+
+//         // Deduct from sender and add to receiver
+//         await supabase
+//             .from("users")
+//             .update({ balance: sender.balance - amount })
+//             .eq("id", sender.id);
+
+//         await supabase
+//             .from("users")
+//             .update({ balance: supabase.raw("balance + ?", [amount]) })
+//             .eq("id", receiver.id);
+
+//         // Record transaction
+//         await supabase.from("transactions").insert([
+//             { sender_id: sender.id, receiver_id: receiver.id, amount, status: "transferred" }
+//         ]);
+
+//         res.status(200).json({ message: "Money sent successfully" });
+//     } catch (error) {
+//         res.status(500).json({ message: "Error processing request", error: error.message });
+//     }
+// };
 const sendMoney = async (req, res) => {
     try {
-        const { senderUsername, receiverUsername, amount } = req.body; // Fix: Accept usernames
+        const { senderUsername, receiverUsername, amount } = req.body;
 
         if (!senderUsername || !receiverUsername || !amount) {
             return res.status(400).json({ message: "Missing required fields" });
         }
 
-        // Fetch sender & receiver IDs
+        console.log(`📥 Received request: sender=${senderUsername}, receiver=${receiverUsername}, amount=${amount}`);
+
+        // ✅ Convert senderUsername to senderId
         const { data: sender, error: senderError } = await supabase
             .from("users")
             .select("id, balance")
             .eq("username", senderUsername)
             .single();
 
+        if (!sender || senderError) {
+            console.error("❌ Sender not found:", senderError);
+            return res.status(404).json({ message: "Sender not found" });
+        }
+
+        // ✅ Convert receiverUsername to receiverId
         const { data: receiver, error: receiverError } = await supabase
             .from("users")
-            .select("id,balance")
+            .select("id, balance")
             .eq("username", receiverUsername)
             .single();
 
-        if (!sender || senderError) return res.status(404).json({ message: "Sender not found" });
-        if (!receiver || receiverError) return res.status(404).json({ message: "Receiver not found" });
+        if (!receiver || receiverError) {
+            console.error("❌ Receiver not found:", receiverError);
+            return res.status(404).json({ message: "Receiver not found" });
+        }
 
+        console.log(`✅ Converted to IDs: senderId=${sender.id}, receiverId=${receiver.id}`);
+
+        // ✅ Ensure sender has enough balance
         if (sender.balance < amount) {
-            console.log('sender baalnce was' + sender.balance)
+            console.error(`❌ Insufficient balance: Sender (${senderUsername}) has ${sender.balance}`);
             return res.status(400).json({ message: "Insufficient balance" });
         }
 
-        // Deduct from sender and add to receiver
+        // ✅ Deduct from sender and add to receiver
         await supabase
             .from("users")
             .update({ balance: sender.balance - amount })
@@ -168,19 +231,22 @@ const sendMoney = async (req, res) => {
 
         await supabase
             .from("users")
-            .update({ balance: supabase.raw("balance + ?", [amount]) })
+            .update({ balance: receiver.balance + amount })
             .eq("id", receiver.id);
 
-        // Record transaction
+        // ✅ Record transaction
         await supabase.from("transactions").insert([
             { sender_id: sender.id, receiver_id: receiver.id, amount, status: "transferred" }
         ]);
 
+        console.log("✅ Money sent successfully!");
         res.status(200).json({ message: "Money sent successfully" });
     } catch (error) {
+        console.error("❌ Error processing transaction:", error.message);
         res.status(500).json({ message: "Error processing request", error: error.message });
     }
 };
+
 
 // Get transaction history
 // const getTransactionHistory = async (req, res) => {
@@ -513,24 +579,11 @@ const getSentMoneyRequests = async (req, res) => {
 // Get all friends of a user
 const getAllFriends = async (req, res) => {
     try {
-        const { username } = req.body; // Fix: Accept username
+        const { userId } = req.body;  // ✅ FIXED: Expect `userId` in request body
 
-        if (!username) {
-            return res.status(400).json({ message: "Username is required" });
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
         }
-
-        // Convert username to userId
-        const { data: user, error: userError } = await supabase
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single();
-
-        if (!user || userError) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const userId = user.id;
 
         // Get all friends
         const { data: relationships, error } = await supabase
@@ -559,27 +612,15 @@ const getAllFriends = async (req, res) => {
     }
 };
 
+
 // Get all friend requests received
 const getAllFriendRequestsReceived = async (req, res) => {
     try {
-        const { username } = req.body; // Fix: Accept username
+        const { userId } = req.body;  // ✅ FIXED: Expect `userId` in request body
 
-        if (!username) {
-            return res.status(400).json({ message: "Username is required" });
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
         }
-
-        // Convert username to userId
-        const { data: user, error: userError } = await supabase
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single();
-
-        if (!user || userError) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const userId = user.id;
 
         // Fetch friend requests received
         const { data: requests, error } = await supabase
@@ -596,27 +637,13 @@ const getAllFriendRequestsReceived = async (req, res) => {
     }
 };
 
-// Get all friend requests sent
 const getAllFriendRequestsSent = async (req, res) => {
     try {
-        const { username } = req.body; // Fix: Accept username
+        const { userId } = req.body;  // ✅ FIXED: Expect `userId` in request body
 
-        if (!username) {
-            return res.status(400).json({ message: "Username is required" });
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
         }
-
-        // Convert username to userId
-        const { data: user, error: userError } = await supabase
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single();
-
-        if (!user || userError) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const userId = user.id;
 
         // Fetch friend requests sent
         const { data: requests, error } = await supabase
@@ -633,27 +660,13 @@ const getAllFriendRequestsSent = async (req, res) => {
     }
 };
 
-// Get all blocked users
 const getBlockedRelationships = async (req, res) => {
     try {
-        const { username } = req.body; // Fix: Accept username
+        const { userId } = req.body;  // ✅ FIXED: Expect `userId` in request body
 
-        if (!username) {
-            return res.status(400).json({ message: "Username is required" });
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
         }
-
-        // Convert username to userId
-        const { data: user, error: userError } = await supabase
-            .from("users")
-            .select("id")
-            .eq("username", username)
-            .single();
-
-        if (!user || userError) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const userId = user.id;
 
         // Fetch blocked relationships
         const { data: blockedRelationships, error } = await supabase
@@ -669,6 +682,7 @@ const getBlockedRelationships = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
 
 // Request money from another user
 const requestMoney = async (req, res) => {

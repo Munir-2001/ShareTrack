@@ -31,10 +31,10 @@ import {useAppDispatch, useAppSelector} from '../../Redux/Store/hooks';
 
 const options = ['Add Friends', 'Your Friends', 'Blocked Users'];
 interface User {
-  _id: string;
+  id: string;
   username: string;
   relationship: {
-    _id: string;
+    id: string;
   };
   photo: string;
 }
@@ -43,7 +43,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
   // const dispatch = useAppDispatch();
   const user = useAppSelector((state: {auth: any}) => state.auth.user);
   const isAuth = useAppSelector((state: {auth: any}) => state.auth.isAuth);
-  const [userId, setUserId] = useState(user._id || null); // Replace with dynamic user ID
+  const [userId, setUserId] = useState(user.id || null); // Replace with dynamic user ID
   const [friends, setFriends] = useState<User[]>([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [showMoneyRequests, setShowMoneyRequests] = useState(false);
@@ -66,7 +66,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
   };
 
   useEffect(() => {
-    setUserId(user?._id || null);
+    setUserId(user?.id || null);
   }, [user]);
 
   const toggleMoneyRequests = () => {
@@ -186,7 +186,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
 
           <FlatList
             data={filteredFriends}
-            keyExtractor={(item: any) => item.relationship._id.toString()}
+            keyExtractor={(item: any) => item.relationship.id.toString()}
             renderItem={({item}) => (
               <View style={styles.listElement}>
                 {/* Profile picture */}
@@ -225,7 +225,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                 <Pressable
                   style={[styles.modalButton]}
                   onPress={() => {
-                    blockFriend(selectedFriend?.relationship._id, userId);
+                    blockFriend(selectedFriend?.relationship.id, userId);
 
                     closeModal();
                     fetchData();
@@ -239,7 +239,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                 <Pressable
                   style={[styles.modalButton]}
                   onPress={() => {
-                    deleteRelationship(selectedFriend?.relationship._id);
+                    deleteRelationship(selectedFriend?.relationship.id);
 
                     closeModal();
                     fetchData();
@@ -318,7 +318,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
               {/* Filtered List */}
               <FlatList
                 data={filteredData}
-                keyExtractor={(item: any) => item.relationship._id.toString()}
+                keyExtractor={(item: any) => item.relationship.id.toString()}
                 renderItem={({item}) => (
                   <View style={styles.listElement}>
                     <View style={styles.user}>
@@ -333,7 +333,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                         <Pressable
                           style={[styles.button, styles.approveButton]}
                           onPress={() => {
-                            approveFriendRequest(item.relationship._id);
+                            approveFriendRequest(item.relationship.id);
                             fetchData();
                           }}>
                           <Text style={styles.buttonText}>Approve</Text>
@@ -342,7 +342,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                       <Pressable
                         style={styles.button}
                         onPress={() => {
-                          deleteRelationship(item.relationship._id);
+                          deleteRelationship(item.relationship.id);
                           fetchData();
                         }}>
                         <Icon name="trash-outline" size={20} color="#1E2A78" />
@@ -377,7 +377,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                 <Pressable
                           style={[styles.button, styles.approveButton]}
                           onPress={() => {
-                            deleteRelationship(item.relationship._id);
+                            deleteRelationship(item.relationship.id);
                   fetchData();
                           }}>
                           <Text style={styles.buttonText}>Unblock</Text>
@@ -388,7 +388,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
             //   <Pressable
             //     style={styles.button}
             //     onPress={() => {
-            //       deleteRelationship(item.relationship._id);
+            //       deleteRelationship(item.relationship.id);
             //       fetchData();
             //     }}>
             //     <Text>Unblock</Text>
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
 
 // const options = ['Add Friends', 'Your Friends', 'Blocked Users'];
 // interface Transaction {
-//   _id: string;
+//   id: string;
 //   sender_username: string;
 //   receiver_username: string;
 //   amount: number;
@@ -639,10 +639,10 @@ const styles = StyleSheet.create({
 // }
 
 // interface User {
-//   _id: string;
+//   id: string;
 //   username: string;
 //   relationship: {
-//     _id: string;
+//     id: string;
 //   };
 //   photo: string;
 // }
@@ -650,7 +650,7 @@ const styles = StyleSheet.create({
 // export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
 //   const user = useAppSelector((state: {auth: any}) => state.auth.user);
 //   const isAuth = useAppSelector((state: {auth: any}) => state.auth.isAuth);
-//   const [userId, setUserId] = useState(user._id || null);
+//   const [userId, setUserId] = useState(user.id || null);
 //   const [friends, setFriends] = useState<User[]>([]);
 //   const [pendingRequests, setPendingRequests] = useState([]);
 //   const [sentRequests, setSentRequests] = useState([]);
@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
 //   const [moneyRequests, setMoneyRequests] = useState([]);
 
 //   useEffect(() => {
-//     setUserId(user?._id || null);
+//     setUserId(user?.id || null);
 //   }, [user]);
 
 //   useEffect(() => {
@@ -771,15 +771,15 @@ const styles = StyleSheet.create({
 //       {showMoneyRequests ? (
 //        <FlatList
 //        data={moneyRequests}
-//        keyExtractor={(item) => item._id}
+//        keyExtractor={(item) => item.id}
 //        renderItem={({ item }: { item: Transaction }) => (
 //          <View style={styles.moneyRequestItem}>
 //            <Text>{item.sender_username} requested ${item.amount}</Text>
 //            <View style={styles.buttonContainer}>
-//              <Pressable style={styles.approveButton} onPress={() => handleApproveRequest(item._id)}>
+//              <Pressable style={styles.approveButton} onPress={() => handleApproveRequest(item.id)}>
 //                <Text style={styles.buttonText}>Approve</Text>
 //              </Pressable>
-//              <Pressable style={styles.declineButton} onPress={() => handleDeclineRequest(item._id)}>
+//              <Pressable style={styles.declineButton} onPress={() => handleDeclineRequest(item.id)}>
 //                <Text style={styles.buttonText}>Decline</Text>
 //              </Pressable>
 //            </View>
@@ -790,7 +790,7 @@ const styles = StyleSheet.create({
 //       ) : (
 //         <FlatList
 //           data={filteredFriends}
-//           keyExtractor={(item) => item.relationship._id.toString()}
+//           keyExtractor={(item) => item.relationship.id.toString()}
 //           renderItem={({ item }) => (
 //             <View style={styles.listElement}>
 //               <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.profilePicture} />
