@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 import Icon from '@react-native-vector-icons/ionicons';
 
 interface FormData {
-  item_name: string;
+  name: string;
   description: string;
   rental_price: string;
   category: string;
@@ -24,7 +24,7 @@ interface FormData {
 
 export default function AddItemScreen({ navigation }: any) {
   const [formData, setFormData] = useState<FormData>({
-    item_name: '',
+    name: '',
     description: '',
     rental_price: '',
     category: '',
@@ -45,14 +45,14 @@ export default function AddItemScreen({ navigation }: any) {
 
   // Handle Form Submission
   const handleSubmit = async () => {
-    const { item_name, description, rental_price, category, location } = formData;
+    const { name, description, rental_price, category, location } = formData;
 
-    if (!item_name || !description || !rental_price || !category || !location) {
+    if (!name || !description || !rental_price || !category || !location) {
       Alert.alert("All fields are required.");
       return;
     }
 
-    const itemData = { item_name, category, rental_price, location, owner_id: user.id };
+    const itemData = { name, category, rental_price, location, owner_id: user.id };
 
     try {
       await dispatch(createItem(itemData));
