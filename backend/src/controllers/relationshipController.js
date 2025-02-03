@@ -810,31 +810,145 @@ const getAllFriendRequestsSent = async (req, res) => {
 };
 
 
+// const getBlockedRelationships = async (req, res) => {
+//     try {
+//         const { userId } = req.body;  // ✅ FIXED: Expect `userId` in request body
+
+//         if (!userId) {
+//             return res.status(400).json({ message: "User ID is required" });
+//         }
+
+//         // Fetch blocked relationships
+//         const { data: blockedRelationships, error } = await supabase
+//             .from("relationships")
+//             .select("*")
+//             .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+//             .or("status.eq.2,status.eq.3");
+
+//         if (error) throw error;
+
+//         res.status(200).json(blockedRelationships);
+//     } catch (err) {
+//         res.status(500).json({ message: err.message });
+//     }
+// };
+
+
+// Request money from another user
+
+
+// const getBlockedRelationships = async (req, res) => {
+//     try {
+//         const { userId } = req.body;  
+
+//         if (!userId) {
+//             console.error("❌ getBlockedRelationships: Missing userId");
+//             return res.status(400).json({ message: "User ID is required" });
+//         }
+
+//         // Fetch blocked relationships
+//         const { data: blockedRelationships, error } = await supabase
+//             .from("relationships")
+//             .select("id, requester_id, recipient_id, status")
+//             .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
+//             .or("status.eq.2,status.eq.3");
+
+//         if (error) throw error;
+
+//         if (!blockedRelationships.length) {
+//             console.warn("⚠️ getBlockedRelationships: No blocked users found for user", userId);
+//             return res.status(200).json([]);
+//         }
+
+//         // Identify which user is the blocked one
+//         const blockedUserIds = blockedRelationships.map(rel =>
+//             rel.requester_id === userId ? rel.recipient_id : rel.requester_id
+//         );
+
+//         // Fetch user details
+//         const { data: users, error: userError } = await supabase
+//             .from("users")
+//             .select("id, username, email")
+//             .in("id", blockedUserIds);
+
+//         if (userError) throw userError;
+
+//         // Map usernames to blocked relationships
+//         const blockedUsersWithNames = blockedRelationships.map(rel => ({
+//             ...rel,
+//             user: users.find(u => u.id === (rel.requester_id === userId ? rel.recipient_id : rel.requester_id))
+//         }));
+
+//         console.log("✅ Returning blocked users:", blockedUsersWithNames);
+//         res.status(200).json(blockedUsersWithNames);
+//     } catch (err) {
+//         console.error("❌ getBlockedRelationships: Unexpected error", err.message);
+//         res.status(500).json({ message: err.message });
+//     }
+// };
+
+
 const getBlockedRelationships = async (req, res) => {
     try {
-        const { userId } = req.body;  // ✅ FIXED: Expect `userId` in request body
+        const { userId } = req.body;
 
         if (!userId) {
+            console.error("❌ getBlockedRelationships: Missing userId");
             return res.status(400).json({ message: "User ID is required" });
         }
 
         // Fetch blocked relationships
         const { data: blockedRelationships, error } = await supabase
             .from("relationships")
-            .select("*")
+            .select("id, requester_id, recipient_id, status")
             .or(`requester_id.eq.${userId},recipient_id.eq.${userId}`)
-            .or("status.eq.2,status.eq.3");
+            .in("status", [2, 3]); // ✅ Ensure only blocked users are fetched
 
-        if (error) throw error;
+        if (error) {
+            console.error("❌ getBlockedRelationships: Error fetching relationships", error);
+            return res.status(500).json({ message: "Error fetching relationships" });
+        }
 
-        res.status(200).json(blockedRelationships);
+        if (!blockedRelationships.length) {
+            console.warn("⚠️ getBlockedRelationships: No blocked users found for user", userId);
+            return res.status(200).json([]);
+        }
+
+        // Identify blocked user IDs
+        const blockedUserIds = blockedRelationships.map(rel =>
+            rel.requester_id === userId ? rel.recipient_id : rel.requester_id
+        );
+
+        // Fetch user details
+        const { data: users, error: userError } = await supabase
+            .from("users")
+            .select("id, username, email")
+            .in("id", blockedUserIds);
+
+        if (userError) {
+            console.error("❌ getBlockedRelationships: Error fetching user details", userError);
+            return res.status(500).json({ message: "Error fetching user details" });
+        }
+
+        // Map usernames to blocked relationships
+        const blockedUsersWithNames = blockedRelationships.map(rel => {
+            const blockedUser = users.find(u => u.id === (rel.requester_id === userId ? rel.recipient_id : rel.requester_id));
+            return {
+                ...rel,
+                username: blockedUser ? blockedUser.username : "Unknown User",
+                email: blockedUser ? blockedUser.email : "N/A"
+            };
+        });
+
+        console.log("✅ Returning blocked users:", blockedUsersWithNames);
+        res.status(200).json(blockedUsersWithNames);
     } catch (err) {
+        console.error("❌ getBlockedRelationships: Unexpected error", err.message);
         res.status(500).json({ message: err.message });
     }
 };
 
 
-// Request money from another user
 const requestMoney = async (req, res) => {
     try {
         const { senderUsername, receiverUsername, amount } = req.body; // Fix: Accept usernames

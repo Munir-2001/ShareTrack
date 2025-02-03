@@ -182,28 +182,100 @@ export const getFriendRequestsSent = async (userId) => {
     }
 };
 
-// Get all blocked users for a user
+// // Get all blocked users for a user
+// export const getBlockedUsers = async (userId) => {
+//     try {
+//         const response = await fetch(`${API_URL}/api/relationship/blocked`, {  // ✅ Changed from GET to POST
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
+//         });
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message);
+//         }
+
+//         return await response.json();
+//     } catch (error) {
+//         console.error("❌ getBlockedUsers: Error fetching blocked users:", error.message);
+//         throw error;
+//     }
+// };
+
+// export const getBlockedUsers = async (userId) => {
+//     try {
+//         console.log("📡 Fetching blocked users for user:", userId);
+
+//         const response = await fetch(`${API_URL}/api/relationship/blocked`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({ userId }),
+//         });
+
+//         const data = await response.json();
+//         console.log("🚫 Blocked Users API Response:", data);
+
+//         if (!response.ok) {
+//             console.error("❌ API Error:", data.message);
+//             throw new Error(data.message);
+//         }
+
+//         // ✅ Ensure blocked user details are properly structured
+//         const formattedData = data.map(blockedUser => ({
+//             ...blockedUser,
+//             username: blockedUser.user?.username || "Unknown",  // ✅ Ensure username exists
+//             relationship: blockedUser.relationship || { id: blockedUser.id } // ✅ Fallback if missing
+//         }));
+
+//         console.log("🚫 Processed Blocked Users:", formattedData);
+//         return formattedData;
+//     } catch (error) {
+//         console.error("❌ getBlockedUsers: Error fetching blocked users:", error.message);
+//         throw error;
+//     }
+// };
+
 export const getBlockedUsers = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/blocked`, {  // ✅ Changed from GET to POST
+        console.log("📡 Fetching blocked users for user:", userId);
+
+        const response = await fetch(`${API_URL}/api/relationship/blocked`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
+            body: JSON.stringify({ userId }),
         });
 
+        const data = await response.json();
+        console.log("🚫 Blocked Users API Response:", data);
+
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message);
+            console.error("❌ API Error:", data.message);
+            throw new Error(data.message);
         }
 
-        return await response.json();
+        // ✅ Ensure blocked user details are properly structured
+        const formattedData = data.map(blockedUser => ({
+            ...blockedUser,
+            username: blockedUser.username || "Unknown User",  // ✅ Ensure username exists
+            relationship: blockedUser.relationship || { id: blockedUser.id } // ✅ Fallback if missing
+        }));
+
+        console.log("🚫 Processed Blocked Users:", formattedData);
+        return formattedData;
     } catch (error) {
         console.error("❌ getBlockedUsers: Error fetching blocked users:", error.message);
         throw error;
     }
 };
+
+
 
 
 // // Make a friend request

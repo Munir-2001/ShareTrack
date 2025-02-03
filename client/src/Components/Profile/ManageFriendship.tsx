@@ -399,45 +399,36 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
 
       {/* <Text style={styles.header}>Blocked Users</Text> */}
       {selectedOption === 'Blocked Users' && (
-        <FlatList
-          data={blockedUsers}
-          keyExtractor={(item: any) => item.id.toString()}
-          renderItem={({item}) => (
+    <FlatList
+        data={blockedUsers}
+        keyExtractor={(item: any) => item.relationship?.id.toString() || item.id.toString()}
+        renderItem={({ item }) => (
             <View style={styles.listElement}>
                 {/* Profile picture */}
                 <Image
-                  source={{uri: 'https://via.placeholder.com/50'}} // Placeholder image URL
-                  style={styles.profilePicture}
+                    source={{ uri: 'https://via.placeholder.com/50' }} // Placeholder image URL
+                    style={styles.profilePicture}
                 />
                 {/* User details */}
                 <View style={styles.userDetails}>
-                  <Text style={styles.userName}>{item.username}</Text>
+                    <Text style={styles.userName}>
+                        {item.username ? item.username : "Unknown User"}
+                    </Text>
                 </View>
 
                 <Pressable
-                          style={[styles.button, styles.approveButton]}
-                          onPress={() => {
-                            deleteRelationship(item.relationship.id);
-                  fetchData();
-                          }}>
-                          <Text style={styles.buttonText}>Unblock</Text>
-                        </Pressable>
-              </View>
-            // <View style={styles.listElement}>
-            //   <Text>{item.username}</Text>
-            //   <Pressable
-            //     style={styles.button}
-            //     onPress={() => {
-            //       deleteRelationship(item.relationship.id);
-            //       fetchData();
-            //     }}>
-            //     <Text>Unblock</Text>
-            //   </Pressable>
-            // </View>
-          )}
-        />
-      )}
-        
+                    style={[styles.button, styles.approveButton]}
+                    onPress={() => {
+                        deleteRelationship(item.relationship.id);
+                        fetchData();
+                    }}>
+                    <Text style={styles.buttonText}>Unblock</Text>
+                </Pressable>
+            </View>
+        )}
+    />
+)}
+
       {selectedFriend && (
         <SendMoney
           friendUsername={selectedFriend.username}
