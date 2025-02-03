@@ -16,9 +16,9 @@ import Icon from '@react-native-vector-icons/ionicons';
 interface FormData {
   name: string;
   description: string;
-  rental_price: string;
+  price: string;
   category: string;
-  location: string;
+  city: string;
   isAvailable: boolean;
 }
 
@@ -26,9 +26,9 @@ export default function AddItemScreen({ navigation }: any) {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     description: '',
-    rental_price: '',
+    price: '',
     category: '',
-    location: '',
+    city: '',
     isAvailable: true,
   });
 
@@ -45,14 +45,14 @@ export default function AddItemScreen({ navigation }: any) {
 
   // Handle Form Submission
   const handleSubmit = async () => {
-    const { name, description, rental_price, category, location } = formData;
+    const { name, description, price, category, city } = formData;
 
-    if (!name || !description || !rental_price || !category || !location) {
+    if (!name || !description || !price || !category || !city) {
       Alert.alert("All fields are required.");
       return;
     }
 
-    const itemData = { name, category, rental_price, location, owner_id: user.id };
+    const itemData = { name, category, price,description, city, owner_id: user.id };
 
     try {
       await dispatch(createItem(itemData));
