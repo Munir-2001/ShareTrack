@@ -50,15 +50,36 @@ export const getTransactionHistory = async (username) => {
     }
   };
   
-// Get all friends for a user
+// // Get all friends for a user
+// export const getFriends = async (userId) => {
+//     try {
+//         const response = await fetch(`${API_URL}/api/relationship/friends`, {  // ✅ Changed from GET to POST
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
+//         });
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message);
+//         }
+
+//         return await response.json();
+//     } catch (error) {
+//         console.error("❌ getFriends: Error fetching friends:", error.message);
+//         throw error;
+//     }
+// };
 export const getFriends = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/friends`, {  // ✅ Changed from GET to POST
+        const response = await fetch(`${API_URL}/api/relationship/friends`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
+            body: JSON.stringify({ userId }),
         });
 
         if (!response.ok) {
@@ -66,7 +87,15 @@ export const getFriends = async (userId) => {
             throw new Error(error.message);
         }
 
-        return await response.json();
+        let friends = await response.json();
+
+        // ✅ Ensure every friend has a `relationship` field
+        friends = friends.map(friend => ({
+            ...friend,
+            relationship: friend.relationship || { id: friend.id } // ✅ Fallback if missing
+        }));
+
+        return friends;
     } catch (error) {
         console.error("❌ getFriends: Error fetching friends:", error.message);
         throw error;
@@ -74,27 +103,61 @@ export const getFriends = async (userId) => {
 };
 
 // Get all friend requests received for a user
+// export const getFriendRequestsReceived = async (userId) => {
+//     try {
+//         const response = await fetch(`${API_URL}/api/relationship/requests/received`, {  // ✅ Changed from GET to POST
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
+//         });
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message);
+//         }
+
+//         return await response.json();
+//     } catch (error) {
+//         console.error("❌ getFriendRequestsReceived: Error fetching requests:", error.message);
+//         throw error;
+//     }
+// };
 export const getFriendRequestsReceived = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}/api/relationship/requests/received`, {  // ✅ Changed from GET to POST
+        console.log("📡 Fetching received friend requests for user:", userId);
+
+        const response = await fetch(`${API_URL}/api/relationship/requests/received`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
+            body: JSON.stringify({ userId }),
         });
 
+        const data = await response.json();
+        console.log("📥 Received Friend Requests API Response:", data); // ✅ Debug API response
+
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message);
+            console.error("❌ API Error:", data.message);
+            throw new Error(data.message);
         }
 
-        return await response.json();
+        // ✅ Ensure all items have `relationship` field
+        const formattedData = data.map(request => ({
+            ...request,
+            relationship: request.relationship || { id: request.id } // ✅ Fallback if missing
+        }));
+
+        console.log("📥 Processed Received Requests:", formattedData);
+        return formattedData;
     } catch (error) {
         console.error("❌ getFriendRequestsReceived: Error fetching requests:", error.message);
         throw error;
     }
 };
+
 
 // Get all friend requests sent by a user
 export const getFriendRequestsSent = async (userId) => {
@@ -143,30 +206,58 @@ export const getBlockedUsers = async (userId) => {
 };
 
 
-// Make a friend request
+// // Make a friend request
+// export const requestFriend = async (userId, friendUsername) => {
+//     try {
+//         const response = await fetch(`${API_URL}/api/relationship/request`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//             },
+//             credentials: "include", // Include cookies for session authentication if required
+//             body: JSON.stringify({ requester: userId, recipeintUsername: friendUsername }),
+//         });
+//         console.log('backend response was'+response)
+
+//         if (!response.ok) {
+//             const error = await response.json();
+//             throw new Error(error.message);
+//         }
+
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
 export const requestFriend = async (userId, friendUsername) => {
     try {
+        console.log("📤 Sending friend request:", { userId, friendUsername });
+
         const response = await fetch(`${API_URL}/api/relationship/request`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             credentials: "include", // Include cookies for session authentication if required
-            body: JSON.stringify({ requester: userId, recipeintUsername: friendUsername }),
+            body: JSON.stringify({ requesterId: userId, recipientUsername: friendUsername }), // ✅ Fixed key names
         });
-        console.log('backend response was'+response)
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message);
-        }
 
         const data = await response.json();
+
+        if (!response.ok) {
+            console.error("❌ requestFriend API Error:", data.message);
+            throw new Error(data.message);
+        }
+
+        console.log("✅ Friend request sent successfully:", data);
         return data;
     } catch (error) {
+        console.error("❌ Error sending friend request:", error.message);
         throw error;
     }
 };
+
 
 // Approve a friend request
 export const approveFriendRequest = async (relationshipId) => {

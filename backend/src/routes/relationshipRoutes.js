@@ -178,6 +178,31 @@ relationshipRouter.delete("/delete", deleteRelationship);
  *         description: Relationship not found
  */
 relationshipRouter.put("/block", blockRelationship);
+// /**
+//  * @swagger
+//  * /api/relationship/friends:
+//  *   post:
+//  *     summary: Get all friends of a user
+//  *     tags:
+//  *       - Relationships
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               userId:
+//  *                 type: integer
+//  *                 description: The unique identifier of the user whose friends are being retrieved.
+//  *             required:
+//  *               - userId
+//  *     responses:
+//  *       200:
+//  *         description: List of friends retrieved successfully
+//  */
+// relationshipRouter.post("/friends", getAllFriends);
+
 /**
  * @swagger
  * /api/relationship/friends:
@@ -202,6 +227,7 @@ relationshipRouter.put("/block", blockRelationship);
  *         description: List of friends retrieved successfully
  */
 relationshipRouter.post("/friends", getAllFriends);
+
 
 /**
  * @swagger
