@@ -366,11 +366,37 @@ relationshipRouter.post("/blocked", getBlockedRelationships);
  */
 relationshipRouter.post("/sendMoney", sendMoney);
 
+// /**
+//  * @swagger
+//  * /api/relationship/requestMoney:
+//  *   post:
+//  *     summary: Request money from another user
+//  *     tags:
+//  *       - Transactions
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               senderId:
+//  *                 type: integer
+//  *               receiverId:
+//  *                 type: integer
+//  *               amount:
+//  *                 type: number
+//  *     responses:
+//  *       201:
+//  *         description: Money request sent successfully
+//  */
+// relationshipRouter.post("/requestMoney", requestMoney);
+
 /**
  * @swagger
  * /api/relationship/requestMoney:
  *   post:
- *     summary: Request money from another user
+ *     summary: Request money from another user with a repayment date
  *     tags:
  *       - Transactions
  *     requestBody:
@@ -379,18 +405,37 @@ relationshipRouter.post("/sendMoney", sendMoney);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - senderUsername
+ *               - receiverUsername
+ *               - amount
+ *               - repaymentDate
  *             properties:
- *               senderId:
- *                 type: integer
- *               receiverId:
- *                 type: integer
+ *               senderUsername:
+ *                 type: string
+ *                 description: The username of the sender requesting money
+ *               receiverUsername:
+ *                 type: string
+ *                 description: The username of the receiver
  *               amount:
  *                 type: number
+ *                 description: Amount of money requested
+ *               repaymentDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: The agreed date when the amount must be repaid
  *     responses:
  *       201:
  *         description: Money request sent successfully
+ *       400:
+ *         description: Missing required fields
+ *       404:
+ *         description: Sender or Receiver not found
+ *       500:
+ *         description: Internal server error
  */
 relationshipRouter.post("/requestMoney", requestMoney);
+
 
 /**
  * @swagger

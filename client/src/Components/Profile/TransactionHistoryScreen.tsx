@@ -137,11 +137,11 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
                 <Text style={styles.transactionText}>
                   {isPending
                     ? isSent
-                      ? `Pending to send $${item.amount} to ${item.receiver_username}`
-                      : `Pending to receive $${item.amount} from ${item.sender_username}`
+                      ? `Pending to receive $${item.amount} from ${item.receiver_username}`
+                      : `Pending to send $${item.amount} to ${item.sender_username}`
                     : isSent
                     ? `Sent $${item.amount} to ${item.receiver_username}`
-                    : `Received $${item.amount} from ${item.sender_username}`}
+                    : `Received request for $${item.amount} from ${item.sender_username}`}
                 </Text>
                 <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
                 <Text style={styles.dateText}>{formatDate(item.created_at)}</Text>
