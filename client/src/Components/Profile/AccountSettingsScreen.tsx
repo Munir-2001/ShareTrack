@@ -3,16 +3,52 @@ import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, Styl
 import { useAppSelector, useAppDispatch } from "../../Redux/Store/hooks";
 import { updateUser } from "../../Redux/Actions/AuthActions/AuthAction";
 import { API_URL } from "../../constants";
-
+import { Picker } from '@react-native-picker/picker';
 const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
     const dispatch = useAppDispatch();
     const user = useAppSelector((state) => state.auth.user);
+    const [age, setAge] = useState(user?.age?.toString() || "");
+    const [gender, setGender] = useState(user?.gender || "");
+    const [maritalStatus, setMaritalStatus] = useState(user?.marital_status || "");
+    const [educationLevel, setEducationLevel] = useState(user?.education_level || "");
+    const [employmentStatus, setEmploymentStatus] = useState(user?.employment_status || "");
 
     const [username, setUsername] = useState(user?.username || "");
     const [phone, setPhone] = useState(user?.phone || "");
     const [email, setEmail] = useState(user?.email || "");
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+
+    // const handleUpdate = async () => {
+    //     setLoading(true);
+    //     setSuccessMessage("");
+
+    //     try {
+    //         const response = await fetch(`${API_URL}/api/auth/update`, {
+    //             method: "PUT",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //                 Authorization: `Bearer ${user.token}`,
+    //             },
+    //             body: JSON.stringify({ phone, email }),
+    //         });
+
+    //         if (!response.ok) {
+    //             const error = await response.json();
+    //             throw new Error(error.message);
+    //         }
+
+    //         const updatedUser = await response.json();
+    //         dispatch(updateUser(updatedUser));
+
+    //         setSuccessMessage("Profile updated successfully!");
+    //         navigation.goBack();
+    //     } catch (error: any) {
+    //         Alert.alert("Error", error.message || "Something went wrong.");
+    //     }
+
+    //     setLoading(false);
+    // };
 
     const handleUpdate = async () => {
         setLoading(true);
@@ -25,7 +61,7 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${user.token}`,
                 },
-                body: JSON.stringify({ phone, email }),
+                body: JSON.stringify({ phone, email, age, gender, marital_status: maritalStatus, education_level: educationLevel, employment_status: employmentStatus }),
             });
 
             if (!response.ok) {
@@ -44,6 +80,8 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
 
         setLoading(false);
     };
+
+
 
     return (
         <View style={styles.container}>
@@ -82,6 +120,74 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('PROFILE')}>
                 <Text style={styles.backButtonText}>Back to Profile</Text>
             </TouchableOpacity>
+
+            {/* Age Input */}
+            <Text style={styles.label}>Age</Text>
+            <TextInput
+                style={styles.input}
+                value={age}
+                onChangeText={setAge}
+                keyboardType="numeric"
+            />
+
+            {/* Gender Dropdown */}
+            <Text style={styles.label}>Gender</Text>
+            <Picker
+                selectedValue={gender}
+                onValueChange={(itemValue) => setGender(itemValue)}
+                style={styles.picker}
+            >
+                <Picker.Item label="Select Gender" value="" />
+                <Picker.Item label="Male" value="Male" />
+                <Picker.Item label="Female" value="Female" />
+                <Picker.Item label="Other" value="Other" />
+            </Picker>
+
+            {/* Marital Status Dropdown */}
+            <Text style={styles.label}>Marital Status</Text>
+            <Picker
+                selectedValue={maritalStatus}
+                onValueChange={(itemValue) => setMaritalStatus(itemValue)}
+                style={styles.picker}
+            >
+                <Picker.Item label="Select Marital Status" value="" />
+                <Picker.Item label="Single" value="Single" />
+                <Picker.Item label="Married" value="Married" />
+                <Picker.Item label="Divorced" value="Divorced" />
+                <Picker.Item label="Widowed" value="Widowed" />
+            </Picker>
+
+            {/* Education Level Dropdown */}
+            <Text style={styles.label}>Education Level</Text>
+            <Picker
+                selectedValue={educationLevel}
+                onValueChange={(itemValue) => setEducationLevel(itemValue)}
+                style={styles.picker}
+            >
+                <Picker.Item label="Select Education Level" value="" />
+                <Picker.Item label="High School" value="High School" />
+                <Picker.Item label="Bachelor" value="Bachelor" />
+                <Picker.Item label="Master" value="Master" />
+                <Picker.Item label="PhD" value="PhD" />
+                <Picker.Item label="Other" value="Other" />
+            </Picker>
+
+            {/* Employment Status Dropdown */}
+            <Text style={styles.label}>Employment Status</Text>
+            <Picker
+                selectedValue={employmentStatus}
+                onValueChange={(itemValue) => setEmploymentStatus(itemValue)}
+                style={styles.picker}
+            >
+                <Picker.Item label="Select Employment Status" value="" />
+                <Picker.Item label="Employed" value="Employed" />
+                <Picker.Item label="Unemployed" value="Unemployed" />
+                <Picker.Item label="Self-Employed" value="Self-Employed" />
+                <Picker.Item label="Student" value="Student" />
+                <Picker.Item label="Retired" value="Retired" />
+            </Picker>
+
+
         </View>
     );
 };
@@ -146,4 +252,10 @@ const styles = StyleSheet.create({
         color: "#333",
         fontWeight: "bold",
     },
+    picker: {
+        height: 50,
+        backgroundColor: "#F5F5F5",
+        marginBottom: 15,
+    },
+    
 });
