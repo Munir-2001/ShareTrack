@@ -1125,7 +1125,7 @@ const getUserBalance = async (req, res) => {
         // Convert username to userId
         const { data: user, error: userError } = await supabase
             .from("users")
-            .select("id, balance") // Fix: Select balance too
+            .select("id, balance,credit_score") // Fix: Select balance too
             .eq("username", username)
             .single();
 
@@ -1133,7 +1133,7 @@ const getUserBalance = async (req, res) => {
             return res.status(404).json({ message: "User not found or balance not available" });
         }
 
-        res.status(200).json({ balance: user.balance });
+        res.status(200).json({ balance: user.balance , credit_score: user.credit_score});
     } catch (err) {
         res.status(500).json({ message: "Error fetching user balance", error: err.message });
     }

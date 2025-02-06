@@ -62,6 +62,7 @@ const User = {
     blockedUntil: null,
     blockReason: String(""),
     created_at: new Date().toISOString(),
+    credit_score:text
   };
   
   User.hashPassword = async function (password) {

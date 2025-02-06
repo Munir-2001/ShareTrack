@@ -35,6 +35,8 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
 
   const user = useAppSelector((state: { auth: any }) => state.auth.user);
   const [balance, setBalance] = useState<number | null>(null);
+  const [creditScore, setCreditScore] = useState<number | null>(null);
+
   // const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
   const [modalVisible, setModalVisible] = useState(false);
   const [adjustmentVisible, setAdjustmentVisible] = useState(false);
@@ -44,7 +46,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const gotoPendingRequests = () => {
     navigation.navigate('PendingRequestsScreen');
   };
-  const goToAccountSettings = () =>{
+  const goToAccountSettings = () => {
     navigation.navigate('AccountSettingsScreen');
 
   }
@@ -53,7 +55,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     if (user && user.id) {
       const fetchUserBalance = async () => {
         try {
-          console.log('user id defined is '+ user.userId)
+          console.log('user id defined is ' + user.userId)
           const response = await fetch(`${API_URL}/api/relationship/getUserBalance`, {
             method: 'POST',
             headers: {
@@ -67,7 +69,8 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
           }
 
           const data = await response.json();
-          setBalance(data.balance); // Set the balance state
+          setBalance(data.balance);
+          setCreditScore(data.credit_score); // ✅ Store credit score in state
         } catch (error) {
           console.error('Error fetching user balance:', error);
         }
@@ -135,7 +138,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     }
   };
 
-  
+
   const uploadImage = async () => {
     if (!photo) {
       Alert.alert('No Image Selected', 'Please select an image first.');
@@ -307,11 +310,20 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
 
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             <Text style={styles.userName}>{userState.username || userState.email}</Text>
-            
-            <View style={styles.balanceBox}>
-              <Text style={styles.balanceTitle}>Current Balance</Text>
-              <Text style={styles.balanceAmount}>${balance?.toFixed(2) || '0.00'}</Text>
+            <View style={styles.balanceCreditContainer}>
+              {/* Balance Section */}
+              <View style={styles.balanceBox}>
+                <Text style={styles.balanceTitle}>Balance</Text>
+                <Text style={styles.balanceAmount}>${balance?.toFixed(2) || '0.00'}</Text>
+              </View>
+
+              {/* Credit Score Section */}
+              <View style={styles.creditScoreBox}>
+                <Text style={styles.creditScoreTitle}>Credit Score</Text>
+                <Text style={styles.creditScoreValue}>{creditScore || 'N/A'}</Text>
+              </View>
             </View>
+
 
             <View style={styles.amountBox}>
               <View style={styles.column}>
@@ -632,4 +644,38 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
+  balanceCreditContainer: {
+    flexDirection: 'row', // Display items in a row
+    justifyContent: 'space-between', // Space them evenly
+    alignItems: 'center', // Align them vertically
+    margin: 10,
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  creditScoreBox: {
+    flex: 6, // Take up equal space
+    margin: 5,
+    padding: 15,
+    backgroundColor: '#4CAF50', // Green background
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  creditScoreTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 5,
+  },
+  creditScoreValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+
 });

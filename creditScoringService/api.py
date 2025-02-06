@@ -101,6 +101,8 @@ def predict_credit_score(input_data: CreditScoreInput):
         input_data.timely_payment_score
     ]).reshape(1, -1)
 
+    print("🚀 Input Features:", features)  # ✅ Debugging: Check input data
+
     # Make a prediction
     predicted_score = model.predict(features)[0]
     print("after api call the new score is", predicted_score)  # ✅ Also correct
