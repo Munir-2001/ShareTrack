@@ -84,6 +84,91 @@ const { supabase } = require("../config/db");
 //     }
 //   };
   
+// const getUserLoans = async (req, res) => {
+//   try {
+//     console.log("Received request body:", req.body);
+
+//     const { userId } = req.body;
+//     if (!userId) {
+//       console.error("Missing userId in request!");
+//       return res.status(400).json({ message: "User ID is required" });
+//     }
+
+//     console.log("Fetching transactions for userId:", userId);
+
+//     // ✅ Fetch transactions related to the user
+//     const { data: transactions, error: transactionError } = await supabase
+//       .from("transactions")
+//       .select("id, amount, sender_id, receiver_id")
+//       .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+
+//     if (transactionError) {
+//       console.error("Supabase error fetching transactions:", transactionError);
+//       throw transactionError;
+//     }
+
+//     if (!transactions.length) {
+//       console.log("No transactions found for user:", userId);
+//       return res.status(200).json([]);
+//     }
+
+//     console.log("Fetched transactions:", transactions);
+
+//     const transactionIds = transactions.map((t) => t.id);
+
+//     // ✅ Fetch lending details for those transactions
+//     const { data: lendingDetails, error: lendingError } = await supabase
+//       .from("lending_details")
+//       .select("transaction_id, repayment_date")
+//       .in("transaction_id", transactionIds);
+
+//     if (lendingError) {
+//       console.error("Supabase error fetching lending details:", lendingError);
+//       throw lendingError;
+//     }
+
+//     console.log("Fetched lending details:", lendingDetails);
+
+//     // ✅ Fetch usernames
+//     const userIds = [...new Set(transactions.flatMap(t => [t.sender_id, t.receiver_id]))];
+//     const { data: users, error: usersError } = await supabase
+//       .from("users")
+//       .select("id, username")
+//       .in("id", userIds);
+
+//     if (usersError) {
+//       console.error("Supabase error fetching users:", usersError);
+//       throw usersError;
+//     }
+
+//     console.log("Fetched users:", users);
+
+//     // ✅ Map usernames to user IDs
+//     const userMap = users.reduce((acc, user) => {
+//       acc[user.id] = user.username;
+//       return acc;
+//     }, {});
+
+//     // ✅ Merge transactions with lending details
+//     const loans = transactions.map((t) => ({
+//       transaction_id: t.id,
+//       amount: t.amount,
+//       repayment_date:
+//         lendingDetails.find((l) => l.transaction_id === t.id)?.repayment_date || null,
+//       sender_username: userMap[t.sender_id] || "Unknown",
+//       receiver_username: userMap[t.receiver_id] || "Unknown",
+//     }));
+
+//     console.log("Final loan data:", loans);
+//     res.status(200).json(loans);
+//   } catch (error) {
+//     console.error("Error fetching loans:", error.message);
+//     res.status(500).json({ message: "Error fetching loans", error: error.message });
+//   }
+// };
+// debugger;
+
+
 const getUserLoans = async (req, res) => {
   try {
     console.log("Received request body:", req.body);
@@ -99,7 +184,7 @@ const getUserLoans = async (req, res) => {
     // ✅ Fetch transactions related to the user
     const { data: transactions, error: transactionError } = await supabase
       .from("transactions")
-      .select("id, amount, sender_id, receiver_id")
+      .select("id, amount, sender_id, receiver_id, status")
       .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
 
     if (transactionError) {
@@ -149,24 +234,38 @@ const getUserLoans = async (req, res) => {
       return acc;
     }, {});
 
-    // ✅ Merge transactions with lending details
-    const loans = transactions.map((t) => ({
-      transaction_id: t.id,
-      amount: t.amount,
-      repayment_date:
-        lendingDetails.find((l) => l.transaction_id === t.id)?.repayment_date || null,
-      sender_username: userMap[t.sender_id] || "Unknown",
-      receiver_username: userMap[t.receiver_id] || "Unknown",
-    }));
+    // ✅ Merge transactions with lending details and swap sender/receiver if status is "approved"
+    const loans = transactions.map((t) => {
+      const repaymentDate = lendingDetails.find((l) => l.transaction_id === t.id)?.repayment_date || null;
+      
+      let senderUsername = userMap[t.sender_id] || "Unknown";
+      let receiverUsername = userMap[t.receiver_id] || "Unknown";
 
-    console.log("Final loan data:", loans);
+      // 🔄 If the loan is "approved", reverse the sender & receiver
+      if (t.status === "approved") {
+        [senderUsername, receiverUsername] = [receiverUsername, senderUsername]; // Swap values
+      }
+
+      return {
+        transaction_id: t.id,
+        amount: t.amount,
+        repayment_date: repaymentDate,
+        sender_username: senderUsername,
+        receiver_username: receiverUsername,
+        status: t.status
+      };
+    });
+
+    console.log("Final loan data being returned:", loans);
     res.status(200).json(loans);
+
   } catch (error) {
-    console.error("Error fetching loans:", error.message);
-    res.status(500).json({ message: "Error fetching loans", error: error.message });
+    console.error("❌ getUserLoans: Unexpected error:", error.message);
+    res.status(500).json({ message: "Unexpected error fetching loans", error: error.message });
   }
 };
-debugger;
+
+
 
 // const repayLoan = async (req, res) => {
 //   try {
@@ -179,48 +278,60 @@ debugger;
 //     // ✅ Fetch the transaction details
 //     const { data: transaction, error: transactionError } = await supabase
 //       .from("transactions")
-//       .select("id, amount, sender_id, receiver_id")
+//       .select("id, amount, sender_id, receiver_id, status")
 //       .eq("id", transactionId)
-//       .single(); // Fetch only one transaction
+//       .single();
 
 //     if (transactionError || !transaction) {
 //       return res.status(404).json({ message: "Transaction not found" });
 //     }
 
-//     const { amount, sender_id, receiver_id } = transaction;
+//     let { amount, sender_id, receiver_id, status } = transaction;
 
-//     // ✅ Fetch the borrower (receiver) and lender (sender) details
+//     // ✅ Determine the correct borrower and lender
+//     let borrower_id = sender_id;
+//     let lender_id = receiver_id;
+
+//     if (status === "approved") {
+//       borrower_id = receiver_id; // Borrower is the original sender
+//       lender_id = sender_id; // Lender is the original receiver
+//     }
+
+//     console.log(`🔄 Borrower (Who is repaying): ${borrower_id}`);
+//     console.log(`✅ Lender (Who gets repaid): ${lender_id}`);
+
+//     // ✅ Fetch borrower and lender balances
 //     const { data: borrower, error: borrowerError } = await supabase
 //       .from("users")
 //       .select("id, balance")
-//       .eq("id", receiver_id)
+//       .eq("id", borrower_id)
 //       .single();
 
 //     const { data: lender, error: lenderError } = await supabase
 //       .from("users")
 //       .select("id, balance")
-//       .eq("id", sender_id)
+//       .eq("id", lender_id)
 //       .single();
 
 //     if (borrowerError || lenderError || !borrower || !lender) {
 //       return res.status(404).json({ message: "User not found" });
 //     }
 
-//     // ✅ Check if the borrower has enough balance
+//     // ✅ Ensure borrower has enough balance
 //     if (borrower.balance < amount) {
 //       return res.status(400).json({ message: "Insufficient balance" });
 //     }
 
-//     // ✅ Deduct the amount from the borrower and credit the lender
+//     // ✅ Correct balance update logic
 //     const { error: updateBorrowerError } = await supabase
 //       .from("users")
 //       .update({ balance: borrower.balance - amount })
-//       .eq("id", receiver_id);
+//       .eq("id", borrower_id); // The borrower pays the lender
 
 //     const { error: updateLenderError } = await supabase
 //       .from("users")
 //       .update({ balance: lender.balance + amount })
-//       .eq("id", sender_id);
+//       .eq("id", lender_id); // The lender receives the repayment
 
 //     if (updateBorrowerError || updateLenderError) {
 //       return res.status(500).json({ message: "Failed to update balances" });
@@ -235,19 +346,19 @@ debugger;
 //     if (updateTransactionError) {
 //       return res.status(500).json({ message: "Failed to update transaction status" });
 //     }
-//     if(!updateTransactionError){
-//       //now call the model and feed the data in it regarding the loan reapyment.
 
-//     }
-
-//     res.status(200).json({ message: "Loan repaid successfully" });
+//     res.status(200).json({
+//       message: "Loan repaid successfully",
+//       borrower_balance: borrower.balance - amount,
+//       lender_balance: lender.balance + amount
+//     });
 
 //   } catch (error) {
 //     res.status(500).json({ message: "Error repaying loan", error: error.message });
 //   }
 // };
 
-
+//perfect calcualtion of amounts
 const repayLoan = async (req, res) => {
   try {
     const { transactionId } = req.body;
@@ -256,51 +367,61 @@ const repayLoan = async (req, res) => {
       return res.status(400).json({ message: "Transaction ID is required" });
     }
 
-    // ✅ Fetch the transaction details
+    // ✅ Fetch transaction details
     const { data: transaction, error: transactionError } = await supabase
       .from("transactions")
-      .select("id, amount, sender_id, receiver_id")
+      .select("id, amount, sender_id, receiver_id, status")
       .eq("id", transactionId)
-      .single(); // Fetch only one transaction
+      .single();
 
     if (transactionError || !transaction) {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    const { amount, sender_id, receiver_id } = transaction;
+    let { amount, sender_id, receiver_id, status } = transaction;
 
-    // ✅ Fetch the borrower (receiver) and lender (sender) details
+    // ✅ Borrower is ALWAYS the sender_id (the original requester)
+    let borrower_id = sender_id;
+    let lender_id = receiver_id;
+
+    console.log(`🔄 Borrower (Who is repaying): ${borrower_id}`);
+    console.log(`✅ Lender (Who gets repaid): ${lender_id}`);
+
+    // ✅ Fetch borrower and lender balances
     const { data: borrower, error: borrowerError } = await supabase
       .from("users")
       .select("id, balance")
-      .eq("id", receiver_id)
+      .eq("id", borrower_id)
       .single();
 
     const { data: lender, error: lenderError } = await supabase
       .from("users")
       .select("id, balance")
-      .eq("id", sender_id)
+      .eq("id", lender_id)
       .single();
 
     if (borrowerError || lenderError || !borrower || !lender) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // ✅ Check if the borrower has enough balance
+    // ✅ Ensure borrower has enough balance before repayment
     if (borrower.balance < amount) {
-      return res.status(400).json({ message: "Insufficient balance" });
+      return res.status(400).json({ message: "Insufficient balance to repay loan" });
     }
 
-    // ✅ Deduct the amount from the borrower and credit the lender
+    // ✅ Deduct amount from borrower & add to lender **(CORRECTED)**
+    const updatedBorrowerBalance = borrower.balance - amount; // Borrower loses money
+    const updatedLenderBalance = lender.balance + amount; // Lender gains money back
+
     const { error: updateBorrowerError } = await supabase
       .from("users")
-      .update({ balance: borrower.balance - amount })
-      .eq("id", receiver_id);
+      .update({ balance: updatedBorrowerBalance })
+      .eq("id", borrower_id);
 
     const { error: updateLenderError } = await supabase
       .from("users")
-      .update({ balance: lender.balance + amount })
-      .eq("id", sender_id);
+      .update({ balance: updatedLenderBalance })
+      .eq("id", lender_id);
 
     if (updateBorrowerError || updateLenderError) {
       return res.status(500).json({ message: "Failed to update balances" });
@@ -316,35 +437,10 @@ const repayLoan = async (req, res) => {
       return res.status(500).json({ message: "Failed to update transaction status" });
     }
 
-    // ✅ Now call the function to recalculate user financial metrics
-    const lenderMetrics = await calculateUserFinancialMetrics(sender_id);
-    const borrowerMetrics = await calculateUserFinancialMetrics(receiver_id);
-
-    // ✅ Update metrics in the database for both lender and borrower
-    const { error: updateLenderMetricsError } = await supabase
-      .from("users")
-      .update({
-        total_lend_borrow_ratio: lenderMetrics.totalLendBorrowRatio,
-        timely_payment_score: lenderMetrics.timelyPaymentScore
-      })
-      .eq("id", sender_id);
-
-    const { error: updateBorrowerMetricsError } = await supabase
-      .from("users")
-      .update({
-        total_lend_borrow_ratio: borrowerMetrics.totalLendBorrowRatio,
-        timely_payment_score: borrowerMetrics.timelyPaymentScore
-      })
-      .eq("id", receiver_id);
-
-    if (updateLenderMetricsError || updateBorrowerMetricsError) {
-      return res.status(500).json({ message: "Failed to update financial metrics" });
-    }
-
     res.status(200).json({
       message: "Loan repaid successfully",
-      lenderMetrics,
-      borrowerMetrics
+      borrower_balance: updatedBorrowerBalance,
+      lender_balance: updatedLenderBalance
     });
 
   } catch (error) {
@@ -408,7 +504,7 @@ const calculateUserFinancialMetrics = async (userId) => {
       const timelyPaymentScore = totalRepayments > 0 ? (timelyRepayments / totalRepayments) * 100 : 0;
 
       //here we must call the model and send the data as input then get the output
-      
+
 
       return { totalLendBorrowRatio, timelyPaymentScore };
 
