@@ -867,7 +867,6 @@ const requestMoney = async (req, res) => {
                     receiver_id: receiver.id,
                     amount,
                     status: "pending",
-                    transaction_type: "lending"
                 }
             ])
             .select()
@@ -876,13 +875,13 @@ const requestMoney = async (req, res) => {
         if (transactionError) throw transactionError;
 
         // Insert repayment details into `lending_details`
-        const { error: lendingError } = await supabase.from("lending_details").insert([
-            {
-                transaction_id: transaction.id,
-                repayment_date: repaymentDate,
-                mode_of_payment: "Amount Loaned" // Default, can be updated later
-            }
-        ]);
+        // const { error: lendingError } = await supabase.from("lending_details").insert([
+        //     {
+        //         transaction_id: transaction.id,
+        //         repayment_date: repaymentDate,
+        //         mode_of_payment: "Amount Loaned" // Default, can be updated later
+        //     }
+        // ]);
 
         if (lendingError) throw lendingError;
 
@@ -990,9 +989,19 @@ const respondToMoneyRequest = async (req, res) => {
         // ✅ Update transaction status
         const { error: approveError } = await supabase
             .from("transactions")
-            .update({ status: "approved" })
-            .eq("id", transactionId);
+            .update({ status: "approved",
+                transaction_type: "lending" 
+             })
+            .eq("id", transactionId)
 
+            const { error: lendingError } = await supabase.from("lending_details").insert([
+                {
+                    transaction_id: transaction.id,
+                    repayment_date: repaymentDate,
+                    mode_of_payment: "Amount Loaned" // Default, can be updated later
+                }
+            ]);
+            
         if (approveError) throw approveError;
 
         console.log("✅ Transaction approved successfully!");

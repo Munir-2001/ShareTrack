@@ -191,11 +191,16 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     console.log('Navigating to TransactionHistoryScreen...');
     navigation.navigate('TransactionHistoryScreen');
   };
+
   const openModal = () => {
     setModalVisible(true);
     console.log('open modal');
   };
 
+  const goToUpcomingRepayments = () => {
+    console.log('Navigating to UpcomingRepaymentsScreen...');
+    navigation.navigate('UpcomingRepaymentsScreen');
+  };
   const closeModal = () => {
     console.log('Closing Modal');
     setModalVisible(false);
@@ -341,7 +346,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
                 </TouchableOpacity>
               </View>
               <View style={styles.row}>
-                <TouchableOpacity style={styles.item}>
+                <TouchableOpacity style={styles.item} onPress={goToUpcomingRepayments}>
                   <Icon name="calendar" size={24} color="#1E2A78" />
                   <Text style={styles.itemText}>Upcoming Transactions</Text>
                 </TouchableOpacity>
