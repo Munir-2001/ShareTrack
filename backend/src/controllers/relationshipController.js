@@ -45,8 +45,8 @@ const requestRelationship = async (req, res) => {
             let message;
             switch (existingRelationship.status) {
                 case 0:
-                    message = existingRelationship.requester_id === requesterId ? 
-                        "Friend request already sent!" : 
+                    message = existingRelationship.requester_id === requesterId ?
+                        "Friend request already sent!" :
                         "Friend request pending!";
                     break;
                 case 1:
@@ -54,8 +54,8 @@ const requestRelationship = async (req, res) => {
                     break;
                 case 2:
                 case 3:
-                    message = existingRelationship.requester_id === requesterId ? 
-                        "User has blocked you!" : 
+                    message = existingRelationship.requester_id === requesterId ?
+                        "User has blocked you!" :
                         "You have blocked this user!";
                     break;
             }
@@ -263,7 +263,7 @@ const getTransactionHistory = async (req, res) => {
 
         // Fetch sender and receiver usernames
         const userIds = [...new Set([...transactions.map(t => t.sender_id), ...transactions.map(t => t.receiver_id)])];
-        
+
         const { data: users, error: usersError } = await supabase
             .from("users")
             .select("id, username")
@@ -292,6 +292,67 @@ const getTransactionHistory = async (req, res) => {
         res.status(500).json({ message: "Error fetching transaction history", error: error.message });
     }
 };
+
+
+// const getMoneyRequests = async (req, res) => {
+//     try {
+//         const { username } = req.body;
+
+//         if (!username) {
+//             console.log("❌ getMoneyRequests: Username is missing in request");
+//             return res.status(400).json({ message: "Username is required" });
+//         }
+
+//         // Convert username to userId
+//         const { data: user, error: userError } = await supabase
+//             .from("users")
+//             .select("id")
+//             .eq("username", username)
+//             .single();
+
+//         if (!user || userError) {
+//             console.log("❌ getMoneyRequests: User not found for username:", username);
+//             return res.status(404).json({ message: "User not found" });
+//         }
+
+//         const userId = user.id;
+
+//         // Fetch pending money requests
+//         const { data: requests, error } = await supabase
+//             .from("transactions")
+//             .select("id, sender_id, receiver_id, amount, status, created_at")
+//             .eq("receiver_id", userId)
+//             .eq("status", "pending");
+
+            
+        
+
+//         if (error) {
+//             console.error("Error fetching transactions:", error.message);
+//             return res.status(500).json({ message: "Error fetching transactions", error: error.message });
+//         }
+
+//         // ✅ Rename sender & receiver fields for clarity before sending response
+//         const formattedRequests = requests.map(req => ({
+//             id: req.id,
+//             sender_username: req.sender.username, // Extract username from sender object
+//             receiver_username: req.receiver.username, // Extract username from receiver object
+//             amount: req.amount,
+//             status: req.status,
+//             created_at: req.created_at
+//         }));
+//         if (error) {
+//             console.error("❌ getMoneyRequests: Error fetching data from Supabase:", error);
+//             return res.status(500).json({ message: "Error fetching money requests", error: error.message });
+//         }
+
+//         console.log("✅ getMoneyRequests: Returning transactions:", formattedRequests);
+//         res.status(200).json(requests);
+//     } catch (error) {
+//         console.error("❌ getMoneyRequests: Unexpected error:", error.message);
+//         res.status(500).json({ message: "Unexpected error fetching money requests", error: error.message });
+//     }
+// };
 
 
 const getMoneyRequests = async (req, res) => {
@@ -325,17 +386,48 @@ const getMoneyRequests = async (req, res) => {
             .eq("status", "pending");
 
         if (error) {
-            console.error("❌ getMoneyRequests: Error fetching data from Supabase:", error);
-            return res.status(500).json({ message: "Error fetching money requests", error: error.message });
+            console.error("❌ getMoneyRequests: Error fetching transactions from Supabase:", error);
+            return res.status(500).json({ message: "Error fetching transactions", error: error.message });
         }
 
-        console.log("✅ getMoneyRequests: Returning transactions:", requests);
-        res.status(200).json(requests);
+        // Fetch sender & receiver usernames based on their IDs
+        const senderIds = [...new Set(requests.map(request => request.sender_id))];
+        const receiverIds = [...new Set(requests.map(request => request.receiver_id))];
+
+        const { data: users, error: usersError } = await supabase
+            .from("users")
+            .select("id, username")
+            .in("id", [...senderIds, ...receiverIds]);
+
+        if (usersError) {
+            console.error("❌ getMoneyRequests: Error fetching usernames:", usersError);
+            return res.status(500).json({ message: "Error fetching usernames", error: usersError.message });
+        }
+
+        // Map user IDs to usernames
+        const userMap = users.reduce((acc, user) => {
+            acc[user.id] = user.username;
+            return acc;
+        }, {});
+
+        // Format transactions with sender and receiver usernames
+        const transactionsWithNames = requests.map(request => ({
+            id: request.id,
+            sender_username: userMap[request.sender_id] || "Unknown User",
+            receiver_username: userMap[request.receiver_id] || "Unknown User",
+            amount: request.amount,
+            status: request.status,
+            created_at: request.created_at
+        }));
+
+        console.log("✅ getMoneyRequests: Returning transactions:", transactionsWithNames);
+        res.status(200).json(transactionsWithNames);
     } catch (error) {
         console.error("❌ getMoneyRequests: Unexpected error:", error.message);
         res.status(500).json({ message: "Unexpected error fetching money requests", error: error.message });
     }
 };
+
 
 const getSentMoneyRequests = async (req, res) => {
     try {
@@ -374,7 +466,7 @@ const getSentMoneyRequests = async (req, res) => {
 
         // Fetch receiver usernames based on receiver_id
         const receiverIds = requests.map(request => request.receiver_id);
-        
+
         const { data: receivers, error: receiverError } = await supabase
             .from("users")
             .select("id, username")
@@ -831,6 +923,12 @@ const requestMoney = async (req, res) => {
     try {
         const { senderUsername, receiverUsername, amount, repaymentDate } = req.body; // ✅ Now requires repaymentDate
 
+        //print all params
+        console.log('senderusername' + senderUsername);
+        console.log('receiverUsername' + receiverUsername);
+        console.log('amount is ' + amount);
+        console.log('repaymentDate is' + repaymentDate);
+
         // Validate required fields
         if (!senderUsername || !receiverUsername || !amount || !repaymentDate) {
             return res.status(400).json({ message: "Missing required fields" });
@@ -842,6 +940,7 @@ const requestMoney = async (req, res) => {
             return res.status(400).json({ message: "Invalid repayment date. Must be in the future." });
         }
 
+        console.log('repayment date obj value is ' + repaymentDateObj)
         // Fetch sender & receiver IDs
         const { data: sender, error: senderError } = await supabase
             .from("users")
@@ -867,6 +966,7 @@ const requestMoney = async (req, res) => {
                     receiver_id: receiver.id,
                     amount,
                     status: "pending",
+                    transaction_type: "lending"
                 }
             ])
             .select()
@@ -875,13 +975,13 @@ const requestMoney = async (req, res) => {
         if (transactionError) throw transactionError;
 
         // Insert repayment details into `lending_details`
-        // const { error: lendingError } = await supabase.from("lending_details").insert([
-        //     {
-        //         transaction_id: transaction.id,
-        //         repayment_date: repaymentDate,
-        //         mode_of_payment: "Amount Loaned" // Default, can be updated later
-        //     }
-        // ]);
+        const { error: lendingError } = await supabase.from("lending_details").insert([
+            {
+                transaction_id: transaction.id,
+                repayment_date: repaymentDate,
+                mode_of_payment: "Amount Loaned" // Default, can be updated later
+            }
+        ]);
 
         if (lendingError) throw lendingError;
 
@@ -989,19 +1089,20 @@ const respondToMoneyRequest = async (req, res) => {
         // ✅ Update transaction status
         const { error: approveError } = await supabase
             .from("transactions")
-            .update({ status: "approved",
-                transaction_type: "lending" 
-             })
+            .update({
+                status: "approved",
+                transaction_type: "lending"
+            })
             .eq("id", transactionId)
 
-            const { error: lendingError } = await supabase.from("lending_details").insert([
-                {
-                    transaction_id: transaction.id,
-                    repayment_date: repaymentDate,
-                    mode_of_payment: "Amount Loaned" // Default, can be updated later
-                }
-            ]);
-            
+        // const { error: lendingError } = await supabase.from("lending_details").insert([
+        //     {
+        //         transaction_id: transaction.id,
+
+        //         mode_of_payment: "Amount Loaned" // Default, can be updated later
+        //     }
+        // ]);
+
         if (approveError) throw approveError;
 
         console.log("✅ Transaction approved successfully!");

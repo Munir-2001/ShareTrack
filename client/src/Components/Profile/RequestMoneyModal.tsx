@@ -37,6 +37,7 @@ const RequestMoney: React.FC<RequestMoneyProps> = ({ friendUsername, onClose }) 
     }
 
     try {
+      console.log('data sent to api is RD'+ repaymentDate+'number is '+amountToSend+'sd is '+senderUsername+'fu'+friendUsername)
       const response = await requestMoneyAPI(senderUsername, friendUsername, Number(amountToSend), repaymentDate); // Send sender's username
       Alert.alert('Success', response.message);
       setAmountToSend(''); // Clear the input

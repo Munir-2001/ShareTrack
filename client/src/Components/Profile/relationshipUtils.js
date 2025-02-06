@@ -455,7 +455,7 @@ export const sendMoney = async (senderUsername, receiverUsername, amount) => {
 
 export const requestMoney = async (senderUsername, receiverUsername, amount, repaymentDate) => {
     try {
-        console.log('in req money relation ship utils')
+        console.log('repayment date si '+repaymentDate)
 
         const requestData = {
             senderUsername: senderUsername,

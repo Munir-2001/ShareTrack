@@ -408,6 +408,7 @@ const calculateUserFinancialMetrics = async (userId) => {
       const timelyPaymentScore = totalRepayments > 0 ? (timelyRepayments / totalRepayments) * 100 : 0;
 
       //here we must call the model and send the data as input then get the output
+      
 
       return { totalLendBorrowRatio, timelyPaymentScore };
 
