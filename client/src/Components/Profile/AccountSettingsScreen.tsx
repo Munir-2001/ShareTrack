@@ -151,10 +151,9 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
                 style={styles.picker}
             >
                 <Picker.Item label="Select Marital Status" value="" />
-                <Picker.Item label="Single" value="Single" />
-                <Picker.Item label="Married" value="Married" />
-                <Picker.Item label="Divorced" value="Divorced" />
-                <Picker.Item label="Widowed" value="Widowed" />
+                <Picker.Item label="Single" value="0" />
+                <Picker.Item label="Married" value="1" />
+               
             </Picker>
 
             {/* Education Level Dropdown */}
