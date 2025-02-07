@@ -7,11 +7,13 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
-
+import { Linking, Alert } from 'react-native';
+import { API_URL } from '../../constants';
 import {
   getAllItems,
   getUserItems,
   deleteItem,
+  getItemOwnerPhone
 } from '../../Redux/Actions/AuthActions/ItemAction';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 
@@ -23,11 +25,46 @@ export default function ItemScreen({ navigation }: any) {
 
   const [showAll, setShowAll] = useState(true);
   const [data, setData] = useState<any[]>([]); // ✅ Ensure data is an array of objects
+ 
+ 
+  const fetchOwnerPhoneNumber = async (itemName: string) => {
+    try {
+        console.log(`📞 Fetching phone number for item: ${itemName}`);
 
-  // useEffect(() => {
-  //   if (showAll) setData(allItems);
-  //   else setData(myItems);
-  // }, [showAll, allItems, myItems]);
+        const response = await fetch(`${API_URL}/api/item/getItemOwnerPhone`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ itemName: itemName }), // ✅ Send itemName instead of itemId
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch phone number. Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(`✅ Owner Details Received:`, data);
+
+        if (!data.owner_phone) {  // ✅ Fix here (use owner_phone instead of phone)
+            Alert.alert("Phone number not available!");
+            return;
+        }
+
+        // ✅ Generate WhatsApp URL
+        const whatsappUrl = `https://wa.me/${data.owner_phone.replace(/\D/g, "")}`;
+        console.log(`📲 Opening WhatsApp: ${whatsappUrl}`);
+
+        // ✅ Open WhatsApp Chat
+        Linking.openURL(whatsappUrl);
+
+    } catch (error) {
+        console.error("❌ Error fetching phone number:", error);
+        Alert.alert("Error fetching phone number");
+    }
+};
+
+
   useEffect(() => {
     if (showAll) {
       // ✅ Explicitly define the type of 'item' using TypeScript annotation
@@ -36,7 +73,7 @@ export default function ItemScreen({ navigation }: any) {
       setData(myItems);
     }
   }, [showAll, allItems, myItems]);
-  
+
 
   useEffect(() => {
     dispatch(getAllItems());
@@ -64,31 +101,25 @@ export default function ItemScreen({ navigation }: any) {
 
       <ScrollView>
         <View style={styles.itemsRow}>
-          {data.map((item: any, index: number) => (
+          {data.map((item, index) => (
             <View key={item.id} style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}>
-              <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.itemImage} />
+              <Image source={{ uri: "https://via.placeholder.com/150" }} style={styles.itemImage} />
               <Text style={styles.itemName}>{item.name}</Text>
-
-              {/* ✅ Corrected price display */}
               <Text style={styles.itemPrice}>
-                💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : 'N/A'}
+                💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
               </Text>
-
               <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
               <Text style={styles.itemLocation}>📍 Location: {item.city}, {item.state}, {item.country}</Text>
 
-              {item.owner_id === user.id && (
-                <TouchableOpacity
-                  style={[styles.deleteButton, { backgroundColor: '#D32F2F' }]}
-                  onPress={() => {
-                    dispatch(deleteItem(item.id));
-                    setData(prevData => prevData.filter(i => i.id !== item.id)); // ✅ Remove from local state
-                  }}>
-                  <Text style={styles.deleteText}>🗑️ Delete</Text>
-                </TouchableOpacity>
-              )}
+              {/* ✅ WhatsApp Chat Button */}
+              <TouchableOpacity
+                style={styles.whatsappButton}
+                onPress={() => fetchOwnerPhoneNumber(item.name)}>
+                <Text style={styles.whatsappText}>💬 Chat on WhatsApp</Text>
+              </TouchableOpacity>
             </View>
           ))}
+
         </View>
       </ScrollView>
 
@@ -117,6 +148,26 @@ const styles = StyleSheet.create({
   itemLocation: { fontSize: 14, color: '#333', marginBottom: 10 },
   deleteButton: { padding: 10, justifyContent: 'center', alignItems: 'center' },
   deleteText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
+  whatsappButton: {
+    backgroundColor: "#25D366", // WhatsApp green color
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 10,
+    flexDirection: "row",
+  },
+  whatsappButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  whatsappText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
   fab: { position: 'absolute', bottom: 20, right: 20, backgroundColor: '#1E2A78', width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', elevation: 5 },
   fabText: { fontSize: 28, color: '#fff' },
 });

@@ -205,7 +205,8 @@ const {
     getItemById,
     getItemByOwner,
     updateItem,
-    deleteItem
+    deleteItem,
+    getItemOwnerPhoneNumber
 } = require('../controllers/itemController');
 
 const itemRouter = express.Router();
@@ -321,5 +322,55 @@ itemRouter.put('/:id', updateItem);
  *     tags: [Items]
  */
 itemRouter.delete('/:id', deleteItem);
+
+
+
+// // ✅ Route to get the phone number of an item owner
+// itemRouter.post("/getItemOwnerPhone", getItemOwnerPhoneNumber);
+
+
+/**
+ * @swagger
+ * /api/item/getItemOwnerPhone:
+ *   post:
+ *     summary: Get phone number of the item's owner
+ *     tags:
+ *       - Items
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               itemName:
+ *                 type: string
+ *                 description: The name of the item whose owner’s phone number is required.
+ *             required:
+ *               - itemName
+ *     responses:
+ *       "200":
+ *         description: Successfully retrieved owner phone number
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 owner_id:
+ *                   type: integer
+ *                 owner_username:
+ *                   type: string
+ *                 owner_phone:
+ *                   type: string
+ *       "400":
+ *         description: Bad request, missing item name
+ *       "404":
+ *         description: Item or owner not found
+ *       "500":
+ *         description: Internal server error
+ */
+itemRouter.post("/getItemOwnerPhone", getItemOwnerPhoneNumber);
+
+
 
 module.exports = itemRouter;

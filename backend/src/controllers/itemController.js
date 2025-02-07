@@ -84,6 +84,171 @@
 
 const { supabase } = require("../config/db");
 
+// const getItemOwnerPhoneNumber = async (req, res) => {
+//     try {
+//         const { itemId } = req.body; // 📌 Accept `itemId` in request
+
+//         if (!itemId) {
+//             return res.status(400).json({ message: "Item ID is required" });
+//         }
+
+//         // ✅ Fetch item details to get the owner's ID
+//         const { data: item, error: itemError } = await supabase
+//             .from("items")
+//             .select("owner_id") 
+//             .eq("id", itemId)
+//             .single();
+
+//         if (!item || itemError) {
+//             return res.status(404).json({ message: "Item not found" });
+//         }
+
+//         // ✅ Fetch owner's phone number
+//         const { data: owner, error: ownerError } = await supabase
+//             .from("users")
+//             .select("id, username, phonenumber")
+//             .eq("id", item.owner_id)
+//             .single();
+
+//         if (!owner || ownerError) {
+//             return res.status(404).json({ message: "Owner not found" });
+//         }
+
+//         return res.status(200).json({
+//             owner_id: owner.id,
+//             owner_username: owner.username,
+//             owner_phone: owner.phonenumber,
+//         });
+
+//     } catch (error) {
+//         console.error("Error fetching item owner's phone number:", error);
+//         return res.status(500).json({ message: "Internal server error" });
+//     }
+// };
+
+
+// const getItemOwnerPhoneNumber = async (req, res) => {
+//     try {
+//         const { itemName } = req.body; // 🔥 Accept `itemName` instead of `itemId`
+
+//         if (!itemName) {
+//             return res.status(400).json({ message: "Item name is required" });
+//         }
+
+//         console.log(`🔍 Searching for item: ${itemName}`);
+
+//         // ✅ Fetch item details using `name` instead of `id`
+//         const { data: item, error: itemError } = await supabase
+//             .from("items")
+//             .select("id, owner_id") 
+//             .eq("name", itemName)
+//             .single(); // Ensure we fetch one item
+
+//         if (itemError) {
+//             console.error("❌ Supabase Error:", itemError);
+//             return res.status(500).json({ message: "Database error while fetching item." });
+//         }
+
+//         if (!item) {
+//             console.log(`❌ Item with name '${itemName}' not found.`);
+//             return res.status(404).json({ message: "Item not found" });
+//         }
+
+//         console.log(`✅ Found Item: ${JSON.stringify(item)}`);
+
+//         // ✅ Fetch owner's phone number
+//         const { data: owner, error: ownerError } = await supabase
+//             .from("users")
+//             .select("id, username, phone")
+//             .eq("id", item.owner_id)
+//             .single();
+
+//         if (ownerError) {
+//             console.error("❌ Supabase Error:", ownerError);
+//             return res.status(500).json({ message: "Database error while fetching owner." });
+//         }
+
+//         if (!owner) {
+//             console.log(`❌ Owner with ID ${item.owner_id} not found.`);
+//             return res.status(404).json({ message: "Owner not found" });
+//         }
+
+//         console.log(`✅ Found Owner: ${JSON.stringify(owner)}`);
+
+//         return res.status(200).json({
+//             owner_id: owner.id,
+//             owner_username: owner.username,
+//             owner_phone: owner.phone,
+//         });
+
+//     } catch (error) {
+//         console.error("❌ Error fetching item owner's phone number:", error);
+//         return res.status(500).json({ message: "Internal server error" });
+//     }
+// };
+
+
+const getItemOwnerPhoneNumber = async (req, res) => {
+    try {
+        const { itemName } = req.body; // 🔥 Accept `itemName` instead of `itemId`
+
+        if (!itemName) {
+            return res.status(400).json({ message: "Item name is required" });
+        }
+
+        console.log(`🔍 Searching for item: ${itemName}`);
+
+        // ✅ Fetch item details using `name` instead of `id`
+        const { data: item, error: itemError } = await supabase
+            .from("items")
+            .select("id, owner_id") 
+            .eq("name", itemName)
+            .single(); // Ensure we fetch one item
+
+        if (itemError) {
+            console.error("❌ Supabase Error:", itemError);
+            return res.status(500).json({ message: "Database error while fetching item." });
+        }
+
+        if (!item) {
+            console.log(`❌ Item with name '${itemName}' not found.`);
+            return res.status(404).json({ message: "Item not found" });
+        }
+
+        console.log(`✅ Found Item: ${JSON.stringify(item)}`);
+
+        // ✅ Fetch owner's phone number
+        const { data: owner, error: ownerError } = await supabase
+            .from("users")
+            .select("id, username, phone") // ✅ Ensure correct column name
+            .eq("id", item.owner_id)
+            .single();
+
+        if (ownerError) {
+            console.error("❌ Supabase Error:", ownerError);
+            return res.status(500).json({ message: "Database error while fetching owner." });
+        }
+
+        if (!owner) {
+            console.log(`❌ Owner with ID ${item.owner_id} not found.`);
+            return res.status(404).json({ message: "Owner not found" });
+        }
+
+        console.log(`✅ Found Owner: ${JSON.stringify(owner)}`);
+
+        return res.status(200).json({
+            owner_id: owner.id,
+            owner_username: owner.username,
+            owner_phone: owner.phone,  // ✅ Fix: Ensure correct key name
+        });
+
+    } catch (error) {
+        console.error("❌ Error fetching item owner's phone number:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
 // Create Item
 const createItem = async (req, res) => {
     try {
@@ -152,4 +317,4 @@ const deleteItem = async (req, res) => {
     }
 };
 
-module.exports = { createItem, getAllItems, getItemById, getItemByOwner, updateItem, deleteItem };
+module.exports = {getItemOwnerPhoneNumber, createItem, getAllItems, getItemById, getItemByOwner, updateItem, deleteItem };

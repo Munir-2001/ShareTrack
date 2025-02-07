@@ -49,6 +49,30 @@ export const createItem = (itemData) => async (dispatch) => {
 //         Alert.alert("Error deleting item:", error.message);
 //     }
 // };
+
+export const getItemOwnerPhone = async (itemId) => {
+    try {
+        const response = await fetch(`${API_URL}/api/item/getItemOwnerPhone`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ itemId }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Failed to fetch phone number");
+        }
+
+        return data.owner_phone;
+    } catch (error) {
+        console.error("Error fetching phone number:", error.message);
+        return null;
+    }
+};
+
+
+
 export const deleteItem = (item_id) => {
     return async (dispatch, getState) => {
         try {
