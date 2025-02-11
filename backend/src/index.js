@@ -5,6 +5,7 @@ import itemRoutes from "./routes/itemRoutes.js";
 import relationshipRoutes from "./routes/relationshipRoutes.js";
 import { swaggerUiMiddleware, swaggerUiHandler } from "./swagger.js"; // ✅ Ensure .js extension
 import loanRoutes from "./routes/loanRoutes.js";
+import rentalRouter from "./routes/rentalRoutes.js"
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ app.use("/api/auth", userRoutes);
 app.use("/api/item", itemRoutes);
 app.use("/api/relationship", relationshipRoutes);
 app.use("/api/loans", loanRoutes)
-
+app.use("/api/rental", rentalRouter);
 // Swagger Documentation
 app.use("/api-docs", swaggerUiMiddleware, swaggerUiHandler);
 
