@@ -25,44 +25,51 @@ export default function ItemScreen({ navigation }: any) {
 
   const [showAll, setShowAll] = useState(true);
   const [data, setData] = useState<any[]>([]); // ✅ Ensure data is an array of objects
- 
- 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+        dispatch(getAllItems()); // ✅ Refresh items list when returning to screen
+        dispatch(getUserItems(user.id));
+    });
+
+    return unsubscribe;
+}, [navigation]);
+
+
   const fetchOwnerPhoneNumber = async (itemName: string) => {
     try {
-        console.log(`📞 Fetching phone number for item: ${itemName}`);
+      console.log(`📞 Fetching phone number for item: ${itemName}`);
 
-        const response = await fetch(`${API_URL}/api/item/getItemOwnerPhone`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ itemName: itemName }), // ✅ Send itemName instead of itemId
-        });
+      const response = await fetch(`${API_URL}/api/item/getItemOwnerPhone`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ itemName: itemName }), // ✅ Send itemName instead of itemId
+      });
 
-        if (!response.ok) {
-            throw new Error(`Failed to fetch phone number. Status: ${response.status}`);
-        }
+      if (!response.ok) {
+        throw new Error(`Failed to fetch phone number. Status: ${response.status}`);
+      }
 
-        const data = await response.json();
-        console.log(`✅ Owner Details Received:`, data);
+      const data = await response.json();
+      console.log(`✅ Owner Details Received:`, data);
 
-        if (!data.owner_phone) {  // ✅ Fix here (use owner_phone instead of phone)
-            Alert.alert("Phone number not available!");
-            return;
-        }
+      if (!data.owner_phone) {  // ✅ Fix here (use owner_phone instead of phone)
+        Alert.alert("Phone number not available!");
+        return;
+      }
+      // ✅ Generate WhatsApp URL
+      const whatsappUrl = `https://wa.me/${data.owner_phone.replace(/\D/g, "")}`;
+      console.log(`📲 Opening WhatsApp: ${whatsappUrl}`);
 
-        // ✅ Generate WhatsApp URL
-        const whatsappUrl = `https://wa.me/${data.owner_phone.replace(/\D/g, "")}`;
-        console.log(`📲 Opening WhatsApp: ${whatsappUrl}`);
-
-        // ✅ Open WhatsApp Chat
-        Linking.openURL(whatsappUrl);
+      // ✅ Open WhatsApp Chat
+      Linking.openURL(whatsappUrl);
 
     } catch (error) {
-        console.error("❌ Error fetching phone number:", error);
-        Alert.alert("Error fetching phone number");
+      console.error("❌ Error fetching phone number:", error);
+      Alert.alert("Error fetching phone number");
     }
-};
+  };
 
 
   useEffect(() => {
@@ -117,6 +124,18 @@ export default function ItemScreen({ navigation }: any) {
                 onPress={() => fetchOwnerPhoneNumber(item.name)}>
                 <Text style={styles.whatsappText}>💬 Chat on WhatsApp</Text>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ITEMDETAIL', { item })} // ✅ Pass item data
+                style={styles.itemCard}
+              >
+                {/* <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.itemImage} />
+                <Text style={styles.itemName}>{item.name}</Text> */}
+                <Text style={[styles.itemStatus, { color: item.is_available ? 'green' : 'red' }]}>
+                  {item.is_available ? '🟢 Active' : '🔴 Inactive'}
+                </Text>
+              </TouchableOpacity>
+
             </View>
           ))}
 
@@ -162,7 +181,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-
+  itemStatus: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 5,
+    textAlign: 'center',
+  },
+  
   whatsappText: {
     color: "#fff",
     fontSize: 14,

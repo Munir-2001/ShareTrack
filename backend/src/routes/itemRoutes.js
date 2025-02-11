@@ -1,203 +1,3 @@
-// const express = require('express');
-// const {
-//     createItem,
-//     getAllItems,
-//     getItemById,
-//     getItemByOwner,
-//     updateItem,
-//     deleteItem
-// } = require('../controllers/itemController');
-
-// const itemRouter = express.Router();
-
-// /**
-//  * @swagger
-//  * tags:
-//  *   - name: Items
-//  *     description: API for managing rental items
-//  */
-
-// /**
-//  * @swagger
-//  * /api/item/create:
-//  *   post:
-//  *     summary: Create a new rental item
-//  *     tags: [Items]
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             required:
-//  *               - item_name
-//  *               - category
-//  *               - rental_price
-//  *               - location
-//  *               - owner_id
-//  *             properties:
-//  *               item_name:
-//  *                 type: string
-//  *                 description: Name of the item
-//  *               category:
-//  *                 type: string
-//  *                 description: Category of the item
-//  *               rental_price:
-//  *                 type: number
-//  *                 description: Price to rent the item
-//  *               location:
-//  *                 type: string
-//  *                 description: Location where the item is available
-//  *               owner_id:
-//  *                 type: integer
-//  *                 description: ID of the item owner
-//  *     responses:
-//  *       201:
-//  *         description: Item created successfully
-//  *       400:
-//  *         description: Bad request, validation error
-//  */
-// itemRouter.post('/create', createItem);
-
-// /**
-//  * @swagger
-//  * /api/item/get-all:
-//  *   get:
-//  *     summary: Retrieve all rental items
-//  *     tags: [Items]
-//  *     responses:
-//  *       200:
-//  *         description: List of all items
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: array
-//  *               items:
-//  *                 type: object
-//  *                 properties:
-//  *                   id:
-//  *                     type: integer
-//  *                   item_name:
-//  *                     type: string
-//  *                   category:
-//  *                     type: string
-//  *                   rental_price:
-//  *                     type: number
-//  *                   location:
-//  *                     type: string
-//  *                   owner_id:
-//  *                     type: integer
-//  */
-// itemRouter.get('/get-all', getAllItems);
-
-// /**
-//  * @swagger
-//  * /api/item/owner/{owner_id}:
-//  *   get:
-//  *     summary: Retrieve all items owned by a specific user
-//  *     tags: [Items]
-//  *     parameters:
-//  *       - in: path
-//  *         name: owner_id
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *         description: ID of the owner whose items are being retrieved
-//  *     responses:
-//  *       200:
-//  *         description: List of items owned by the user
-//  *       404:
-//  *         description: Items not found
-//  */
-// itemRouter.get('/owner/:owner_id', getItemByOwner);
-
-// /**
-//  * @swagger
-//  * /api/item/{id}:
-//  *   get:
-//  *     summary: Retrieve a single item by ID
-//  *     tags: [Items]
-//  *     parameters:
-//  *       - in: path
-//  *         name: id
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *         description: ID of the item to retrieve
-//  *     responses:
-//  *       200:
-//  *         description: Item retrieved successfully
-//  *       404:
-//  *         description: Item not found
-//  */
-// itemRouter.get('/:id', getItemById);
-
-// /**
-//  * @swagger
-//  * /api/item/{id}:
-//  *   put:
-//  *     summary: Update an existing rental item
-//  *     tags: [Items]
-//  *     parameters:
-//  *       - in: path
-//  *         name: id
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *         description: ID of the item to update
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             properties:
-//  *               item_name:
-//  *                 type: string
-//  *                 description: Name of the item
-//  *               category:
-//  *                 type: string
-//  *                 description: Category of the item
-//  *               rental_price:
-//  *                 type: number
-//  *                 description: Price to rent the item
-//  *               location:
-//  *                 type: string
-//  *                 description: Location where the item is available
-//  *     responses:
-//  *       200:
-//  *         description: Item updated successfully
-//  *       400:
-//  *         description: Bad request, validation error
-//  *       404:
-//  *         description: Item not found
-//  */
-// itemRouter.put('/:id', updateItem);
-
-// /**
-//  * @swagger
-//  * /api/item/{id}:
-//  *   delete:
-//  *     summary: Delete an item by ID
-//  *     tags: [Items]
-//  *     parameters:
-//  *       - in: path
-//  *         name: id
-//  *         required: true
-//  *         schema:
-//  *           type: integer
-//  *         description: ID of the item to delete
-//  *     responses:
-//  *       200:
-//  *         description: Item deleted successfully
-//  *       404:
-//  *         description: Item not found
-//  */
-// itemRouter.delete('/:id', deleteItem);
-
-// module.exports = itemRouter;
-
-
 const express = require('express');
 const {
     createItem,
@@ -206,10 +6,62 @@ const {
     getItemByOwner,
     updateItem,
     deleteItem,
+    updateItemStatus,
     getItemOwnerPhoneNumber
 } = require('../controllers/itemController');
 
 const itemRouter = express.Router();
+
+/**
+ * @swagger
+ * /api/item/updateStatus:
+ *   put:
+ *     summary: Update the availability status of an item
+ *     tags: [Items]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               itemId:
+ *                 type: integer
+ *                 description: The ID of the item to be updated.
+ *                 example: 3
+ *               is_available:
+ *                 type: boolean
+ *                 description: The new availability status of the item (true for available, false for inactive).
+ *                 example: false
+ *             required:
+ *               - itemId
+ *               - is_available
+ *     responses:
+ *       "200":
+ *         description: Successfully updated item status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     is_available:
+ *                       type: boolean
+ *       "400":
+ *         description: Bad request, missing item ID or status
+ *       "404":
+ *         description: Item not found
+ *       "500":
+ *         description: Internal server error
+ */
+itemRouter.put('/updateStatus', updateItemStatus);
+
 
 /**
  * @swagger
@@ -370,7 +222,6 @@ itemRouter.delete('/:id', deleteItem);
  *         description: Internal server error
  */
 itemRouter.post("/getItemOwnerPhone", getItemOwnerPhoneNumber);
-
 
 
 module.exports = itemRouter;
