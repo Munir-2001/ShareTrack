@@ -12,7 +12,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ItemScreen from './Items';
 import AddItemScreen from './AddItem';
 import ItemDetailScreen from './ItemDetailScreen';
-
+import RentalItemScreen from './RentalItemScreen';
+import RentalOffersScreen from './RentalOfferScreens';
 const Stack = createNativeStackNavigator();
 
 export default function RentingModule() {
@@ -31,6 +32,15 @@ export default function RentingModule() {
                 <Stack.Screen name="ITEMDETAIL">
                     {(props) => <ItemDetailScreen {...props} />}
                 </Stack.Screen>
+                <Stack.Screen name="RENTALITEMDETAILS">
+                    {(props) => <RentalItemScreen {...props} />}
+                </Stack.Screen>
+                <Stack.Screen name="RENTALOFFERS">
+                    {(props) => <RentalOffersScreen {...props} />}
+                </Stack.Screen>
+
+
+                
 
             </Stack.Navigator>
         </>

@@ -25,16 +25,16 @@ export default function ItemScreen({ navigation }: any) {
 
   const [showAll, setShowAll] = useState(true);
   const [showRentals, setShowRentals] = useState(false); // ✅ Manage rentals tab visibility
-const [rentalItems, setRentalItems] = useState<any[]>([]); // ✅ Store rental items data
+  const [rentalItems, setRentalItems] = useState<any[]>([]); // ✅ Store rental items data
   const [data, setData] = useState<any[]>([]); // ✅ Ensure data is an array of objects
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-        dispatch(getAllItems()); // ✅ Refresh items list when returning to screen
-        dispatch(getUserItems(user.id));
+      dispatch(getAllItems()); // ✅ Refresh items list when returning to screen
+      dispatch(getUserItems(user.id));
     });
 
     return unsubscribe;
-}, [navigation]);
+  }, [navigation]);
 
 
   const fetchOwnerPhoneNumber = async (itemName: string) => {
@@ -76,14 +76,14 @@ const [rentalItems, setRentalItems] = useState<any[]>([]); // ✅ Store rental i
     try {
       const response = await fetch(`${API_URL}/api/rental/rentals`);
       if (!response.ok) throw new Error("Failed to fetch rental items");
-  
+
       const data = await response.json();
       setRentalItems(data); // ✅ Update rental items state
     } catch (error) {
       console.error("❌ Error fetching rental items:", error);
     }
   };
-  
+
   // ✅ Fetch rentals when Rentals tab is active
   useEffect(() => {
     if (showRentals) {
@@ -93,7 +93,7 @@ const [rentalItems, setRentalItems] = useState<any[]>([]); // ✅ Store rental i
       setRentalItems([]); // ✅ Clear rental items when switching tabs
     }
   }, [showRentals]);
-  
+
 
   useEffect(() => {
     if (showAll) {
@@ -129,40 +129,40 @@ const [rentalItems, setRentalItems] = useState<any[]>([]); // ✅ Store rental i
         </TouchableOpacity>
       </View> */}
 
-<View style={styles.toggleButtonsContainer}>
-  <TouchableOpacity
-    style={[styles.toggleButton, showAll && styles.activeButton]}
-    onPress={() => {
-      setShowAll(true);
-      setShowRentals(false);
-    }}>
-    <Text style={showAll ? styles.activeButtonText : styles.toggleButtonText}>
-      📦 Show All Items
-    </Text>
-  </TouchableOpacity>
+      <View style={styles.toggleButtonsContainer}>
+        <TouchableOpacity
+          style={[styles.toggleButton, showAll && styles.activeButton]}
+          onPress={() => {
+            setShowAll(true);
+            setShowRentals(false);
+          }}>
+          <Text style={showAll ? styles.activeButtonText : styles.toggleButtonText}>
+            📦 Show All Items
+          </Text>
+        </TouchableOpacity>
 
-  <TouchableOpacity
-    style={[styles.toggleButton, !showAll && !showRentals && styles.activeButton]}
-    onPress={() => {
-      setShowAll(false);
-      setShowRentals(false);
-    }}>
-    <Text style={!showAll && !showRentals ? styles.activeButtonText : styles.toggleButtonText}>
-      🏠 Show My Items
-    </Text>
-  </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toggleButton, !showAll && !showRentals && styles.activeButton]}
+          onPress={() => {
+            setShowAll(false);
+            setShowRentals(false);
+          }}>
+          <Text style={!showAll && !showRentals ? styles.activeButtonText : styles.toggleButtonText}>
+            🏠 Show My Items
+          </Text>
+        </TouchableOpacity>
 
-  <TouchableOpacity
-    style={[styles.toggleButton, showRentals && styles.activeButton]}
-    onPress={() => {
-      setShowAll(false);
-      setShowRentals(true);
-    }}>
-    <Text style={showRentals ? styles.activeButtonText : styles.toggleButtonText}>
-      🚀 Rentals
-    </Text>
-  </TouchableOpacity>
-</View>
+        <TouchableOpacity
+          style={[styles.toggleButton, showRentals && styles.activeButton]}
+          onPress={() => {
+            setShowAll(false);
+            setShowRentals(true);
+          }}>
+          <Text style={showRentals ? styles.activeButtonText : styles.toggleButtonText}>
+            🚀 Rentals
+          </Text>
+        </TouchableOpacity>
+      </View>
       {/* <ScrollView>
         <View style={styles.itemsRow}>
           {data.map((item, index) => (
@@ -196,54 +196,83 @@ const [rentalItems, setRentalItems] = useState<any[]>([]); // ✅ Store rental i
         </View>
       </ScrollView> */}
       <ScrollView>
-  <View style={styles.itemsRow}>
-    {showRentals
-      ? rentalItems.map((item, index) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() => navigation.navigate("ITEMDETAIL", { item })}
-            style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}>
-            <Image source={{ uri: "https://via.placeholder.com/150" }} style={styles.itemImage} />
-            <Text style={styles.itemName}>{item.item_name}</Text>
-            <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
-            <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
-            <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
-          </TouchableOpacity>
-        ))
-      : data.map((item, index) => (
-          <TouchableOpacity
-            key={item.id}
-            onPress={() => navigation.navigate("ITEMDETAIL", { item })}
-            style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}>
-            <Image source={{ uri: "https://via.placeholder.com/150" }} style={styles.itemImage} />
-            <Text style={styles.itemName}>{item.name}</Text>
-            <Text style={styles.itemPrice}>
-              💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
-            </Text>
-            <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
-            <Text style={styles.itemLocation}>📍 Location: {item.city}, {item.state}, {item.country}</Text>
+        <View style={styles.itemsRow}>
+          {showRentals
+            ? rentalItems.map((item, index) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => navigation.navigate("RENTALITEMDETAILS", { item })}
+                style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}>
+                <Image source={{ uri: "https://via.placeholder.com/150" }} style={styles.itemImage} />
+                <Text style={styles.itemName}>{item.item_name}</Text>
+                <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
+                <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
+                <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
+              </TouchableOpacity>
+            ))
+            : data.map((item, index) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => navigation.navigate("ITEMDETAIL", { item })}
+                style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}>
+                <Image source={{ uri: "https://via.placeholder.com/150" }} style={styles.itemImage} />
+                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemPrice}>
+                  💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
+                </Text>
+                <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
+                <Text style={styles.itemLocation}>📍 Location: {item.city}, {item.state}, {item.country}</Text>
 
+                <TouchableOpacity
+                  style={styles.whatsappButton}
+                  onPress={() => fetchOwnerPhoneNumber(item.name)}>
+                  <Text style={styles.whatsappText}>💬 Chat on WhatsApp</Text>
+                </TouchableOpacity>
+
+                <Text style={[styles.itemStatus, { color: item.is_available ? 'green' : 'red' }]}>
+                  {item.is_available ? '🟢 Active' : '🔴 Inactive'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+        </View>
+      </ScrollView>
+
+      {showRentals && (
+        <View style={styles.rentalManagementContainer}>
+          <Text style={styles.rentalManagementTitle}>Rental Management</Text>
+
+          <View style={styles.managementTiles}>
+            {/* Create Rental Item Button */}
             <TouchableOpacity
-              style={styles.whatsappButton}
-              onPress={() => fetchOwnerPhoneNumber(item.name)}>
-              <Text style={styles.whatsappText}>💬 Chat on WhatsApp</Text>
+              style={styles.managementTile}
+              onPress={() => navigation.navigate("CREATERENTALITEM")}
+            >
+              <Text style={styles.managementTileText}>Create Rental Item</Text>
             </TouchableOpacity>
 
-            <Text style={[styles.itemStatus, { color: item.is_available ? 'green' : 'red' }]}>
-              {item.is_available ? '🟢 Active' : '🔴 Inactive'}
-            </Text>
-          </TouchableOpacity>
-        ))}
-  </View>
-</ScrollView>
-
+            {/* Show Rental Offers Button */}
+            <TouchableOpacity
+              style={styles.managementTile}
+              onPress={() => navigation.navigate("RENTALOFFERS")}
+            >
+              <Text style={styles.managementTileText}> Show Rental Offers</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
 
       {/* Floating Add Button */}
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('ADDITEM')}>
-        <Text style={styles.fabText}>➕</Text>
-      </TouchableOpacity>
+      {!showRentals && (
+        <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('ADDITEM')}>
+          <Text style={styles.fabText}>➕</Text>
+        </TouchableOpacity>
+      )}
     </View>
+
+
+
+
   );
 }
 
@@ -273,6 +302,41 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     flexDirection: "row",
   },
+  rentalManagementContainer: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: "#F5F5F5",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  rentalManagementTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1E2A78",
+    marginBottom: 10,
+  },
+
+  managementTiles: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+
+  managementTile: {
+    flex: 1,
+    backgroundColor: "#1E2A78",
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+
+  managementTileText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   whatsappButtonText: {
     color: "#fff",
     fontSize: 16,
@@ -284,7 +348,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     textAlign: 'center',
   },
-  
+
   whatsappText: {
     color: "#fff",
     fontSize: 14,
