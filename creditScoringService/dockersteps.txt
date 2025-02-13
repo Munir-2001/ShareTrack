@@ -1,0 +1,5 @@
+docker build -t credit-scoring-service .
+
+docker run -d -p 8000:8000 --name credit-scoring-container credit-scoring-service
+
+docker ps

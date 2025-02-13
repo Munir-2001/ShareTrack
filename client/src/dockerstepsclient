@@ -1,0 +1,7 @@
+docker build -t client-service .
+docker run -d -p 8081:8081 --name client-container client-service
+docker logs -f client-container
+
+docker ps
+npx react-native run-android
+
