@@ -58,7 +58,8 @@ import {
     acceptRentalOffer,
     rejectRentalOffer,
     getOffersForItem,
-    getUserRentalOffers,
+    getUserRentalOffers,getUserRentalHistoryOffers
+    
 } from '../controllers/rentalController.js'
 
 const rentalRouter = express.Router();
@@ -210,6 +211,30 @@ rentalRouter.get("/offers/:item_id", getOffersForItem);
 
 rentalRouter.get("/offers/user/:user_id", getUserRentalOffers);
 // rentalRouter.get("/offers/:user_id", getUserRentalOffers);
+
+/**
+ * @swagger
+ * /api/rental/offers/history/user/{user_id}:
+ *   get:
+ *     summary: Get incoming & outgoing rental offers for a user
+ *     tags: [Rentals]
+ *     description: Fetch rental offers where the user is the **owner (incoming)** or **renter (outgoing)**.
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the user
+ *     responses:
+ *       200:
+ *         description: List of incoming & outgoing rental offers
+ *       500:
+ *         description: Internal server error
+ */
+
+rentalRouter.get("/offers/history/user/:user_id", getUserRentalHistoryOffers
+);
 
 // module.exports = rentalRouter;
 export default rentalRouter;

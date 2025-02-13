@@ -190,6 +190,10 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const gotoConnections = () => {
     navigation.navigate('CONNECTIONS');
   };
+  const gotoRentalOffersHistory = () => {
+    console.log('Navigating to RentalOffersHistory...');
+    navigation.navigate('RentalOffersHistory');
+  };
   const gotoTransactionHistory = () => {
     console.log('Navigating to TransactionHistoryScreen...');
     navigation.navigate('TransactionHistoryScreen');
@@ -348,10 +352,15 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
                 </TouchableOpacity>
               </View>
               <View style={styles.row}>
-                <TouchableOpacity style={styles.item}>
-                  <Icon name="analytics" size={24} color="#1E2A78" />
+                {/* <TouchableOpacity style={styles.item}>
+                  <Icon name="analytics" size={24} color="#1E2A78" onPress={gotoRentalOffersHistory} />
                   <Text style={styles.itemText}>Insights</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
+                <TouchableOpacity style={styles.item} onPress={() => navigation.navigate("RentalOfferHistory")}>
+  <Icon name="analytics" size={24} color="#1E2A78" />
+  <Text style={styles.itemText}>Rental Histories</Text>
+</TouchableOpacity>
+
                 <TouchableOpacity style={styles.item} onPress={gotoTransactionHistory}>
                   <Icon name="time" size={24} color="#1E2A78" />
                   <Text style={styles.itemText}>Transaction History</Text>

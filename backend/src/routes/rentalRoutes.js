@@ -59,6 +59,8 @@ import {
     rejectRentalOffer,
     getOffersForItem,
     getUserRentalOffers,
+    createRentalItem,
+    getUserRentalHistoryOffers
 } from '../controllers/rentalController.js'
 
 const rentalRouter = express.Router();
@@ -210,6 +212,96 @@ rentalRouter.get("/offers/:item_id", getOffersForItem);
 
 rentalRouter.get("/offers/user/:user_id", getUserRentalOffers);
 // rentalRouter.get("/offers/:user_id", getUserRentalOffers);
+
+
+/**
+ * @swagger
+ * /api/rental/createRentalItem:
+ *   post:
+ *     summary: Create a new rental item
+ *     description: Creates a new rental item in the database.
+ *     tags:
+ *       - Rentals
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               owner_id:
+ *                 type: integer
+ *                 description: ID of the user creating the rental item.
+ *               item_name:
+ *                 type: string
+ *                 description: Name of the rental item.
+ *               category:
+ *                 type: string
+ *                 description: Category of the rental item.
+ *               rental_price:
+ *                 type: number
+ *                 description: Price per day for renting the item.
+ *               location:
+ *                 type: string
+ *                 description: Location of the rental item.
+ *               status:
+ *                 type: string
+ *                 description: Status of the item, defaults to "available".
+ *     responses:
+ *       201:
+ *         description: Rental item created successfully
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Server error
+ */
+rentalRouter.post("/createRentalItem", createRentalItem);
+
+// /**
+//  * @swagger
+//  * /api/rental/history/user/{user_id}:
+//  *   get:
+//  *     summary: Get incoming & outgoing rental offers for a user
+//  *     tags: [Rentals]
+//  *     description: Fetch rental offers where the user is the **owner (incoming)** or **renter (outgoing)**.
+//  *     parameters:
+//  *       - in: path
+//  *         name: user_id
+//  *         required: true
+//  *         schema:
+//  *           type: integer
+//  *         description: ID of the user
+//  *     responses:
+//  *       200:
+//  *         description: List of incoming & outgoing rental offers
+//  *       500:
+//  *         description: Internal server error
+//  */
+// rentalRouter.get("/history/user/:user_id", getUserRentalHistoryOffers);
+
+
+/**
+ * @swagger
+ * /api/rental/history/user/{user_id}:
+ *   get:
+ *     summary: Get all accepted & rejected rental offers (incoming & outgoing) for a user
+ *     tags: [Rentals]
+ *     description: Fetch past rental offers where the user is the **owner (incoming)** or **renter (outgoing)**.
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the user
+ *     responses:
+ *       200:
+ *         description: List of accepted & rejected rental offers
+ *       500:
+ *         description: Internal server error
+ */
+rentalRouter.get("/history/user/:user_id", getUserRentalHistoryOffers);
+
 
 // module.exports = rentalRouter;
 export default rentalRouter;

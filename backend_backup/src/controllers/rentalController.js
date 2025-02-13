@@ -518,6 +518,144 @@ const getOffersForItem = async (req, res) => {
 };
 
 
+// const getUserRentalHistoryOffers = async (req, res) => {
+//     try {
+//         const { user_id } = req.params;
+
+//         // ✅ Get incoming offers (where user is the owner of the rental item & offer is pending)
+//         const { data: incoming, error: incomingError } = await supabase
+//             .from("rental_offers")
+//             .select(`
+//                 id, 
+//                 item_id, 
+//                 proposed_price, 
+//                 status, 
+//                 created_at, 
+//                 users!rental_offers_renter_id_fkey(username),
+//                 rental_items!inner(owner_id, item_name, rental_price)  
+//             `)
+//             .eq("rental_items.owner_id", user_id)
+//             .in("status",["accepted","rejected"])
+//             .order("created_at", { ascending: false });
+
+//         // ✅ Get outgoing offers (where user is the renter & offer is pending)
+//         const { data: outgoing, error: outgoingError } = await supabase
+//             .from("rental_offers")
+//             .select(`
+//                 id, 
+//                 item_id, 
+//                 proposed_price, 
+//                 status, 
+//                 created_at, 
+//                 rental_items!inner(item_name, rental_price, owner_id),
+//                 users!rental_offers_renter_id_fkey(username)  -- ✅ Get renter's name
+//             `)
+//             .eq("renter_id", user_id)
+//             .in("status",["accepted","rejected"])
+//             .order("created_at", { ascending: false });
+
+//         if (incomingError || outgoingError) {
+//             console.error("❌ Error fetching rental offers:", incomingError || outgoingError);
+//             return res.status(500).json({ message: "Error fetching offers" });
+//         }
+
+//         return res.status(200).json({ 
+//             incoming: incoming.map(offer => ({
+//                 id: offer.id,
+//                 item_id: offer.item_id,
+//                 item_name: offer.rental_items?.item_name,
+//                 rental_price: offer.rental_items?.rental_price,  // ✅ Include original price
+//                 proposed_price: offer.proposed_price,
+//                 status: offer.status,
+//                 renter_name: offer.users?.username || "Unknown User",  // ✅ Get renter name
+//                 created_at: offer.created_at
+//             })),
+//             outgoing: outgoing.map(offer => ({
+//                 id: offer.id,
+//                 item_id: offer.item_id,
+//                 item_name: offer.rental_items?.item_name,
+//                 rental_price: offer.rental_items?.rental_price,  // ✅ Include original price
+//                 proposed_price: offer.proposed_price,
+//                 status: offer.status,
+//                 renter_name: offer.users?.username || "Unknown User",  // ✅ Get renter's name (Corrected!)
+//                 created_at: offer.created_at
+//             }))
+//         });
+//     } catch (error) {
+//         console.error("❌ Internal Server Error:", error);
+//         return res.status(500).json({ message: "Internal server error" });
+//     }
+// };
+
+const getUserRentalHistoryOffers = async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        // ✅ Get incoming offers (User is the Owner)
+        const { data: incoming, error: incomingError } = await supabase
+            .from("rental_offers")
+            .select(`
+                id, 
+                item_id, 
+                proposed_price, 
+                status, 
+                created_at, 
+                renter_id, 
+                rental_items(id, owner_id, item_name),
+                users(username)  
+            `)
+            .eq("rental_items.owner_id", user_id)  // ✅ Corrected: Join with rental_items.owner_id
+            .in("status", ["accepted", "rejected"])
+            .order("created_at", { ascending: false });
+
+        // ✅ Get outgoing offers (User is the Renter)
+        const { data: outgoing, error: outgoingError } = await supabase
+            .from("rental_offers")
+            .select(`
+                id, 
+                item_id, 
+                proposed_price, 
+                status, 
+                created_at, 
+                rental_items(id, item_name, owner_id),
+                users(username)  
+            `)
+            .eq("renter_id", user_id)
+            .in("status", ["accepted", "rejected"])
+            .order("created_at", { ascending: false });
+
+        if (incomingError || outgoingError) {
+            console.error("❌ Error fetching rental offers:", incomingError || outgoingError);
+            return res.status(500).json({ message: "Error fetching offers" });
+        }
+
+        return res.status(200).json({
+            incoming: incoming.map(offer => ({
+                id: offer.id,
+                item_id: offer.item_id,
+                item_name: offer.rental_items?.item_name,
+                proposed_price: offer.proposed_price,
+                status: offer.status,
+                renter_name: offer.users?.username || "Unknown User",
+                created_at: offer.created_at,
+            })),
+            outgoing: outgoing.map(offer => ({
+                id: offer.id,
+                item_id: offer.item_id,
+                item_name: offer.rental_items?.item_name,
+                proposed_price: offer.proposed_price,
+                status: offer.status,
+                renter_name: "You",
+                owner_name: offer.users?.username || "Unknown Owner",
+                created_at: offer.created_at,
+            }))
+        });
+    } catch (error) {
+        console.error("❌ Internal Server Error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 
 // module.exports = { getRentalItems,getUserRentalOffers, submitRentalOffer, acceptRentalOffer, rejectRentalOffer, getOffersForItem };
-export { getRentalItems,getUserRentalOffers, submitRentalOffer, acceptRentalOffer, rejectRentalOffer, getOffersForItem };
+export { getRentalItems,getUserRentalOffers,getUserRentalHistoryOffers, submitRentalOffer, acceptRentalOffer, rejectRentalOffer, getOffersForItem };

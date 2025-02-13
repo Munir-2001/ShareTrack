@@ -18,7 +18,7 @@
     import TransactionHistoryScreen from './TransactionHistoryScreen';
     import AccountSettingsScreen from './AccountSettingsScreen';
     import UpcomingRepaymentsScreen from './UpcomingRepaymentsScreen'
-
+import RentalOffersHistory from './RentalOfferHistory';
 
     const Stack = createNativeStackNavigator();
 
@@ -53,9 +53,13 @@
                     <Stack.Screen name="UpcomingRepaymentsScreen" >
                     {(props) => <UpcomingRepaymentsScreen {...props} />}
 
+
                     </Stack.Screen>
-
-
+                  
+                    <Stack.Screen name="RentalOfferHistory">
+                        {(props) => <RentalOffersHistory {...props} />}
+                    </Stack.Screen>
+                    
                 </Stack.Navigator>
             </>
 
