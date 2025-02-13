@@ -16,6 +16,16 @@ import {
   getItemOwnerPhone
 } from '../../Redux/Actions/AuthActions/ItemAction';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
+const itemImages = [
+  require('../../Assets/1.jpg'),
+  require('../../Assets/2.jpg'),
+  require('../../Assets/3.jpg'),
+  require('../../Assets/4.jpg'),
+  require('../../Assets/5.jpg'),
+];
+
+// Function to Get a Random Image
+const getRandomImage = () => itemImages[Math.floor(Math.random() * itemImages.length)];
 
 export default function ItemScreen({ navigation }: any) {
   const dispatch = useAppDispatch();
@@ -163,39 +173,8 @@ export default function ItemScreen({ navigation }: any) {
           </Text>
         </TouchableOpacity>
       </View>
+
       {/* <ScrollView>
-        <View style={styles.itemsRow}>
-          {data.map((item, index) => (
-            <View key={item.id} style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}>
-              <Image source={{ uri: "https://via.placeholder.com/150" }} style={styles.itemImage} />
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemPrice}>
-                💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
-              </Text>
-              <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
-              <Text style={styles.itemLocation}>📍 Location: {item.city}, {item.state}, {item.country}</Text>
-
-              <TouchableOpacity
-                style={styles.whatsappButton}
-                onPress={() => fetchOwnerPhoneNumber(item.name)}>
-                <Text style={styles.whatsappText}>💬 Chat on WhatsApp</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => navigation.navigate('ITEMDETAIL', { item })}
-                style={styles.itemCard}
-              >
-                <Text style={[styles.itemStatus, { color: item.is_available ? 'green' : 'red' }]}>
-                  {item.is_available ? '🟢 Active' : '🔴 Inactive'}
-                </Text>
-              </TouchableOpacity>
-
-            </View>
-          ))}
-
-        </View>
-      </ScrollView> */}
-      <ScrollView>
         <View style={styles.itemsRow}>
           {showRentals
             ? rentalItems.map((item, index) => (
@@ -235,7 +214,53 @@ export default function ItemScreen({ navigation }: any) {
               </TouchableOpacity>
             ))}
         </View>
+      </ScrollView> */}
+      <ScrollView>
+        <View style={styles.itemsRow}>
+          {showRentals
+            ? rentalItems.map((item, index) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => navigation.navigate("RENTALITEMDETAILS", { item })}
+                style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}
+              >
+                <Image source={getRandomImage()} style={styles.itemImage} />
+                <Text style={styles.itemName}>{item.item_name}</Text>
+                <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
+                <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
+                <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
+              </TouchableOpacity>
+            ))
+            : data.map((item, index) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => navigation.navigate("ITEMDETAIL", { item })}
+                style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}
+              >
+                <Image source={getRandomImage()} style={styles.itemImage} />
+                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemPrice}>
+                  💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
+                </Text>
+                <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
+                <Text style={styles.itemLocation}>📍 Location: {item.city}, {item.state}, {item.country}</Text>
+
+                <TouchableOpacity
+                  style={styles.whatsappButton}
+                  onPress={() => fetchOwnerPhoneNumber(item.name)}
+                >
+                  <Text style={styles.whatsappText}>💬 Chat on WhatsApp</Text>
+                </TouchableOpacity>
+
+                <Text style={[styles.itemStatus, { color: item.is_available ? 'green' : 'red' }]}>
+                  {item.is_available ? '🟢 Active' : '🔴 Inactive'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+        </View>
       </ScrollView>
+
+
 
       {showRentals && (
         <View style={styles.rentalManagementContainer}>
