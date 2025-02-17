@@ -128,5 +128,61 @@ const resolveReport = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-export {resolveReport,getReportedUsers,updateUserStatus,getAllUsers}
+export const admingetPendingRentals = async (req, res) => {
+    try {
+      const { data, error } = await supabase
+        .from("rental_items")
+        .select("*")
+        .eq("status", "under_review"); // ✅ Fetch only items under review
+  
+      if (error) throw error;
+  
+      res.status(200).json(data);
+    } catch (error) {
+      console.error("Error fetching pending rentals:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+  
+  export const adminapproveRental = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      const { error } = await supabase
+        .from("rental_items")
+        .update({ status: "approved", rejection_reason: null }) // ✅ Clear rejection reason
+        .eq("id", id);
+  
+      if (error) throw error;
+  
+      res.status(200).json({ message: "Rental item approved successfully" });
+    } catch (error) {
+      console.error("Error approving rental:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+  export const adminrejectRental = async (req, res) => {
+    const { id } = req.params;
+    const { reason } = req.body;
+  
+    if (!reason) {
+      return res.status(400).json({ error: "Rejection reason is required" });
+    }
+  
+    try {
+      const { error } = await supabase
+        .from("rental_items")
+        .update({ status: "rejected", rejection_reason: reason }) // ✅ Store rejection reason
+        .eq("id", id);
+  
+      if (error) throw error;
+  
+      res.status(200).json({ message: "Rental item rejected successfully" });
+    } catch (error) {
+      console.error("Error rejecting rental:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
+  
+  
+export {resolveReport,getReportedUsers,updateUserStatus,getAllUsers,admingetPendingRentals,adminapproveRental,adminrejectRental}

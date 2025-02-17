@@ -459,7 +459,7 @@ const getOffersForItem = async (req, res) => {
         return res.status(400).json({ error: "All fields are required." });
       }
   
-      const status = "available"; // Default status for new items
+      const status = "under_review"; // Default status for new items
   
       // Insert data into Supabase
       const { data, error } = await supabase
