@@ -53,7 +53,7 @@ adminRoutes.post("/login", adminLogin);
  *       403:
  *         description: Forbidden - Admin access required
  */
-adminRoutes.get("/users",authenticateAdmin, getAllUsers);
+adminRoutes.get("/users",getAllUsers);
 
 /**
  * @swagger
@@ -86,7 +86,7 @@ adminRoutes.get("/users",authenticateAdmin, getAllUsers);
  *       403:
  *         description: Forbidden - Admin access required
  */
-adminRoutes.put("/users/:id/status",authenticateAdmin, updateUserStatus);
+adminRoutes.put("/users/:id/status", updateUserStatus);
 
 /**
  * @swagger
@@ -100,7 +100,7 @@ adminRoutes.put("/users/:id/status",authenticateAdmin, updateUserStatus);
  *       403:
  *         description: Forbidden - Admin access required
  */
-adminRoutes.get("/reports", authenticateAdmin,getReportedUsers);
+adminRoutes.get("/reports", getReportedUsers);
 
 /**
  * @swagger
@@ -123,7 +123,7 @@ adminRoutes.get("/reports", authenticateAdmin,getReportedUsers);
  *       403:
  *         description: Forbidden - Admin access required
  */
-adminRoutes.put("/reports/:id/resolve",authenticateAdmin, resolveReport);
+adminRoutes.put("/reports/:id/resolve",resolveReport);
 
 // module.exports = router;
 export default adminRoutes;

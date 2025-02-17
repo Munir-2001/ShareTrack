@@ -54,7 +54,18 @@ export const adminLogin = async (email: string, password: string) => {
   }
 };
 
-export async function fetchUsers() {
+// export async function fetchUsers() {
+//   try {
+//     const response = await fetch(`${API_URL}/users`);
+//     if (!response.ok) throw new Error("Failed to fetch users");
+
+//     return response.json();
+//   } catch (error) {
+//     console.error("Error fetching users:", error);
+//     return null;
+//   }
+// }
+export const fetchUsers = async () => {
   try {
     const response = await fetch(`${API_URL}/users`);
     if (!response.ok) throw new Error("Failed to fetch users");
@@ -64,7 +75,7 @@ export async function fetchUsers() {
     console.error("Error fetching users:", error);
     return null;
   }
-}
+};
 
 export async function updateUserStatus(userId: string, isActive: boolean) {
   try {
