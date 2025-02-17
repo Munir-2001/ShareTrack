@@ -34,19 +34,25 @@
 
 
 import express from "express";
+import cors from "cors"
 import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
 import relationshipRoutes from "./routes/relationshipRoutes.js";
 import loanRoutes from "./routes/loanRoutes.js";
 import rentalRouter from "./routes/rentalRoutes.js";
 import itemRoutes from "./routes/itemRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js"
 import { swaggerUiMiddleware, swaggerUiHandler } from "./swagger.js"; // ✅ Ensure .js extension
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-
+app.use(cors({
+  origin: "*", // Allow all origins (you can restrict it to Next.js domain later)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 // Middleware
 app.use(express.json());
 
@@ -56,6 +62,7 @@ app.use("/api/item", itemRoutes);
 app.use("/api/relationship", relationshipRoutes);
 app.use("/api/loans", loanRoutes);
 app.use("/api/rental", rentalRouter);
+app.use("/api/admin",adminRoutes);
 
 // Swagger Documentation
 app.use("/api-docs", swaggerUiMiddleware, swaggerUiHandler);
