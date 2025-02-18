@@ -128,7 +128,7 @@ const resolveReport = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-export const admingetPendingRentals = async (req, res) => {
+ const admingetPendingRentals = async (req, res) => {
     try {
       const { data, error } = await supabase
         .from("rental_items")
@@ -144,7 +144,7 @@ export const admingetPendingRentals = async (req, res) => {
     }
   };
   
-  export const adminapproveRental = async (req, res) => {
+   const adminapproveRental = async (req, res) => {
     const { id } = req.params;
   
     try {
@@ -161,7 +161,7 @@ export const admingetPendingRentals = async (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
-  export const adminrejectRental = async (req, res) => {
+   const adminrejectRental = async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
   
