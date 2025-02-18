@@ -1,146 +1,4 @@
-// const { supabase } = require("../config/db");
-
 import {supabase} from '../config/db.js'
-
-// // ✅ Get all rental items
-// const getRentalItems = async (req, res) => {
-//     try {
-//         const { data, error } = await supabase.from("rental_items").select("*");
-
-//         if (error) {
-//             console.error("❌ Supabase Error:", error);
-//             return res.status(500).json({ message: "Database error while fetching rental items." });
-//         }
-
-//         return res.status(200).json(data);
-//     } catch (error) {
-//         console.error("❌ Error fetching rental items:", error);
-//         return res.status(500).json({ message: "Internal server error" });
-//     }
-// };
-
-// // ✅ Submit a rental offer
-// const submitRentalOffer = async (req, res) => {
-//     try {
-//         const { item_id, renter_id, proposed_price } = req.body;
-
-//         if (!item_id || !renter_id || !proposed_price) {
-//             return res.status(400).json({ message: "All fields are required" });
-//         }
-
-//         const { data, error } = await supabase
-//             .from("rental_offers")
-//             .insert([{ item_id, renter_id, proposed_price, status: "pending" }])
-//             .select();
-
-//         if (error) {
-//             console.error("❌ Error submitting rental offer:", error);
-//             return res.status(500).json({ message: "Database error while submitting rental offer." });
-//         }
-
-//         return res.status(201).json({ message: "Rental offer submitted!", data });
-//     } catch (error) {
-//         console.error("❌ Internal Server Error:", error);
-//         return res.status(500).json({ message: "Internal server error" });
-//     }
-// };
-
-// // ✅ Accept a rental offer
-// const acceptRentalOffer = async (req, res) => {
-//     try {
-//         const { offer_id, rental_start, rental_end } = req.body;
-
-//         if (!offer_id || !rental_start || !rental_end) {
-//             return res.status(400).json({ message: "All fields are required" });
-//         }
-
-//         const { data: offer, error: offerError } = await supabase
-//             .from("rental_offers")
-//             .select("*")
-//             .eq("id", offer_id)
-//             .single();
-
-//         if (offerError || !offer) {
-//             return res.status(404).json({ message: "Offer not found." });
-//         }
-
-//         const { data: rentalData, error: rentalError } = await supabase
-//             .from("rental_histories")
-//             .insert([
-//                 {
-//                     item_id: offer.item_id,
-//                     renter_id: offer.renter_id,
-//                     rental_start,
-//                     rental_end,
-//                     total_amount_paid: offer.proposed_price,
-//                     payment_status: "pending",
-//                     offer_id: offer.id
-//                 }
-//             ])
-//             .select();
-
-//         if (rentalError) {
-//             return res.status(500).json({ message: "Database error while approving rental." });
-//         }
-
-//         await supabase
-//             .from("rental_offers")
-//             .update({ status: "accepted" })
-//             .eq("id", offer_id);
-
-//         return res.status(200).json({ message: "Offer accepted!", rentalData });
-//     } catch (error) {
-//         console.error("❌ Internal Server Error:", error);
-//         return res.status(500).json({ message: "Internal server error" });
-//     }
-// };
-
-// // ✅ Reject a rental offer
-// const rejectRentalOffer = async (req, res) => {
-//     try {
-//         const { offer_id } = req.body;
-
-//         if (!offer_id) {
-//             return res.status(400).json({ message: "Offer ID is required" });
-//         }
-
-//         const { data, error } = await supabase
-//             .from("rental_offers")
-//             .update({ status: "rejected" })
-//             .eq("id", offer_id);
-
-//         if (error) {
-//             console.error("❌ Error rejecting rental offer:", error);
-//             return res.status(500).json({ message: "Database error while rejecting rental offer." });
-//         }
-
-//         return res.status(200).json({ message: "Offer rejected!", data });
-//     } catch (error) {
-//         console.error("❌ Internal Server Error:", error);
-//         return res.status(500).json({ message: "Internal server error" });
-//     }
-// };
-
-// // ✅ Get all offers for a rental item
-// const getOffersForItem = async (req, res) => {
-//     try {
-//         const { item_id } = req.params;
-
-//         const { data, error } = await supabase
-//             .from("rental_offers")
-//             .select("*")
-//             .eq("item_id", item_id);
-
-//         if (error) {
-//             return res.status(500).json({ message: "Database error fetching offers." });
-//         }
-
-//         return res.status(200).json(data);
-//     } catch (error) {
-//         return res.status(500).json({ message: "Internal server error" });
-//     }
-// };
-
 
 const getRentalItems = async (req, res) => {
     try {
@@ -555,6 +413,34 @@ const getOffersForItem = async (req, res) => {
 //   }
 // };
 
+export const getUserRentalItems = async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        if (!user_id) {
+            return res.status(400).json({ message: "User ID is required." });
+        }
+
+        // ✅ Fetch all rental items created by this user
+        const { data, error } = await supabase
+            .from("rental_items")
+            .select("*")
+            .eq("owner_id", user_id)
+            .order("created_at", { ascending: false });
+
+        if (error) {
+            console.error("❌ Supabase Error:", error);
+            return res.status(500).json({ message: "Database error while fetching rental items." });
+        }
+
+        return res.status(200).json(data);
+    } catch (error) {
+        console.error("❌ Internal Server Error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+// ✅ Export the function
 
 const getUserRentalHistoryOffers = async (req, res) => {
     try {

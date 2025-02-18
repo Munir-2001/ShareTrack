@@ -174,9 +174,9 @@ const adminapproveRental = async (req, res) => {
     try {
       const { error } = await supabase
         .from("rental_items")
-        .update({ status: "approved", rejection_reason: null }) // ✅ Clear rejection reason
+        .update({ status: "available", rejection_reason: null }) 
         .eq("id", id);
-  
+  //status set as available so we can continue flow. no need for approved.
       if (error) throw error;
   
       res.status(200).json({ message: "Rental item approved successfully" });

@@ -60,7 +60,8 @@ import {
     getOffersForItem,
     getUserRentalOffers,
     createRentalItem,
-    getUserRentalHistoryOffers
+    getUserRentalHistoryOffers,
+    getUserRentalItems
 } from '../controllers/rentalController.js'
 
 const rentalRouter = express.Router();
@@ -80,6 +81,29 @@ const rentalRouter = express.Router();
  */
 rentalRouter.get("/rentals", getRentalItems);
 
+/**
+ * @swagger
+ * /api/rental/user/{user_id}:
+ *   get:
+ *     summary: Get rental items submitted by a user
+ *     tags: [Rentals]
+ *     description: Fetch all rental items created by a specific user.
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the user who submitted the rentals
+ *     responses:
+ *       200:
+ *         description: List of rental items
+ *       400:
+ *         description: Missing user ID
+ *       500:
+ *         description: Internal server error
+ */
+rentalRouter.get("/user/:user_id", getUserRentalItems);
 /**
  * @swagger
  * /api/rental/offer:

@@ -173,48 +173,6 @@ export default function ItemScreen({ navigation }: any) {
           </Text>
         </TouchableOpacity>
       </View>
-
-      {/* <ScrollView>
-        <View style={styles.itemsRow}>
-          {showRentals
-            ? rentalItems.map((item, index) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => navigation.navigate("RENTALITEMDETAILS", { item })}
-                style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}>
-                <Image source={{ uri: "https://via.placeholder.com/150" }} style={styles.itemImage} />
-                <Text style={styles.itemName}>{item.item_name}</Text>
-                <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
-                <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
-                <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
-              </TouchableOpacity>
-            ))
-            : data.map((item, index) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => navigation.navigate("ITEMDETAIL", { item })}
-                style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}>
-                <Image source={{ uri: "https://via.placeholder.com/150" }} style={styles.itemImage} />
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemPrice}>
-                  💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
-                </Text>
-                <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
-                <Text style={styles.itemLocation}>📍 Location: {item.city}, {item.state}, {item.country}</Text>
-
-                <TouchableOpacity
-                  style={styles.whatsappButton}
-                  onPress={() => fetchOwnerPhoneNumber(item.name)}>
-                  <Text style={styles.whatsappText}>💬 Chat on WhatsApp</Text>
-                </TouchableOpacity>
-
-                <Text style={[styles.itemStatus, { color: item.is_available ? 'green' : 'red' }]}>
-                  {item.is_available ? '🟢 Active' : '🔴 Inactive'}
-                </Text>
-              </TouchableOpacity>
-            ))}
-        </View>
-      </ScrollView> */}
       <ScrollView>
         <View style={styles.itemsRow}>
           {showRentals
@@ -272,7 +230,8 @@ export default function ItemScreen({ navigation }: any) {
               style={styles.managementTile}
               onPress={() => navigation.navigate("CREATERENTALITEM")}
             >
-              <Text style={styles.managementTileText}>➕</Text>
+              <Text style={styles.managementTileText}>
+                ➕</Text>
             </TouchableOpacity>
 
             {/* Show Rental Offers Button */}
@@ -282,6 +241,15 @@ export default function ItemScreen({ navigation }: any) {
             >
               <Text style={styles.managementTileText}> Show Rental Offers</Text>
             </TouchableOpacity>
+            
+
+            <TouchableOpacity
+              style={styles.managementTile}
+              onPress={() => navigation.navigate("RentalStatus")}
+            >
+              <Text style={styles.managementTileText}>Rental Status</Text>
+            </TouchableOpacity>
+
           </View>
         </View>
       )}

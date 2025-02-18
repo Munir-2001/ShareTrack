@@ -15,6 +15,9 @@ import ItemDetailScreen from './ItemDetailScreen';
 import RentalItemScreen from './RentalItemScreen';
 import RentalOffersScreen from './RentalOfferScreens';
 import CreateRentalItem from '../Profile/CreateRentalItem';
+import RentalStatus from '../Profile/RentalStatus';
+
+
 const Stack = createNativeStackNavigator();
 
 export default function RentingModule() {
@@ -40,9 +43,13 @@ export default function RentingModule() {
                     {(props) => <RentalOffersScreen {...props} />}
                 </Stack.Screen>
 
+                <Stack.Screen name="RentalStatus">
+                    {(props) => <RentalStatus {...props} />}
+                </Stack.Screen>
+
                 <Stack.Screen name="CREATERENTALITEM" component={CreateRentalItem} />
 
-                
+
 
             </Stack.Navigator>
         </>
