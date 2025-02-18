@@ -272,7 +272,7 @@ export default function ItemScreen({ navigation }: any) {
               style={styles.managementTile}
               onPress={() => navigation.navigate("CREATERENTALITEM")}
             >
-              <Text style={styles.managementTileText}>Create Rental Item</Text>
+              <Text style={styles.managementTileText}>➕</Text>
             </TouchableOpacity>
 
             {/* Show Rental Offers Button */}

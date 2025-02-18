@@ -216,6 +216,7 @@ import {
   admingetPendingRentals,
   adminapproveRental,
   adminrejectRental,
+  adminLogin
 } from "../controllers/adminController.js";
 
 /**
@@ -238,7 +239,36 @@ import {
  *         description: Forbidden - Admin access required
  */
 adminRoutes.get("/users", getAllUsers);
-
+/**
+ * @swagger
+ * /api/admin/login:
+ *   post:
+ *     summary: Admin login
+ *     tags: [Admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Admin email
+ *                  value:admin@gmail.com
+ *               password:
+ *                 type: string
+ *                 description: Admin password
+ *                  value:9
+ *     responses:
+ *       200:
+ *         description: Admin logged in successfully
+ *       401:
+ *         description: Invalid credentials
+ *       403:
+ *         description: User is not an admin
+ */
+adminRoutes.post("/login", adminLogin);
 /**
  * @swagger
  * /api/admin/users/{id}/status:

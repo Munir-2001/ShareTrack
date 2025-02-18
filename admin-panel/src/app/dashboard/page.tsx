@@ -150,7 +150,14 @@ export default function DashboardPage() {
         >
           View User Management
         </button>
-        </div>
+        <button
+          onClick={() => router.push("/rentals")}
+          className="w-full bg-orange-600 text-white py-3 mt-5 rounded-lg font-semibold hover:bg-orange-700 transition-all duration-300"
+        >
+          View Rental Requests
+        </button>
+
+      </div>
 
       {/* User Management Table */}
       {showUsers && (
@@ -180,9 +187,8 @@ export default function DashboardPage() {
                   <td className="p-2">
                     <button
                       onClick={() => toggleUserStatus(user.id, user.is_active)}
-                      className={`px-3 py-1 rounded text-white font-medium ${
-                        user.is_active ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
-                      }`}
+                      className={`px-3 py-1 rounded text-white font-medium ${user.is_active ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
+                        }`}
                     >
                       {user.is_active ? "Deactivate" : "Activate"}
                     </button>

@@ -128,23 +128,47 @@ const resolveReport = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
- const admingetPendingRentals = async (req, res) => {
-    try {
-      const { data, error } = await supabase
-        .from("rental_items")
-        .select("*")
-        .eq("status", "under_review"); // ✅ Fetch only items under review
+//  const admingetPendingRentals = async (req, res) => {
+//     try {
+//       const { data, error } = await supabase
+//         .from("rental_items")
+//         .select("*")
+//         .eq("status", "under_review"); // ✅ Fetch only items under review
   
-      if (error) throw error;
+//       if (error) throw error;
   
-      res.status(200).json(data);
-    } catch (error) {
-      console.error("Error fetching pending rentals:", error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  };
+//       res.status(200).json(data);
+//     } catch (error) {
+//       console.error("Error fetching pending rentals:", error);
+//       res.status(500).json({ error: "Internal Server Error" });
+//     }
+//   };
   
-   const adminapproveRental = async (req, res) => {
+
+const admingetPendingRentals = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("rental_items")
+      .select("*, users:owner_id(username, email)") // ✅ Fetch owner details
+      .eq("status", "under_review");
+
+    if (error) throw error;
+
+    // ✅ Remove `users` object, but keep extracted owner details
+    const formattedData = data.map(({ users, ...rental }) => ({
+      ...rental, // ✅ Keep all existing fields
+      owner_name: users?.username || "Unknown", // ✅ Extracted owner's username
+      owner_email: users?.email || "Unknown",   // ✅ Extracted owner's email
+    }));
+
+    res.status(200).json(formattedData);
+  } catch (error) {
+    console.error("Error fetching pending rentals:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const adminapproveRental = async (req, res) => {
     const { id } = req.params;
   
     try {
