@@ -1,0 +1,186 @@
+Check all client credentials
+
+curl -X GET "https://gateway.nium.com/api/v1/client/4f65e729-869a-4a62-a12e-032abfccd401" \
+     -H "X-Api-Key: WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj"
+
+
+Create a customer (US onboarding with the KYC)
+curl -X POST "https://gateway.nium.com/api/v4/client/4f65e729-869a-4a62-a12e-032abfccd401/customer" \
+     -H "Content-Type: application/json" \
+     -H "X-Api-Key: WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj" \
+     -d '{
+          "billingAddress1": "Allama Iqbal Road, PECHS Block 6",
+          "billingCity": "Karachi",
+          "billingCountry": "PK",
+          "billingState": "SD",
+          "billingZipCode": "74600",
+          "correspondenceAddress1": "KDA Scheme 1, Main Tipu Sultan Road",
+          "correspondenceCity": "Karachi",
+          "correspondenceCountry": "PK",
+          "correspondenceState": "SD",
+          "correspondenceZipCode": "75290",
+          "countryCode": "US",
+          "dateOfBirth": "1997-05-18",
+          "deliveryAddress1": "North Nazimabad Block H, Main Road",
+          "deliveryCity": "Karachi",
+          "deliveryCountry": "PK",
+          "deliveryState": "SD",
+          "deliveryZipCode": "74600",
+          "email": "taimoor.shuja132@gmail.com",
+          "firstName": "Taimoor",
+          "gender": "Male",
+          "kycMode": "E_KYC",
+          "lastName": "Shuja",
+          "mobile": "03011234567",
+          "nationality": "PK",
+          "preferredName": "Taimoor",
+          "verificationConsent": true,
+          "identificationDoc": [
+            {
+              "identificationType": "National Id",
+              "identificationValue": "123456789"
+            }
+          ]
+      }'
+
+
+
+Get a customer details
+curl -X GET "https://gateway.nium.com/api/v2/client/4f65e729-869a-4a62-a12e-032abfccd401/customer/a4e6c28e-669a-4924-b949-aa3909d268e1" \
+     -H "X-Api-Key: WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj"
+
+
+Get a wallet details
+curl -X GET "https://gateway.nium.com/api/v1/client/6c5e82bc-821f-4b6b-a7ac-b022d7f93f1e/customer/d4cce85b-b28f-4653-9eac-26431d2e42d8/wallet/" \
+     -H "X-Api-Key: I22ak096JV5pNmLn89R9u4yPtNR9mIY4azjqNxx6"
+
+
+Transactions
+
+Generate a virtual account
+curl -X POST "https://gateway.nium.com/api/v1/client/4f65e729-869a-4a62-a12e-032abfccd401/customer/a4e6c28e-669a-4924-b949-aa3909d268e1/wallet/96b97851-d684-4164-b502-176bca39994c/paymentId" \
+     -H "Content-Type: application/json" \
+     -H "X-Api-Key: WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj" \
+     -d '{
+          "accountCategory": "SELF_FUNDING_ACCOUNT",
+          "bankName": "CFSB_US",
+          "currencyCode": "USD"
+      }'
+
+
+Fund a Customer wallet
+curl -X POST "https://gateway.nium.com/api/v1/inward/payment/manual" \
+     -H "Content-Type: application/json" \
+     -H "X-Api-Key: WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj" \
+     -d '{
+          "amount": 5000,
+          "currency": "USD",
+          "bankReferenceNumber": "4321",
+          "bankSource": "CFSB_US",
+          "country": "US",
+          "instructionType": "PROCESS",
+          "narrative": "",
+          "remitterAccountNumber": "",
+          "remitterBankName": "CFSB_US",
+          "remitterName": "Aman",
+          "remitterNameLocalLanguage": "",
+          "transactionId": "",
+          "transactionSource": "",
+          "type": "",
+          "virtualAccountNumber": "85081121173"
+      }'
+
+
+Get a Transaction Status
+
+curl -X GET "https://gateway.nium.com/api/v1/client/4f65e729-869a-4a62-a12e-032abfccd401/customer/446f425e-f205-4172-9c92-38e3057c6692/wallet/399200ed-cfec-418b-84fe-a68d0f891490/remittance/SYSTEM_REFERENCE_NUMBER/audit" \
+     -H "X-Api-Key: WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj"
+
+
+P2P transfer
+curl -X POST "https://gateway.nium.com/api/v1/client/4f65e729-869a-4a62-a12e-032abfccd401/customer/446f425e-f205-4172-9c92-38e3057c6692/wallet/399200ed-cfec-418b-84fe-a68d0f891490/transfers" \
+     -H "Content-Type: application/json" \
+     -H "X-Api-Key: WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj" \
+     -d '{
+          "tags": [
+            {
+              "key": "key_example",
+              "value": "value_example"
+            }
+          ],
+          "authenticationCode": "",
+          "customerComments": "Paid for lunch",
+          "destinationAmount": 300,
+          "destinationCurrencyCode": "USD",
+          "destinationWalletHashId": "96b97851-d684-4164-b502-176bca39994c",
+          "exemptionCode": "",
+          "purposeCode": "IR002",
+          "sourceAmount": "",
+          "sourceCurrencyCode": "USD"
+      }'
+
+
+Cerate a benificiary
+
+curl -X POST "https://gateway.nium.com/api/v1/client/4f65e729-869a-4a62-a12e-032abfccd401/customer/446f425e-f205-4172-9c92-38e3057c6692/beneficiaries" \
+     -H "Content-Type: application/json" \
+     -H "X-Api-Key: WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj" \
+     -d '{
+          "beneficiaryDetail": {
+            "name": "Taimoor Shuja",
+            "account_type": "Individual",
+            "address": "KDA Scheme 1, Main Tipu Sultan Road",
+            "country_code": "US",
+            "state": "SD",
+            "city": "Karachi",
+            "postcode": "74600",
+            "contact_country_code": "1",
+            "contact_number": ""
+          },
+          "payoutDetail": {
+            "country_code": "US",
+            "destination_currency": "USD",
+            "account_number": "85081121173",
+            "routing_code_type_1": "ACH CODE",
+            "routing_code_value_1": "111000025",
+            "payout_method": "LOCAL"
+          },
+          "authenticationCode": ""
+      }'
+
+Initiate a payout
+
+curl -X POST "https://gateway.nium.com/api/v1/client/4f65e729-869a-4a62-a12e-032abfccd401/customer/446f425e-f205-4172-9c92-38e3057c6692/wallet/399200ed-cfec-418b-84fe-a68d0f891490/remittance" \
+     -H "Content-Type: application/json" \
+     -H "X-Api-Key: I22ak096JV5pNmLn89R9u4yPtNR9mIY4azjqNxx6" \
+     -d '{
+          "beneficiary": {
+            "id": "67abc5ab82a3f61722f346fb"
+          },
+          "payout": {
+            "audit_id": "",
+            "destinationAmount": 0,
+            "preScreening": false,
+            "serviceTime": "2025-03-18",
+            "sourceAmount": 500,
+            "sourceCurrency": "USD",
+            "swiftFeeType": "OUR",
+            "tradeOrderID": "TR12345"
+          },
+          "customerComments": "Transfer to employee",
+          "purposeCode": "IR002",
+          "sourceOfFunds": "Salary",
+          "additionalFees": {
+            "feeType": "FIXED",
+            "feeValue": 2
+          },
+          "ownPayment": true,
+          "tags": [{
+            "key": "key",
+            "value": "value"
+          }],
+          "beneficiaryIntermediaryBankCode": "",
+          "externalId": "am103456"
+      }'
+
+
