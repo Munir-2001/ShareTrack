@@ -161,6 +161,14 @@ const blockRelationship = async (req, res) => {
     }
 };
 
+const API_KEY = "WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj"; // Hardcoded API key
+
+const clientHashId = "4f65e729-869a-4a62-a12e-032abfccd401";
+const customerHashId = "a4e6c28e-669a-4924-b949-aa3909d268e1"; // Customer
+const walletHashId = "96b97851-d684-4164-b502-176bca39994c"; // Customer Wallet
+const destinationWalletHashId = "7d963c76-5d49-4333-8211-ec8b3a3a2348"; // Receiver Wallet
+const destinationAmount = 5; // Example amount in USD
+
 const sendMoney = async (req, res) => {
     try {
         const { senderUsername, receiverUsername, amount } = req.body;
@@ -220,12 +228,62 @@ const sendMoney = async (req, res) => {
         ]);
 
         console.log("✅ Money sent successfully!");
-        res.status(200).json({ message: "Money sent successfully" });
+
+        // 🔥 Call P2P transfer after successful money transfer
+        const p2pResponse = await P2P(amount);
+
+        if (p2pResponse.success) {
+            console.log("✅ P2P Transfer Successful:", p2pResponse.data);
+            res.status(200).json({ message: "Money sent successfully and P2P transfer completed" });
+        } else {
+            console.error("❌ P2P Transfer Failed:", p2pResponse.error);
+            res.status(500).json({ message: "Money sent, but P2P transfer failed", error: p2pResponse.error });
+        }
     } catch (error) {
         console.error("❌ Error processing transaction:", error.message);
         res.status(500).json({ message: "Error processing request", error: error.message });
     }
 };
+
+async function P2P(destinationAmount) {
+    const url = `https://gateway.nium.com/api/v1/client/${clientHashId}/customer/${customerHashId}/wallet/${walletHashId}/transfers`;
+
+    const body = {
+        "tags": [{ "key": "key_example", "value": "value_example" }],
+        "authenticationCode": "",  
+        "customerComments": "Paid via P2P",
+        "destinationAmount": destinationAmount,
+        "destinationCurrencyCode": "USD",
+        "destinationWalletHashId": destinationWalletHashId,
+        "exemptionCode": "",
+        "purposeCode": "IR002",
+        "sourceAmount": "",
+        "sourceCurrencyCode": "USD"
+    };
+
+    const headers = {
+        "X-Api-Key": API_KEY,
+        "Content-Type": "application/json"
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            return { success: true, data };
+        } else {
+            return { success: false, error: data };
+        }
+    } catch (error) {
+        return { success: false, error };
+    }
+}
 
 
 
