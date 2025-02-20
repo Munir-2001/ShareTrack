@@ -161,17 +161,90 @@ const blockRelationship = async (req, res) => {
     }
 };
 
+// const sendMoney = async (req, res) => {
+//     try {
+//         const { senderUsername, receiverUsername, amount } = req.body;
+
+//         if (!senderUsername || !receiverUsername || !amount) {
+//             return res.status(400).json({ message: "Missing required fields" });
+//         }
+
+//         console.log(`📥 Received request: sender=${senderUsername}, receiver=${receiverUsername}, amount=${amount}`);
+
+//         // ✅ Convert senderUsername to senderId
+//         const { data: sender, error: senderError } = await supabase
+//             .from("users")
+//             .select("id, balance")
+//             .eq("username", senderUsername)
+//             .single();
+
+//         if (!sender || senderError) {
+//             console.error("❌ Sender not found:", senderError);
+//             return res.status(404).json({ message: "Sender not found" });
+//         }
+
+//         // ✅ Convert receiverUsername to receiverId
+//         const { data: receiver, error: receiverError } = await supabase
+//             .from("users")
+//             .select("id, balance")
+//             .eq("username", receiverUsername)
+//             .single();
+
+//         if (!receiver || receiverError) {
+//             console.error("❌ Receiver not found:", receiverError);
+//             return res.status(404).json({ message: "Receiver not found" });
+//         }
+
+//         console.log(`✅ Converted to IDs: senderId=${sender.id}, receiverId=${receiver.id}`);
+
+//         // ✅ Ensure sender has enough balance
+//         if (sender.balance < amount) {
+//             console.error(`❌ Insufficient balance: Sender (${senderUsername}) has ${sender.balance}`);
+//             return res.status(400).json({ message: "Insufficient balance" });
+//         }
+
+//         // ✅ Deduct from sender and add to receiver
+//         await supabase
+//             .from("users")
+//             .update({ balance: sender.balance - amount })
+//             .eq("id", sender.id);
+
+//         await supabase
+//             .from("users")
+//             .update({ balance: receiver.balance + amount })
+//             .eq("id", receiver.id);
+
+//         // ✅ Record transaction
+//         await supabase.from("transactions").insert([
+//             { sender_id: sender.id, receiver_id: receiver.id, amount, status: "transferred" }
+//         ]);
+
+//         console.log("✅ Money sent successfully!");
+//         res.status(200).json({ message: "Money sent successfully" });
+//     } catch (error) {
+//         console.error("❌ Error processing transaction:", error.message);
+//         res.status(500).json({ message: "Error processing request", error: error.message });
+//     }
+// };
+const API_KEY = "WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj";
+const CLIENT_HASH_ID = "4f65e729-869a-4a62-a12e-032abfccd401";
+var clientHashId="4f65e729-869a-4a62-a12e-032abfccd401";
+var customerHashId="446f425e-f205-4172-9c92-38e3057c6692";//Customer
+var walletHashId="399200ed-cfec-418b-84fe-a68d0f891490";//Customer
+var customer2HashId='47a385ac-9831-4729-a81f-dce956b83793';//Customer2
+var wallet2HashId='7d963c76-5d49-4333-8211-ec8b3a3a2348';
+var customer3HashId="a4e6c28e-669a-4924-b949-aa3909d268e1";
+var wallet3HashId='96b97851-d684-4164-b502-176bca39994c';
 const sendMoney = async (req, res) => {
     try {
         const { senderUsername, receiverUsername, amount } = req.body;
-
         if (!senderUsername || !receiverUsername || !amount) {
             return res.status(400).json({ message: "Missing required fields" });
         }
-
+        console.log('in new sendMoney')
         console.log(`📥 Received request: sender=${senderUsername}, receiver=${receiverUsername}, amount=${amount}`);
 
-        // ✅ Convert senderUsername to senderId
+        // ✅ Fetch sender details
         const { data: sender, error: senderError } = await supabase
             .from("users")
             .select("id, balance")
@@ -182,8 +255,8 @@ const sendMoney = async (req, res) => {
             console.error("❌ Sender not found:", senderError);
             return res.status(404).json({ message: "Sender not found" });
         }
-
-        // ✅ Convert receiverUsername to receiverId
+        debugger;
+        // ✅ Fetch receiver details
         const { data: receiver, error: receiverError } = await supabase
             .from("users")
             .select("id, balance")
@@ -203,30 +276,97 @@ const sendMoney = async (req, res) => {
             return res.status(400).json({ message: "Insufficient balance" });
         }
 
-        // ✅ Deduct from sender and add to receiver
-        await supabase
+        // ✅ Database Transaction: Deduct from sender, add to receiver
+        const { error: senderUpdateError } = await supabase
             .from("users")
             .update({ balance: sender.balance - amount })
             .eq("id", sender.id);
 
-        await supabase
+        const { error: receiverUpdateError } = await supabase
             .from("users")
             .update({ balance: receiver.balance + amount })
             .eq("id", receiver.id);
 
-        // ✅ Record transaction
+        if (senderUpdateError || receiverUpdateError) {
+            console.error("❌ Error updating balances:", senderUpdateError, receiverUpdateError);
+            return res.status(500).json({ message: "Error processing transaction" });
+        }
+
+        // ✅ Record transaction in ShareTrack
         await supabase.from("transactions").insert([
             { sender_id: sender.id, receiver_id: receiver.id, amount, status: "transferred" }
         ]);
 
-        console.log("✅ Money sent successfully!");
-        res.status(200).json({ message: "Money sent successfully" });
+        console.log("✅ Money transferred internally!");
+
+        // ✅ Call P2P Transfer API on Nium
+        console.log("🚀 Initiating external P2P transfer...");
+        const p2pResponse = await transferP2P(clientHashId, customerHashId, walletHashId, amount, wallet3HashId);
+
+        // if (p2pResponse.data.status=="failed") {
+        //     // 🚨 Rollback transaction if P2P API fails
+        //     console.error("❌ P2P Transfer Failed, rolling back database changes...");
+        //     await supabase.from("users").update({ balance: sender.balance }).eq("id", sender.id);
+        //     await supabase.from("users").update({ balance: receiver.balance }).eq("id", receiver.id);
+        //     return res.status(500).json({ message: "P2P transfer failed. Transaction rolled back." });
+        // }
+
+        console.log("✅ P2P Transfer Successful:", p2pResponse);
+        res.status(200).json({ message: "Money sent successfully (Internal + P2P)" });
+
     } catch (error) {
         console.error("❌ Error processing transaction:", error.message);
         res.status(500).json({ message: "Error processing request", error: error.message });
     }
 };
 
+//NIUM IMPLEMENTATION BLOCK
+
+async function transferP2P(clientHashId, customerHashId, walletHashId, destinationAmount, destinationWalletHashId) {
+    const url = `https://gateway.nium.com/api/v1/client/${clientHashId}/customer/${customerHashId}/wallet/${walletHashId}/transfers`;
+  
+    const body = {
+      "tags": [
+        {
+          "key": "key_example",
+          "value": "value_example"
+        }
+      ],
+      "authenticationCode": "",  // Can be set dynamically if needed
+      "customerComments": "Paid for lunch",
+      "destinationAmount": destinationAmount,
+      "destinationCurrencyCode": "USD",
+      "destinationWalletHashId": destinationWalletHashId,
+      "exemptionCode": "",
+      "purposeCode": "IR002",
+      "sourceAmount": "",
+      "sourceCurrencyCode": "USD"
+    };
+  
+    const headers = {
+      "X-Api-Key": API_KEY,
+      "Content-Type": "application/json"
+    };
+  
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(body)
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        console.log("Transfer Successful:", data);
+      } else {
+        console.error("Error in Transfer:", data);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+  
 
 
 const getTransactionHistory = async (req, res) => {

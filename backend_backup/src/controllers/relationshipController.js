@@ -219,6 +219,9 @@ const sendMoney = async (req, res) => {
             { sender_id: sender.id, receiver_id: receiver.id, amount, status: "transferred" }
         ]);
 
+       
+
+
         console.log("✅ Money sent successfully!");
         res.status(200).json({ message: "Money sent successfully" });
     } catch (error) {
@@ -229,6 +232,7 @@ const sendMoney = async (req, res) => {
 
 
 
+//End of NIUM IMPLEMENTATION BLOCK
 const getTransactionHistory = async (req, res) => {
     try {
         const { username } = req.body; // Fix: Accept username instead of userId
@@ -295,66 +299,6 @@ const getTransactionHistory = async (req, res) => {
     }
 };
 
-
-// const getMoneyRequests = async (req, res) => {
-//     try {
-//         const { username } = req.body;
-
-//         if (!username) {
-//             console.log("❌ getMoneyRequests: Username is missing in request");
-//             return res.status(400).json({ message: "Username is required" });
-//         }
-
-//         // Convert username to userId
-//         const { data: user, error: userError } = await supabase
-//             .from("users")
-//             .select("id")
-//             .eq("username", username)
-//             .single();
-
-//         if (!user || userError) {
-//             console.log("❌ getMoneyRequests: User not found for username:", username);
-//             return res.status(404).json({ message: "User not found" });
-//         }
-
-//         const userId = user.id;
-
-//         // Fetch pending money requests
-//         const { data: requests, error } = await supabase
-//             .from("transactions")
-//             .select("id, sender_id, receiver_id, amount, status, created_at")
-//             .eq("receiver_id", userId)
-//             .eq("status", "pending");
-
-            
-        
-
-//         if (error) {
-//             console.error("Error fetching transactions:", error.message);
-//             return res.status(500).json({ message: "Error fetching transactions", error: error.message });
-//         }
-
-//         // ✅ Rename sender & receiver fields for clarity before sending response
-//         const formattedRequests = requests.map(req => ({
-//             id: req.id,
-//             sender_username: req.sender.username, // Extract username from sender object
-//             receiver_username: req.receiver.username, // Extract username from receiver object
-//             amount: req.amount,
-//             status: req.status,
-//             created_at: req.created_at
-//         }));
-//         if (error) {
-//             console.error("❌ getMoneyRequests: Error fetching data from Supabase:", error);
-//             return res.status(500).json({ message: "Error fetching money requests", error: error.message });
-//         }
-
-//         console.log("✅ getMoneyRequests: Returning transactions:", formattedRequests);
-//         res.status(200).json(requests);
-//     } catch (error) {
-//         console.error("❌ getMoneyRequests: Unexpected error:", error.message);
-//         res.status(500).json({ message: "Unexpected error fetching money requests", error: error.message });
-//     }
-// };
 
 
 const getMoneyRequests = async (req, res) => {
@@ -496,10 +440,6 @@ const getSentMoneyRequests = async (req, res) => {
     }
 };
 
-
-
-
-
 const getAllFriends = async (req, res) => {
     try {
         const { userId } = req.body;  // ✅ Expect `userId` in request body
@@ -610,7 +550,6 @@ const getAllFriendRequestsReceived = async (req, res) => {
     }
 };
 
-
 const getAllFriendRequestsSent = async (req, res) => {
     try {
         const { userId } = req.body;
@@ -662,8 +601,6 @@ const getAllFriendRequestsSent = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
-
-
 
 const getBlockedRelationships = async (req, res) => {
     try {
@@ -724,202 +661,6 @@ const getBlockedRelationships = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
-
-
-// const requestMoney = async (req, res) => {
-//     try {
-//         const { senderUsername, receiverUsername, amount } = req.body; // Fix: Accept usernames
-
-//         if (!senderUsername || !receiverUsername || !amount) {
-//             return res.status(400).json({ message: "Missing required fields" });
-//         }
-
-//         // Fetch sender & receiver IDs
-//         const { data: sender, error: senderError } = await supabase
-//             .from("users")
-//             .select("id")
-//             .eq("username", senderUsername)
-//             .single();
-
-//         const { data: receiver, error: receiverError } = await supabase
-//             .from("users")
-//             .select("id")
-//             .eq("username", receiverUsername)
-//             .single();
-
-//         if (!sender || senderError) return res.status(404).json({ message: "Sender not found" });
-//         if (!receiver || receiverError) return res.status(404).json({ message: "Receiver not found" });
-
-//         // Record money request
-//         await supabase.from("transactions").insert([
-//             { sender_id: sender.id, receiver_id: receiver.id, amount, status: "pending" }
-//         ]);
-
-//         res.status(201).json({ message: "Money request sent successfully" });
-//     } catch (error) {
-//         res.status(500).json({ message: "Error processing request", error: error.message });
-//     }
-// };
-
-
-// const respondToMoneyRequest = async (req, res) => {
-//     try {
-//         const { transactionId, response } = req.body;
-
-//         if (!transactionId || !response) {
-//             return res.status(400).json({ message: "Transaction ID and response are required" });
-//         }
-
-//         console.log(`Processing request: ${transactionId} - ${response}`);
-
-//         const { data: transaction, error: transactionError } = await supabase
-//             .from("transactions")
-//             .select("*")
-//             .eq("id", transactionId)
-//             .single();
-
-//         if (!transaction || transactionError) {
-//             return res.status(404).json({ message: "Transaction not found" });
-//         }
-
-//         if (response === "declined") {
-//             const { error: declineError } = await supabase
-//                 .from("transactions")
-//                 .update({ status: "declined" })
-//                 .eq("id", transactionId);
-
-//             if (declineError) throw declineError;
-
-//             return res.status(200).json({ message: "Money request declined" });
-//         }
-
-//         // Fetch receiver's balance
-//         const { data: receiverBalance, error: receiverError } = await supabase
-//             .from("users")
-//             .select("balance")
-//             .eq("user_id", transaction.receiver_id)
-//             .single();
-
-//         if (!receiverBalance || receiverError || receiverBalance.balance < transaction.amount) {
-//             return res.status(400).json({ message: "Insufficient balance to approve request" });
-//         }
-
-//         console.log(`Processing approval for transaction: ${transactionId}`);
-
-//         // Process transaction
-//         await supabase
-//             .from("users")
-//             .update({ balance: receiverBalance.balance - transaction.amount })
-//             .eq("user_id", transaction.receiver_id);
-
-//         await supabase
-//             .from("users")
-//             .update({ balance: supabase.raw("balance + ?", [transaction.amount]) })
-//             .eq("user_id", transaction.sender_id);
-
-//         const { error: approveError } = await supabase
-//             .from("transactions")
-//             .update({ status: "approved" })
-//             .eq("id", transactionId);
-
-//         if (approveError) throw approveError;
-
-//         res.status(200).json({ message: "Money request approved successfully" });
-//     } catch (error) {
-//         console.error("Error processing money request:", error.message);
-//         res.status(500).json({ message: "Error processing request", error: error.message });
-//     }
-// };
-// const respondToMoneyRequest = async (req, res) => {
-//     try {
-//         const { transactionId, response } = req.body;
-
-//         if (!transactionId || !response) {
-//             return res.status(400).json({ message: "Transaction ID and response are required" });
-//         }
-
-//         console.log(`Processing request: ${transactionId} - ${response}`);
-
-//         // Fetch transaction details
-//         const { data: transaction, error: transactionError } = await supabase
-//             .from("transactions")
-//             .select("*")
-//             .eq("id", transactionId)
-//             .single();
-
-//         if (!transaction || transactionError) {
-//             return res.status(404).json({ message: "Transaction not found" });
-//         }
-
-//         if (response === "declined") {
-//             console.log("✅ Declining transaction:", transactionId);
-//             await supabase.from("transactions").update({ status: "declined" }).eq("id", transactionId);
-//             return res.status(200).json({ message: "Money request declined" });
-//         }
-
-//         // ✅ Fetch receiver's balance from `users` table
-//         const { data: receiver, error: receiverError } = await supabase
-//             .from("users")
-//             .select("balance")
-//             .eq("id", transaction.receiver_id)
-//             .single();
-
-//         if (receiverError) {
-//             console.error("❌ Error fetching receiver balance:", receiverError);
-//             return res.status(500).json({ message: "Error fetching receiver balance" });
-//         }
-
-//         if (!receiver) {
-//             console.error("❌ Receiver balance not found for user_id:", transaction.receiver_id);
-//             return res.status(404).json({ message: "Receiver balance record not found" });
-//         }
-
-//         console.log(`✅ Receiver Balance: ${receiver.balance}, Requested Amount: ${transaction.amount}`);
-
-//         if (receiver.balance < transaction.amount) {
-//             console.error("❌ Insufficient balance for approval");
-//             return res.status(400).json({ message: "Insufficient balance to approve request" });
-//         }
-
-//         console.log(`✅ Processing approval for transaction: ${transactionId}`);
-
-//         // ✅ Deduct amount from receiver's balance in `users` table
-//         const { error: deductError } = await supabase
-//             .from("users")
-//             .update({ balance: receiver.balance - transaction.amount })
-//             .eq("id", transaction.receiver_id);
-
-//         if (deductError) {
-//             console.error("❌ Error deducting balance:", deductError);
-//             return res.status(500).json({ message: "Error processing transaction" });
-//         }
-
-//         // ✅ Add amount to sender's balance in `users` table
-//         const { error: addError } = await supabase
-//             .from("users")
-//             .update({ balance: transaction.amount + receiver.balance }) // ✅ Fix: Use computed balance
-//             .eq("id", transaction.sender_id);
-
-//         if (addError) {
-//             console.error("❌ Error adding balance to sender:", addError);
-//             return res.status(500).json({ message: "Error processing transaction" });
-//         }
-
-//         // ✅ Update transaction status
-//         const { error: approveError } = await supabase
-//             .from("transactions")
-//             .update({ status: "approved" })
-//             .eq("id", transactionId);
-
-//         if (approveError) throw approveError;
-
-//         console.log("✅ Transaction approved successfully!");
-//         res.status(200).json({ message: "Money request approved successfully" });
-//     } catch (error) {
-//         console.error("❌ Error processing money request:", error.message);
-//         res.status(500).json({ message: "Error processing request", error: error.message });
-//     }
-// };
 
 const requestMoney = async (req, res) => {
     try {
@@ -992,9 +733,6 @@ const requestMoney = async (req, res) => {
         res.status(500).json({ message: "Error processing request", error: error.message });
     }
 };
-
-
-
 
 const respondToMoneyRequest = async (req, res) => {
     try {
@@ -1115,7 +853,6 @@ const respondToMoneyRequest = async (req, res) => {
     }
 };
 
-
 const getUserBalance = async (req, res) => {
     try {
         const { username } = req.body; // Fix: Accept username instead of userId
@@ -1141,23 +878,6 @@ const getUserBalance = async (req, res) => {
     }
 };
 
-// module.exports = {
-//     requestRelationship,
-//     approveRelationship,
-//     deleteRelationship,
-//     blockRelationship,
-//     sendMoney,
-//     getTransactionHistory,
-//     getMoneyRequests,
-//     getSentMoneyRequests,
-//     getAllFriends,
-//     getAllFriendRequestsReceived,
-//     getAllFriendRequestsSent,
-//     getBlockedRelationships,
-//     requestMoney,
-//     respondToMoneyRequest,
-//     getUserBalance
-// };
 export{
     requestRelationship,
     approveRelationship,
