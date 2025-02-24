@@ -1,48 +1,66 @@
-# # Use Node.js image
+
+# # Use Node.js 22 Alpine as the base image
 # FROM node:22-alpine
 
-# # Set working directory inside the container
+# # Set the working directory inside the container
 # WORKDIR /usr/src/app
 
-# # Copy package.json and package-lock.json (if available)
-# COPY package.json package-lock.json ./
+# # Install required packages:
+# # - openjdk17-jdk: For Android builds.
+# # - android-tools: For Android command-line tools.
+# # - bash: For shell commands.
+# # - netcat-openbsd: To wait for Metro Bundler to be ready.
+# RUN apk add --no-cache openjdk17-jdk android-tools bash netcat-openbsd
 
-# # Install dependencies
+# # Copy package files and install dependencies
+# COPY package.json package-lock.json ./
 # RUN npm install --legacy-peer-deps
 
-# # Copy all frontend files to the container
+# # Copy the rest of the application code
 # COPY . .
 
-# # Expose the port your React Native Metro Bundler runs on
-# EXPOSE 8081
+# # Ensure the Gradle wrapper is executable (assumes it's in the android folder)
+# RUN chmod +x android/gradlew
 
-# # Command to start the frontend (Metro Bundler for React Native)
-# CMD ["npx", "react-native", "start"]
+# # Expose the port used by Metro Bundler (3000)
+# EXPOSE 3000
 
+# # Start Metro Bundler on port 3000, wait until it’s ready, then run the Android app.
+# CMD sh -c "npx react-native start --port=3000 & \
+#            until nc -z localhost 3000; do echo 'Waiting for Metro Bundler on port 3000...'; sleep 1; done; \
+#            npx react-native run-android --port=3000"
 
 # Use Node.js 22 Alpine as the base image
 FROM node:22-alpine
 
-# Set working directory inside the container
+# Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Install dependencies required for building Android apps
-RUN apk add --no-cache openjdk17-jdk android-tools bash
+# Install required packages:
+# - openjdk17-jdk: For Android builds.
+# - android-tools: For Android command-line tools.
+# - bash: For shell commands.
+# - netcat-openbsd: To wait for Metro Bundler.
+RUN apk add --no-cache openjdk17-jdk android-tools bash netcat-openbsd
 
-# Copy package.json and package-lock.json (if available)
+# Copy package files and install dependencies
 COPY package.json package-lock.json ./
-
-# Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy all frontend files to the container
+# Copy the rest of your application code
 COPY . .
 
-# Expose the port for Metro Bundler
-EXPOSE 8081
+# Ensure the Gradle wrapper is executable (located in android/gradlew)
+RUN chmod +x android/gradlew
 
-# Grant execution permission to entrypoint script
-RUN chmod +x /usr/src/app/entrypoint.sh
+# Create a symlink in the root directory to point to android/gradlew
+RUN ln -s android/gradlew gradlew
 
-# Set entrypoint to start Metro Bundler and build the Android app
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+# Expose the port used by Metro Bundler (3000)
+EXPOSE 3000
+
+# Start Metro Bundler on port 3000 in the background, wait until it's ready,
+# then run the Android app with the specified Metro port.
+CMD sh -c "npx react-native start --port=3000 & \
+           until nc -z localhost 3000; do echo 'Waiting for Metro Bundler on port 3000...'; sleep 1; done; \
+           npx react-native run-android --port=3000"
