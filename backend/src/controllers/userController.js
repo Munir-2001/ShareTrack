@@ -51,13 +51,17 @@ const loginUser = async (req, res) => {
     // Fetch user
     const { data: user, error } = await supabase
       .from("users")
-      .select("id, username, phone, email, password","balance,credit_score")
+      .select("id, username, phone, email, password,balance,credit_score,is_active")
       .eq("email", email)
       .single();
 
     if (error || !user) {
       return res.status(404).json({ message: "User not found" });
     }
+    if (!user.is_active) {
+      return res.status(403).json({ message: "Account is deactivated. Please contact support." });
+    }
+    
 
     // Check password match
     const isMatch = await bcrypt.compare(password, user.password);
