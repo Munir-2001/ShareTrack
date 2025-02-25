@@ -45,6 +45,7 @@ const createUser = async (req, res) => {
 
 // Log in user by comparing hashed passwords
 const loginUser = async (req, res) => {
+  console.log('log test');
   try {
     const { email, password } = req.body;
 
