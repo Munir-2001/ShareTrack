@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { 
+    View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, StyleSheet, ScrollView 
+} from "react-native";
 import { useAppSelector, useAppDispatch } from "../../Redux/Store/hooks";
 import { updateUser } from "../../Redux/Actions/AuthActions/AuthAction";
 import { API_URL } from "../../constants";
 import { Picker } from '@react-native-picker/picker';
+
 const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
     const dispatch = useAppDispatch();
     const user = useAppSelector((state) => state.auth.user);
@@ -18,37 +21,6 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
     const [email, setEmail] = useState(user?.email || "");
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
-
-    // const handleUpdate = async () => {
-    //     setLoading(true);
-    //     setSuccessMessage("");
-
-    //     try {
-    //         const response = await fetch(`${API_URL}/api/auth/update`, {
-    //             method: "PUT",
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //                 Authorization: `Bearer ${user.token}`,
-    //             },
-    //             body: JSON.stringify({ phone, email }),
-    //         });
-
-    //         if (!response.ok) {
-    //             const error = await response.json();
-    //             throw new Error(error.message);
-    //         }
-
-    //         const updatedUser = await response.json();
-    //         dispatch(updateUser(updatedUser));
-
-    //         setSuccessMessage("Profile updated successfully!");
-    //         navigation.goBack();
-    //     } catch (error: any) {
-    //         Alert.alert("Error", error.message || "Something went wrong.");
-    //     }
-
-    //     setLoading(false);
-    // };
 
     const handleUpdate = async () => {
         setLoading(true);
@@ -81,113 +53,69 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
         setLoading(false);
     };
 
-
-
     return (
-        <View style={styles.container}>
-            <Text style={styles.header}>Account Settings</Text>
+        <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
+            <View style={styles.innerContainer}>
+                <Text style={styles.header}>Account Settings</Text>
 
-            {successMessage ? <Text style={styles.successText}>{successMessage}</Text> : null}
+                {successMessage ? <Text style={styles.successText}>{successMessage}</Text> : null}
 
-            <Text style={styles.label}>Username</Text>
-            <TextInput
-                style={styles.input}
-                value={username}
-                onChangeText={setUsername}
-                editable={false}
-            />
+                <Text style={styles.label}>Username</Text>
+                <TextInput style={styles.input} value={username} editable={false} />
 
-            <Text style={styles.label}>Phone</Text>
-            <TextInput
-                style={styles.input}
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-            />
+                <Text style={styles.label}>Phone</Text>
+                <TextInput style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
 
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-            />
+                <Text style={styles.label}>Email</Text>
+                <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
 
-            <TouchableOpacity style={styles.button} onPress={handleUpdate} disabled={loading}>
-                {loading ? <ActivityIndicator color="white" /> : <Text style={styles.buttonText}>Update</Text>}
-            </TouchableOpacity>
+                <Text style={styles.label}>Age</Text>
+                <TextInput style={styles.input} value={age} onChangeText={setAge} keyboardType="numeric" />
 
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('PROFILE')}>
-                <Text style={styles.backButtonText}>Back to Profile</Text>
-            </TouchableOpacity>
+                <Text style={styles.label}>Gender</Text>
+                <Picker selectedValue={gender} onValueChange={setGender} style={styles.picker}>
+                    <Picker.Item label="Select Gender" value="" />
+                    <Picker.Item label="Male" value="Male" />
+                    <Picker.Item label="Female" value="Female" />
+                    <Picker.Item label="Other" value="Other" />
+                </Picker>
 
-            {/* Age Input */}
-            <Text style={styles.label}>Age</Text>
-            <TextInput
-                style={styles.input}
-                value={age}
-                onChangeText={setAge}
-                keyboardType="numeric"
-            />
+                <Text style={styles.label}>Marital Status</Text>
+                <Picker selectedValue={maritalStatus} onValueChange={setMaritalStatus} style={styles.picker}>
+                    <Picker.Item label="Select Marital Status" value="" />
+                    <Picker.Item label="Single" value="0" />
+                    <Picker.Item label="Married" value="1" />
+                </Picker>
 
-            {/* Gender Dropdown */}
-            <Text style={styles.label}>Gender</Text>
-            <Picker
-                selectedValue={gender}
-                onValueChange={(itemValue) => setGender(itemValue)}
-                style={styles.picker}
-            >
-                <Picker.Item label="Select Gender" value="" />
-                <Picker.Item label="Male" value="Male" />
-                <Picker.Item label="Female" value="Female" />
-                <Picker.Item label="Other" value="Other" />
-            </Picker>
+                <Text style={styles.label}>Education Level</Text>
+                <Picker selectedValue={educationLevel} onValueChange={setEducationLevel} style={styles.picker}>
+                    <Picker.Item label="Select Education Level" value="" />
+                    <Picker.Item label="High School" value="High School" />
+                    <Picker.Item label="Bachelor" value="Bachelor" />
+                    <Picker.Item label="Master" value="Master" />
+                    <Picker.Item label="PhD" value="PhD" />
+                    <Picker.Item label="Other" value="Other" />
+                </Picker>
 
-            {/* Marital Status Dropdown */}
-            <Text style={styles.label}>Marital Status</Text>
-            <Picker
-                selectedValue={maritalStatus}
-                onValueChange={(itemValue) => setMaritalStatus(itemValue)}
-                style={styles.picker}
-            >
-                <Picker.Item label="Select Marital Status" value="" />
-                <Picker.Item label="Single" value="0" />
-                <Picker.Item label="Married" value="1" />
-               
-            </Picker>
+                <Text style={styles.label}>Employment Status</Text>
+                <Picker selectedValue={employmentStatus} onValueChange={setEmploymentStatus} style={styles.picker}>
+                    <Picker.Item label="Select Employment Status" value="" />
+                    <Picker.Item label="Employed" value="Employed" />
+                    <Picker.Item label="Unemployed" value="Unemployed" />
+                    <Picker.Item label="Self-Employed" value="Self-Employed" />
+                    <Picker.Item label="Student" value="Student" />
+                    <Picker.Item label="Retired" value="Retired" />
+                </Picker>
 
-            {/* Education Level Dropdown */}
-            <Text style={styles.label}>Education Level</Text>
-            <Picker
-                selectedValue={educationLevel}
-                onValueChange={(itemValue) => setEducationLevel(itemValue)}
-                style={styles.picker}
-            >
-                <Picker.Item label="Select Education Level" value="" />
-                <Picker.Item label="High School" value="High School" />
-                <Picker.Item label="Bachelor" value="Bachelor" />
-                <Picker.Item label="Master" value="Master" />
-                <Picker.Item label="PhD" value="PhD" />
-                <Picker.Item label="Other" value="Other" />
-            </Picker>
+                <TouchableOpacity style={styles.button} onPress={handleUpdate} disabled={loading}>
+                    {loading ? <ActivityIndicator color="white" /> : <Text style={styles.buttonText}>Update</Text>}
+                </TouchableOpacity>
 
-            {/* Employment Status Dropdown */}
-            <Text style={styles.label}>Employment Status</Text>
-            <Picker
-                selectedValue={employmentStatus}
-                onValueChange={(itemValue) => setEmploymentStatus(itemValue)}
-                style={styles.picker}
-            >
-                <Picker.Item label="Select Employment Status" value="" />
-                <Picker.Item label="Employed" value="Employed" />
-                <Picker.Item label="Unemployed" value="Unemployed" />
-                <Picker.Item label="Self-Employed" value="Self-Employed" />
-                <Picker.Item label="Student" value="Student" />
-                <Picker.Item label="Retired" value="Retired" />
-            </Picker>
-
-
-        </View>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('PROFILE')}>
+                    <Text style={styles.backButtonText}>Back to Profile</Text>
+                </TouchableOpacity>
+            </View>
+        </ScrollView>
     );
 };
 
@@ -196,9 +124,10 @@ export default AccountSettingsScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
         backgroundColor: "#fff",
-        justifyContent: "center",
+    },
+    innerContainer: {
+        padding: 20,
     },
     header: {
         fontSize: 22,
@@ -256,5 +185,4 @@ const styles = StyleSheet.create({
         backgroundColor: "#F5F5F5",
         marginBottom: 15,
     },
-    
 });

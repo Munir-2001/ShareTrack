@@ -200,8 +200,8 @@ export default function ItemScreen({ navigation }: any) {
                 <Text style={styles.itemPrice}>
                   💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
                 </Text>
-                <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
-                <Text style={styles.itemLocation}>📍 Location: {item.city}, {item.state}, {item.country}</Text>
+                {/* <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
+                <Text style={styles.itemLocation}>📍 Location: {item.city}, {item.state}, {item.country}</Text> */}
 
                 <TouchableOpacity
                   style={styles.whatsappButton}

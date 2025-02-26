@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { API_URL } from "../../constants.js";
 import { useAppSelector } from "../../Redux/Store/hooks"; // Import user selector
+import { Picker } from '@react-native-picker/picker';
 
 const CreateRentalItem = ({ navigation }: any) => {
   const user = useAppSelector((state: { auth: any }) => state.auth.user); // Get logged-in user
@@ -68,12 +69,15 @@ const CreateRentalItem = ({ navigation }: any) => {
         onChangeText={setRentalPrice}
         keyboardType="numeric"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Location"
-        value={location}
-        onChangeText={setLocation}
-      />
+                <Picker selectedValue={location} onValueChange={setLocation} style={styles.picker}>
+                    <Picker.Item label="Location" value="" />
+                    <Picker.Item label="Karachi" value="Karachi" />
+                    <Picker.Item label="Lahore" value="Lahore" />
+                    <Picker.Item label="Islamabad" value="Islamabad" />
+                    <Picker.Item label="Quetta" value="Quetta" />
+                    <Picker.Item label="Peshawar" value="Peshawar" />
+                    <Picker.Item label="Rawalpindi" value="Rawalpindi " />
+                </Picker>
 
       <Button title="Create Item" onPress={handleCreateRentalItem} />
     </View>
@@ -106,4 +110,15 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 15,
   },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 5,
+},
+picker: {
+  height: 50,
+  backgroundColor: "#F5F5F5",
+  marginBottom: 15,
+},
 });
