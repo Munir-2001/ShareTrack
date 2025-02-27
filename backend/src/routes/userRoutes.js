@@ -92,7 +92,7 @@ userRouter.post("/login", loginUser);
  *       400:
  *         description: Bad request
  */
-userRouter.put("/update", updateUser);
+userRouter.put("/update/:id", updateUser);
 
 /**
  * @swagger

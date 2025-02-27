@@ -41,8 +41,6 @@ const createUser = async (req, res) => {
   }
 };
 
-
-
 // Log in user by comparing hashed passwords
 const loginUser = async (req, res) => {
   try {
@@ -127,19 +125,26 @@ const loginUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
+    console.log("Request params:", req.params); // Debugging
+    console.log("Request body:", req.body); // Debugging
+      const { id } = req.params; // Get ID from URL
       const { phone, email, age, gender, marital_status, education_level, employment_status } = req.body;
+
+      if (!id) {
+          return res.status(400).json({ message: "User ID is required" });
+      }
 
       const { error } = await supabase
           .from("users")
           .update({ phone, email, age, gender, marital_status, education_level, employment_status })
-          .eq("id", req.user.id); // Ensure user authentication is checked
+          .eq("id", id); // Match ID from request body
 
       if (error) throw error;
 
       const { data: updatedUser, error: fetchError } = await supabase
           .from("users")
           .select("*")
-          .eq("id", req.user.id)
+          .eq("id", id)
           .single();
 
       if (fetchError) throw fetchError;
@@ -149,8 +154,6 @@ const updateUser = async (req, res) => {
       res.status(500).json({ message: "Error updating profile", error: error.message });
   }
 };
-
-
 
 
 // Update user details

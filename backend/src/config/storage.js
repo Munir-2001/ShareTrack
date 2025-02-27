@@ -45,4 +45,5 @@ const uploadToStorage = async (photo, folderName = "profilepictures") => {
     }
 };
 
-module.exports = uploadToStorage;
+// module.exports = uploadToStorage;
+export{uploadToStorage};
