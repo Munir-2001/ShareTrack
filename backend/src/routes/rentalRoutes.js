@@ -12,6 +12,9 @@ import {
     getUserRentalHistoryOffers,
     getUserRentalItems
 } from '../controllers/rentalController.js'
+import multer from 'multer';
+
+const upload = multer({ storage: multer.memoryStorage() }); // Stores file in memory
 
 const rentalRouter = express.Router();
 
@@ -187,18 +190,60 @@ rentalRouter.get("/offers/user/:user_id", getUserRentalOffers);
 // rentalRouter.get("/offers/:user_id", getUserRentalOffers);
 
 
+// /**
+//  * @swagger
+//  * /api/rental/createRentalItem:
+//  *   post:
+//  *     summary: Create a new rental item
+//  *     description: Creates a new rental item in the database.
+//  *     tags:
+//  *       - Rentals
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               owner_id:
+//  *                 type: integer
+//  *                 description: ID of the user creating the rental item.
+//  *               item_name:
+//  *                 type: string
+//  *                 description: Name of the rental item.
+//  *               category:
+//  *                 type: string
+//  *                 description: Category of the rental item.
+//  *               rental_price:
+//  *                 type: number
+//  *                 description: Price per day for renting the item.
+//  *               location:
+//  *                 type: string
+//  *                 description: Location of the rental item.
+//  *               status:
+//  *                 type: string
+//  *                 description: Status of the item, defaults to "available".
+//  *     responses:
+//  *       201:
+//  *         description: Rental item created successfully
+//  *       400:
+//  *         description: Invalid input
+//  *       500:
+//  *         description: Server error
+//  */
+// rentalRouter.post("/createRentalItem", createRentalItem);
 /**
  * @swagger
  * /api/rental/createRentalItem:
  *   post:
- *     summary: Create a new rental item
- *     description: Creates a new rental item in the database.
+ *     summary: Create a new rental item with an image
+ *     description: Creates a new rental item in the database and uploads an optional image.
  *     tags:
  *       - Rentals
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -220,6 +265,10 @@ rentalRouter.get("/offers/user/:user_id", getUserRentalOffers);
  *               status:
  *                 type: string
  *                 description: Status of the item, defaults to "available".
+ *               photo:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file of the rental item.
  *     responses:
  *       201:
  *         description: Rental item created successfully
@@ -228,7 +277,11 @@ rentalRouter.get("/offers/user/:user_id", getUserRentalOffers);
  *       500:
  *         description: Server error
  */
-rentalRouter.post("/createRentalItem", createRentalItem);
+
+
+rentalRouter.post("/createRentalItem", upload.single("photo"), createRentalItem);
+
+
 
 // /**
 //  * @swagger

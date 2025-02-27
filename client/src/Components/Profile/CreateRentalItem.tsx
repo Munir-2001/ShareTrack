@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Alert, Image, TouchableOpacity } from "react-native";
 import { API_URL } from "../../constants.js";
 import { useAppSelector } from "../../Redux/Store/hooks"; // Import user selector
 import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'react-native-image-picker';
 
 const CreateRentalItem = ({ navigation }: any) => {
   const user = useAppSelector((state: { auth: any }) => state.auth.user); // Get logged-in user
@@ -10,39 +11,59 @@ const CreateRentalItem = ({ navigation }: any) => {
   const [category, setCategory] = useState("");
   const [rentalPrice, setRentalPrice] = useState("");
   const [location, setLocation] = useState("");
+  const [image, setImage] = useState<any>(null);
 
+  const selectImage = () => {
+    ImagePicker.launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, (response) => {
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+      } else if (response.errorMessage) {
+        Alert.alert("Error", response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        setImage(response.assets[0]);
+      }
+    });
+  };
+  
   const handleCreateRentalItem = async () => {
-    
     if (!itemName || !category || !rentalPrice || !location) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
-
+  
+    const formData = new FormData();
+    formData.append("owner_id", user.id);
+    formData.append("item_name", itemName);
+    formData.append("category", category);
+    formData.append("rental_price", rentalPrice);
+    formData.append("location", location);
+    formData.append("status", "available");
+  
+    if (image) {
+      formData.append("photo", {
+        uri: image.uri,
+        type: image.type || "image/jpeg", // Ensure a valid MIME type
+        name: image.fileName || `photo_${Date.now()}.jpg`,
+      });
+    }
+  
     try {
       const response = await fetch(`${API_URL}/api/rental/createRentalItem`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          owner_id: user.id, // Assign owner_id from logged-in user
-          item_name: itemName,
-          category,
-          rental_price: parseFloat(rentalPrice),
-          location,
-          status: "available", // Default status
-        }),
+        body: formData, // No need to set Content-Type
       });
-
+  
       const data = await response.json();
+  
       if (response.ok) {
         Alert.alert("Success", "Rental item created successfully!");
-        navigation.goBack(); // Navigate back after success
+        navigation.goBack();
       } else {
         Alert.alert("Error", data.message || "Failed to create rental item.");
       }
     } catch (error) {
       Alert.alert("Error", "Something went wrong.");
+      console.error("API Error:", error);
     }
   };
 
@@ -78,13 +99,18 @@ const CreateRentalItem = ({ navigation }: any) => {
                     <Picker.Item label="Peshawar" value="Peshawar" />
                     <Picker.Item label="Rawalpindi" value="Rawalpindi " />
                 </Picker>
+                <TouchableOpacity style={styles.imagePicker} onPress={selectImage}>
+        <Text style={styles.imagePickerText}>Select Image</Text>
+      </TouchableOpacity>
 
+      {image && (
+        <Image source={{ uri: image.uri }} style={styles.previewImage} />
+      )}
       <Button title="Create Item" onPress={handleCreateRentalItem} />
     </View>
   );
 };
 
-export default CreateRentalItem;
 
 const styles = StyleSheet.create({
   container: {
@@ -121,4 +147,23 @@ picker: {
   backgroundColor: "#F5F5F5",
   marginBottom: 15,
 },
+imagePicker: {
+  backgroundColor: "#1E2A78",
+  padding: 10,
+  borderRadius: 5,
+  alignItems: "center",
+  marginBottom: 15,
+},
+imagePickerText: {
+  color: "#fff",
+  fontSize: 16,
+},
+previewImage: {
+  width: "100%",
+  height: 200,
+  borderRadius: 10,
+  marginBottom: 15,
+},
 });
+
+export default CreateRentalItem;

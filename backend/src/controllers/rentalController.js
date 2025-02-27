@@ -1,4 +1,5 @@
 import {supabase} from '../config/db.js'
+import { uploadToStorage } from '../config/storage.js';
 
 const getRentalItems = async (req, res) => {
     try {
@@ -308,35 +309,44 @@ const getOffersForItem = async (req, res) => {
 };
 
 
- const createRentalItem = async (req, res) => {
+const createRentalItem = async (req, res) => {
+    console.log("InSie BAckend");
     try {
-      const { owner_id, item_name, category, rental_price, location } = req.body;
-  
-      // Validation: Ensure all fields are provided
-      if (!owner_id || !item_name || !category || !rental_price || !location) {
-        return res.status(400).json({ error: "All fields are required." });
-      }
-  
-      const status = "under_review"; // Default status for new items
-  
-      // Insert data into Supabase
-      const { data, error } = await supabase
-        .from("rental_items") // Table name
-        .insert([{ owner_id, item_name, category, rental_price, location, status }])
-        .select();
-  
-      // Handle any errors
-      if (error) {
-        console.error("Error inserting rental item:", error);
-        return res.status(500).json({ error: "Failed to create rental item." });
-      }
-  
-      res.status(201).json({ message: "Rental item created successfully", item: data[0] });
+        const { owner_id, item_name, category, rental_price, location } = req.body;
+        const photo = req.file; // Image uploaded via Multer
+
+        // Validation: Ensure all required fields are provided
+        if (!owner_id || !item_name || !category || !rental_price || !location) {
+            return res.status(400).json({ error: "All fields are required." });
+        }
+
+        const status = "under_review"; // Default status for new items
+        let photoUrl = null;
+
+        // If a photo is uploaded, upload to storage
+        if (photo) {
+            const filename = `${item_name}-${Date.now()}.${photo.originalname.split(".").pop()}`;
+            photo.originalname = filename;
+            photoUrl = await uploadToStorage(photo, "rentalitems");
+        }
+
+        // Insert data into Supabase
+        const { data, error } = await supabase
+            .from("rental_items")
+            .insert([{ owner_id, item_name, category, rental_price, location, status, photo: photoUrl }])
+            .select();
+
+        if (error) {
+            console.error("Error inserting rental item:", error);
+            return res.status(500).json({ error: "Failed to create rental item." });
+        }
+
+        res.status(201).json({ message: "Rental item created successfully", item: data[0] });
     } catch (error) {
-      console.error("Server error:", error);
-      res.status(500).json({ error: "Internal server error" });
+        console.error("Server error:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
-  };
+};
 
 //  const getUserRentalHistoryOffers = async (req, res) => {
 //   try {

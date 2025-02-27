@@ -159,8 +159,6 @@ const updateItemStatus = async (req, res) => {
 };
 
 
-
-
 const createItem = async (req, res) => {
     try {
         const { name, description, price, category, owner_id, city, state, country, is_available } = req.body;

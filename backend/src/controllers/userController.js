@@ -2,9 +2,10 @@
 import bcrypt from 'bcrypt'
 // const { supabase } = require("../config/db");
 import {supabase} from '../config/db.js'
-
+import { uploadToStorage } from '../config/storage.js';
 // import supabase from '../config/db.js'
 // Register a new user, ensuring no repeated email, username, or phone
+// const { uploadToStorage } = require('../config/storage'); 
 const createUser = async (req, res) => {
   try {
     const { username, phone, email, password } = req.body;
@@ -125,8 +126,8 @@ const loginUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    console.log("Request params:", req.params); // Debugging
-    console.log("Request body:", req.body); // Debugging
+      
+
       const { id } = req.params; // Get ID from URL
       const { phone, email, age, gender, marital_status, education_level, employment_status } = req.body;
 
@@ -200,6 +201,8 @@ const updateUserDetails = async (req, res) => {
 
 // Update user profile picture
 const updatePhoto = async (req, res) => {
+  console.log("Request body:", req.body);
+  console.log("Request file:", req.file); 
   try {
     const { username } = req.body;
     const photo = req.file; // Multer adds this to req

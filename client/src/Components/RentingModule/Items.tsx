@@ -184,7 +184,7 @@ export default function ItemScreen({ navigation }: any) {
             setShowRentals(true);
           }}>
           <Text style={showRentals ? styles.activeButtonText : styles.toggleButtonText}>
-            Rentals
+          🚀 Rentals
           </Text>
         </TouchableOpacity>
       </View>
@@ -339,8 +339,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 15,
     backgroundColor: '#F5F5F5',
+    color: "#1E2A78",
   },
-  
+
   managementTile: {
     flex: 1,
     backgroundColor: "#1E2A78",
