@@ -102,6 +102,7 @@ const UpcomingRepaymentsScreen = ({ navigation }: { navigation: any }) => {
         placeholder="Search by username or amount..."
         value={searchQuery}
         onChangeText={handleSearch}
+        placeholderTextColor="#666"
       />
 
       {loading ? (

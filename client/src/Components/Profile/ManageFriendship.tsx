@@ -244,6 +244,8 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
             placeholder="Search friends by username"
             value={searchQuery}
             onChangeText={setSearchQuery}
+            placeholderTextColor="#666"
+            
           />
 
 
@@ -333,6 +335,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
               placeholder="Enter username"
               value={friendRequestUsername}
               onChangeText={setFriendRequestUsername}
+                      placeholderTextColor="#666"
             />
             <TouchableOpacity style={styles.sendButton} onPress={handleSendFriendRequest}>
               <Icon name="send" size={30} color="#1E2A78" />

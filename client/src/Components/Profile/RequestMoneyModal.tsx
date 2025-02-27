@@ -57,6 +57,7 @@ const RequestMoney: React.FC<RequestMoneyProps> = ({ friendUsername, onClose }) 
         value={amountToSend}
         onChangeText={setAmountToSend}
         keyboardType="numeric"
+                placeholderTextColor="#666"
       />
       {/* Repayment Date Input */}
       <TextInput
@@ -65,6 +66,7 @@ const RequestMoney: React.FC<RequestMoneyProps> = ({ friendUsername, onClose }) 
         value={repaymentDate}
         onChangeText={(text) => setRepaymentDate(text)}
         keyboardType="default"
+        placeholderTextColor="#666"
       />
 
       <TouchableOpacity style={styles.sendButton} onPress={handleRequestMoney}>

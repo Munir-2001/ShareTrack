@@ -74,6 +74,7 @@ const RentalOffersHistory = ({ navigation }: { navigation: any })  => {
         placeholder="Search by item or renter name..."
         value={searchQuery}
         onChangeText={setSearchQuery}
+        placeholderTextColor="#666"
       />
 
       {/* Tab Buttons */}

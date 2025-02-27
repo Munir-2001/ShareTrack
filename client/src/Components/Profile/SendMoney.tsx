@@ -176,6 +176,7 @@ const SendMoney: React.FC<SendMoneyProps> = ({ friendUsername, onClose }) => {
         value={amountToSend}
         onChangeText={setAmountToSend}
         keyboardType="numeric"
+        placeholderTextColor="#666"
       />
       <TouchableOpacity style={styles.sendButton} onPress={handleSendMoney}>
         <Text style={styles.sendButtonText}>Send Money</Text>

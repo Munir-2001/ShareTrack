@@ -559,6 +559,7 @@ export default function RentalOffersScreen({ navigation }: any) {
         placeholder="Search rental offers..."
         value={searchText}
         onChangeText={setSearchText}
+        placeholderTextColor="#666"
       />
 
       {/* 🏷 Tabs for Incoming & Outgoing Offers */}

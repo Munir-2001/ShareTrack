@@ -188,6 +188,7 @@ const PendingRequestsScreen = ({ navigation }: { navigation: any }) => {
         placeholder="Search by username or amount..."
         value={searchQuery}
         onChangeText={setSearchQuery}
+        placeholderTextColor="#666"
       />
 
       {loading ? (

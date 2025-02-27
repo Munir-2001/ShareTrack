@@ -109,6 +109,7 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
         placeholder="Search by username or amount..."
         value={searchQuery}
         onChangeText={handleSearch}
+        placeholderTextColor="#666"
       />
 
       {loading ? (
@@ -118,7 +119,8 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
       ) : (
         <FlatList
           data={filteredTransactions}
-          keyExtractor={(item) => String(item._id)}
+          // keyExtractor={(item) => String(item._id)}
+          keyExtractor={(item, index) => item._id ? String(item._id) : `transaction-${index}`}
           renderItem={({ item }) => {
             const isSent = item.sender_username === user.username;
             const isPending = item.status === 'pending';

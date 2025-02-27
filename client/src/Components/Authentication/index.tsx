@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         backgroundColor: '#F5F5F5',
         textAlign: 'center',
+        color: '#000',
     },
     signInButton: {
         backgroundColor: '#1E2A78',
