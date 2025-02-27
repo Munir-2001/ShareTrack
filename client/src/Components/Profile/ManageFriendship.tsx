@@ -191,7 +191,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
   };
 
   const openModal = (friend: User) => {
-    setSelectedFriend(friend);
+    // setSelectedFriend(friend);
     setModalVisible(true);
     setShowMoneyRequests(false); 
 
@@ -200,7 +200,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
 
   const closeModal = (): void => {
     console.log('Closing Modal'); // Add this log
-    setSelectedFriend(null);
+    // setSelectedFriend(null);
     setModalVisible(false);
     console.log('Modal Visible State:', modalVisible); // Log after state chang
   };

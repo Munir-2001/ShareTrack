@@ -6,7 +6,8 @@ const getRentalItems = async (req, res) => {
         const { data, error } = await supabase
             .from("rental_items")
             .select("*")
-            .eq("status", "available"); // ✅ Only fetch available items
+            .eq("status", "available") // ✅ Only fetch available items
+            // .eq("is_available", true);
 
         if (error) {
             console.error("❌ Supabase Error:", error);
@@ -132,86 +133,104 @@ const getUserRentalOffers = async (req, res) => {
     }
 };
 
-// const getUserRentalHistoryOffers = async (req, res) => {
-//     try {
-//       const { user_id } = req.params;
-  
-//       // ✅ Get incoming offers (where user is the owner)
-//       const { data: incoming, error: incomingError } = await supabase
-//         .from("rental_offers")
-//         .select(
-//           `
-//             id, 
-//             item_id, 
-//             proposed_price, 
-//             status, 
-//             rental_price
-//             created_at, 
-//             users!rental_offers_renter_id_fkey(username),
-//             rental_items!inner(owner_id, item_name)  
-//           `
-//         )
-//         .eq("rental_items.owner_id", user_id)
-//         .order("created_at", { ascending: false });
-  
-//       // ✅ Get outgoing offers (where user is the renter)
-//       const { data: outgoing, error: outgoingError } = await supabase
-//         .from("rental_offers")
-//         .select(
-//           `
-//             id, 
-//             item_id, 
-//             proposed_price, 
-//             status, 
-//             created_at, 
-//             rental_items!inner(item_name, owner_id),
-//             users!rental_offers_renter_id_fkey(username)  
-//           `
-//         )
-//         .eq("renter_id", user_id)
-//         .order("created_at", { ascending: false });
-  
-//       if (incomingError || outgoingError) {
-//         console.error("❌ Error fetching rental offers:", incomingError || outgoingError);
-//         return res.status(500).json({ message: "Error fetching offers" });
-//       }
-  
-//       return res.status(200).json({
-//         incoming: incoming.map(offer => ({
-//           id: offer.id,
-//           item_id: offer.item_id,
-//           item_name: offer.rental_items?.item_name,
-//           proposed_price: offer.proposed_price,
-//           status: offer.status,
-//           renter_name: offer.users?.username || "Unknown User",
-//           created_at: offer.created_at,
-//         })),
-//         outgoing: outgoing.map(offer => ({
-//           id: offer.id,
-//           item_id: offer.item_id,
-//           item_name: offer.rental_items?.item_name,
-//           proposed_price: offer.proposed_price,
-//           status: offer.status,
-//           renter_name: offer.users?.username || "Unknown User",
-//           created_at: offer.created_at,
-//         })),
-//       });
-//     } catch (error) {
-//       console.error("❌ Internal Server Error:", error);
-//       return res.status(500).json({ message: "Internal server error" });
-//     }
-//   };
 
+// const acceptRentalOffer = async (req, res) => {
+//     try {
+//         const { offer_id, rental_start, rental_end } = req.body;
+
+//         if (!offer_id || !rental_start || !rental_end) {
+//             return res.status(400).json({ message: "All fields are required" });
+//         }
+
+//         // ✅ Step 1: Get offer details
+//         const { data: offer, error: offerError } = await supabase
+//             .from("rental_offers")
+//             .select("*")
+//             .eq("id", offer_id)
+//             .single();
+
+//         if (offerError || !offer) {
+//             return res.status(404).json({ message: "Offer not found." });
+//         }
+
+//         // ✅ Step 2: Update the rental item's status to 'rented'
+//         const { error: itemError } = await supabase
+//             .from("rental_items")
+//             .update({ status: "rented" })
+//             .eq("id", offer.item_id);
+
+//         if (itemError) {
+//             console.error("❌ Error updating item status:", itemError);
+//             return res.status(500).json({ message: "Failed to update item status." });
+//         }
+
+//         // ✅ Step 3: Insert rental record in rental_histories
+//         const { data: rentalData, error: rentalError } = await supabase
+//             .from("rental_histories")
+//             .insert([
+//                 {
+//                     item_id: offer.item_id,
+//                     renter_id: offer.renter_id,
+//                     rental_start,
+//                     rental_end,
+//                     total_amount_paid: offer.proposed_price,
+//                     payment_status: "pending",
+//                     offer_id: offer.id
+//                 }
+//             ])
+//             .select();
+
+//         if (rentalError) {
+//             return res.status(500).json({ message: "Database error while approving rental." });
+//         }
+
+//         // ✅ Step 4: Update offer status to 'accepted'
+//         await supabase
+//             .from("rental_offers")
+//             .update({ status: "accepted" })
+//             .eq("id", offer_id);
+
+//         return res.status(200).json({ message: "Offer accepted!", rentalData });
+//     } catch (error) {
+//         console.error("❌ Internal Server Error:", error);
+//         return res.status(500).json({ message: "Internal server error" });
+//     }
+// };
+// const rejectRentalOffer = async (req, res) => {
+//     try {
+//         const { offer_id } = req.body;
+
+//         if (!offer_id) {
+//             return res.status(400).json({ message: "Offer ID is required" });
+//         }
+
+//         const { data, error } = await supabase
+//             .from("rental_offers")
+//             .update({ status: "rejected" })
+//             .eq("id", offer_id);
+
+//         if (error) {
+//             console.error("❌ Error rejecting rental offer:", error);
+//             return res.status(500).json({ message: "Database error while rejecting rental offer." });
+//         }
+
+//         return res.status(200).json({ message: "Offer rejected!", data });
+//     } catch (error) {
+//         console.error("❌ Internal Server Error:", error);
+//         return res.status(500).json({ message: "Internal server error" });
+//     }
+// };
 
 const acceptRentalOffer = async (req, res) => {
     try {
         const { offer_id, rental_start, rental_end } = req.body;
 
         if (!offer_id || !rental_start || !rental_end) {
+            console.log("❌ Missing required fields in acceptRentalOffer:", { offer_id, rental_start, rental_end });
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        // ✅ Step 1: Get offer details
+        console.log(`📌 Fetching offer details for offer_id: ${offer_id}`);
         const { data: offer, error: offerError } = await supabase
             .from("rental_offers")
             .select("*")
@@ -219,13 +238,14 @@ const acceptRentalOffer = async (req, res) => {
             .single();
 
         if (offerError || !offer) {
+            console.error("❌ Offer not found:", offerError);
             return res.status(404).json({ message: "Offer not found." });
         }
 
-        // ✅ Step 2: Update the rental item's status to 'rented'
+        console.log(`📌 Updating rental item ${offer.item_id} status to 'rented'`);
         const { error: itemError } = await supabase
             .from("rental_items")
-            .update({ status: "rented" })
+            .update({ is_available: false, status: "rented" }) // Make item unavailable
             .eq("id", offer.item_id);
 
         if (itemError) {
@@ -233,7 +253,7 @@ const acceptRentalOffer = async (req, res) => {
             return res.status(500).json({ message: "Failed to update item status." });
         }
 
-        // ✅ Step 3: Insert rental record in rental_histories
+        console.log(`📌 Creating rental history record for item ${offer.item_id}`);
         const { data: rentalData, error: rentalError } = await supabase
             .from("rental_histories")
             .insert([
@@ -250,18 +270,20 @@ const acceptRentalOffer = async (req, res) => {
             .select();
 
         if (rentalError) {
+            console.error("❌ Error creating rental history:", rentalError);
             return res.status(500).json({ message: "Database error while approving rental." });
         }
 
-        // ✅ Step 4: Update offer status to 'accepted'
+        console.log(`📌 Updating offer status to 'accepted' for offer ${offer_id}`);
         await supabase
             .from("rental_offers")
             .update({ status: "accepted" })
             .eq("id", offer_id);
 
+        console.log("✅ Offer accepted successfully!");
         return res.status(200).json({ message: "Offer accepted!", rentalData });
     } catch (error) {
-        console.error("❌ Internal Server Error:", error);
+        console.error("❌ Internal Server Error in acceptRentalOffer:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -270,9 +292,11 @@ const rejectRentalOffer = async (req, res) => {
         const { offer_id } = req.body;
 
         if (!offer_id) {
+            console.log("❌ Missing offer_id in rejectRentalOffer");
             return res.status(400).json({ message: "Offer ID is required" });
         }
 
+        console.log(`📌 Rejecting rental offer with ID: ${offer_id}`);
         const { data, error } = await supabase
             .from("rental_offers")
             .update({ status: "rejected" })
@@ -283,12 +307,15 @@ const rejectRentalOffer = async (req, res) => {
             return res.status(500).json({ message: "Database error while rejecting rental offer." });
         }
 
+        console.log("✅ Offer rejected successfully!");
         return res.status(200).json({ message: "Offer rejected!", data });
     } catch (error) {
-        console.error("❌ Internal Server Error:", error);
+        console.error("❌ Internal Server Error in rejectRentalOffer:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
+
 const getOffersForItem = async (req, res) => {
     try {
         const { item_id } = req.params;

@@ -80,18 +80,24 @@ const CreateRentalItem = ({ navigation }: any) => {
         placeholder="Item Name"
         value={itemName}
         onChangeText={setItemName}
+        placeholderTextColor="#666"
+
       />
       <TextInput
         style={styles.input}
         placeholder="Category"
         value={category}
         onChangeText={setCategory}
+        placeholderTextColor="#666"
+
       />
       <TextInput
         style={styles.input}
         placeholder="Rental Price (per day)"
         value={rentalPrice}
         onChangeText={setRentalPrice}
+        placeholderTextColor="#666"
+
         keyboardType="numeric"
       />
                 <Picker selectedValue={location} onValueChange={setLocation} style={styles.picker}>
@@ -132,7 +138,7 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#DDD",
+    borderColor: "#000000",
     borderRadius: 10,
     paddingHorizontal: 12,
     backgroundColor: "#f9f9f9",

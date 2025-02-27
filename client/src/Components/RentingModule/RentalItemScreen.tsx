@@ -1,3 +1,94 @@
+// import React, { useState } from "react";
+// import {
+//     View,
+//     Text,
+//     TouchableOpacity,
+//     TextInput,
+//     StyleSheet,
+//     Alert,
+// } from "react-native";
+// import { API_URL } from "../../constants";
+// import { useAppSelector } from "../../Redux/Store/hooks";
+
+// export default function RentalItemScreen({ route, navigation }: any) {
+//     const { item } = route.params; // ✅ Get rental item data
+//     const user = useAppSelector((state) => state.auth.user);
+
+//     const [offerPrice, setOfferPrice] = useState("");
+
+//     const submitRentalOffer = async () => {
+//         if (!offerPrice) {
+//             Alert.alert("Error", "Enter a rental price.");
+//             return;
+//         }
+
+//         try {
+//             const response = await fetch(`${API_URL}/api/rental/offer`, {
+//                 method: "POST",
+//                 headers: { "Content-Type": "application/json" },
+//                 body: JSON.stringify({
+//                     item_id: item.id,
+//                     renter_id: user.id,
+//                     proposed_price: parseFloat(offerPrice),
+//                 }),
+//             });
+
+//             const data = await response.json();
+
+//             if (!response.ok) {
+//                 throw new Error(data.message || "Failed to submit rental offer.");
+//             }
+
+//             Alert.alert("Success", "Rental offer submitted!");
+//             setOfferPrice("");
+//         } catch (error) {
+//             console.log("❌ Error submitting rental offer:", error);
+//             Alert.alert("Error", "Could not submit rental offer.");
+//         }
+//     };
+
+//     return (
+//         <View style={styles.container}>
+//             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+//                 <Text style={styles.backButtonText}>← Back</Text>
+//             </TouchableOpacity>
+//             <Text style={styles.itemName}>{item.item_name}</Text>
+//             <Text style={styles.itemPrice}>💰 Rental Price: {item.rental_price} PKR</Text>
+//             <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
+//             <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
+
+//             {/* ✅ Rental Offer Input */}
+//             {user.id !== item.owner_id && (
+//                 <>
+//                     <TextInput
+//                         style={styles.input}
+//                         placeholder="Enter offer price"
+//                         keyboardType="numeric"
+//                         value={offerPrice}
+//                         onChangeText={setOfferPrice}
+//                     />
+//                     <TouchableOpacity style={styles.offerButton} onPress={submitRentalOffer}>
+//                         <Text style={styles.offerButtonText}>📩 Submit Rental Offer</Text>
+//                     </TouchableOpacity>
+//                 </>
+//             )}
+//         </View>
+//     );
+// }
+
+// const styles = StyleSheet.create({
+//     container: { flex: 1, padding: 20, backgroundColor: "#fff", alignItems: "center" },
+//     itemName: { fontSize: 22, fontWeight: "bold", marginBottom: 5, color: "#1E2A78" },
+//     itemPrice: { fontSize: 18, fontWeight: "600", color: "#333", marginBottom: 5 },
+//     itemCategory: { fontSize: 16, color: "#333", marginBottom: 3 },
+//     itemLocation: { fontSize: 16, color: "#333", marginBottom: 10 },
+//     backButton: { alignSelf: "flex-start", padding: 10, marginBottom: 10 },
+//     backButtonText: { fontSize: 18, color: "#1E2A78", fontWeight: "bold" },
+//     input: { width: "80%", borderBottomWidth: 1, marginVertical: 10, padding: 5 },
+//     offerButton: { backgroundColor: "#1E2A78", padding: 10, borderRadius: 8 },
+//     offerButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+// });
+
 import React, { useState } from "react";
 import {
     View,
@@ -15,7 +106,59 @@ export default function RentalItemScreen({ route, navigation }: any) {
     const user = useAppSelector((state) => state.auth.user);
 
     const [offerPrice, setOfferPrice] = useState("");
+    const [isAvailable, setIsAvailable] = useState(item.is_available); // ✅ Track availability status
 
+    // ✅ Toggle Availability Status
+    // const toggleAvailability = async () => {
+    //     try {
+    //         const response = await fetch(`${API_URL}/api/rental/updateAvailability`, {
+    //             method: "PUT",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({
+    //                 item_id: item.id,
+    //                 is_available: !isAvailable, // Toggle the value
+    //             }),
+    //         });
+
+    //         if (!response.ok) {
+    //             throw new Error("Failed to update availability.");
+    //         }
+
+    //         setIsAvailable(!isAvailable); // ✅ Update UI state
+    //         Alert.alert("Success", `Item is now ${!isAvailable ? "Unavailable" : "Available"}`);
+    //     } catch (error) {
+    //         console.log("❌ Error updating availability:", error);
+    //         Alert.alert("Error", "Could not update availability.");
+    //     }
+    // };
+
+    const toggleAvailability = async () => {
+        try {
+            const newStatus = !isAvailable; // ✅ Determine new status before API call
+
+            const response = await fetch(`${API_URL}/api/item/updateStatus`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ itemId: item.id, is_available: newStatus }), // ✅ Use correct key
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to update item status");
+            }
+
+            setIsAvailable(newStatus); // ✅ Update UI state only after a successful API response
+            Alert.alert("Success", `Item is now ${newStatus ? "Active" : "Inactive"}`);
+
+            // ✅ Refresh Page After Updating Status
+            navigation.replace("RENTALITEMDETAILS", { item: { ...item, is_available: newStatus } });
+
+        } catch (error) {
+            console.log("Error updating item:", error);
+            Alert.alert("Error", "Could not update item status");
+        }
+    };
+
+    // ✅ Submit Rental Offer
     const submitRentalOffer = async () => {
         if (!offerPrice) {
             Alert.alert("Error", "Enter a rental price.");
@@ -52,12 +195,27 @@ export default function RentalItemScreen({ route, navigation }: any) {
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                 <Text style={styles.backButtonText}>← Back</Text>
             </TouchableOpacity>
+
             <Text style={styles.itemName}>{item.item_name}</Text>
             <Text style={styles.itemPrice}>💰 Rental Price: {item.rental_price} PKR</Text>
             <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
             <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
 
-            {/* ✅ Rental Offer Input */}
+            {/* ✅ Show Availability Status */}
+            <Text style={styles.availabilityText}>
+                {isAvailable ? "🟢 Available" : "🔴 Not Available"}
+            </Text>
+
+            {/* ✅ Toggle Availability Button (Only for Item Owner) */}
+            {user.id === item.owner_id && (
+                <TouchableOpacity style={styles.availabilityButton} onPress={toggleAvailability}>
+                    <Text style={styles.availabilityButtonText}>
+                        {isAvailable ? "Set as Unavailable" : "Set as Available"}
+                    </Text>
+                </TouchableOpacity>
+            )}
+
+            {/* ✅ Rental Offer Input (Only for non-owners) */}
             {user.id !== item.owner_id && (
                 <>
                     <TextInput
@@ -82,12 +240,19 @@ const styles = StyleSheet.create({
     itemPrice: { fontSize: 18, fontWeight: "600", color: "#333", marginBottom: 5 },
     itemCategory: { fontSize: 16, color: "#333", marginBottom: 3 },
     itemLocation: { fontSize: 16, color: "#333", marginBottom: 10 },
+    availabilityText: { fontSize: 18, fontWeight: "bold", marginVertical: 10, color: "#1E2A78" },
+    
+    /* ✅ Toggle Availability Button */
+    availabilityButton: { backgroundColor: "#E63946", padding: 12, borderRadius: 8, marginVertical: 10 },
+    availabilityButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+
     backButton: { alignSelf: "flex-start", padding: 10, marginBottom: 10 },
     backButtonText: { fontSize: 18, color: "#1E2A78", fontWeight: "bold" },
     input: { width: "80%", borderBottomWidth: 1, marginVertical: 10, padding: 5 },
     offerButton: { backgroundColor: "#1E2A78", padding: 10, borderRadius: 8 },
     offerButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
 });
+
 
 // import React, { useState, useEffect } from 'react';
 // import { View, Text, TouchableOpacity, FlatList, TextInput, StyleSheet, Alert } from 'react-native';

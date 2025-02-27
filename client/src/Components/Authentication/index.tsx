@@ -67,7 +67,7 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
 
 
     return (
-        <View style={{ flex:1,backgroundColor: isDarkMode ? Colors.black : Colors.white }}>
+        <View style={{ flex:1,backgroundColor: isDarkMode ? Colors.white : Colors.white }}>
             <ScrollView contentInsetAdjustmentBehavior="automatic">
                 <View style={styles.container}>
                     <Text style={styles.logo}>
@@ -81,6 +81,7 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
                                 placeholder="Username"
                                 value={username}
                                 onChangeText={setUsername}
+                                placeholderTextColor="#666"
                             />
                             <TextInput
                                 style={styles.input}
@@ -88,6 +89,8 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
                                 value={phone}
                                 onChangeText={setPhone}
                                 keyboardType="phone-pad"
+                                placeholderTextColor="#666"
+
                             />
                         </>
                     )}
@@ -97,6 +100,8 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
                         value={email}
                         onChangeText={setEmail}
                         keyboardType="email-address"
+                        placeholderTextColor="#666"
+
                     />
                     <TextInput
                         style={styles.input}
@@ -104,6 +109,8 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
+                        placeholderTextColor="#666"
+
                     />
                     {isSignUp && (
                         <>
@@ -113,6 +120,8 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
                                 value={confirmPassword} // Ensure you bind to confirmPassword
                                 onChangeText={setConfirmPassword}
                                 secureTextEntry
+                                placeholderTextColor="#666"
+
                             />
                         </>
                     )}
@@ -158,7 +167,7 @@ const styles = StyleSheet.create({
     input: {
         width: '80%',
         padding: 15,
-        borderColor: '#999',
+        borderColor: '#000000',
         borderWidth: 1,
         borderRadius: 5,
         marginVertical: 10,

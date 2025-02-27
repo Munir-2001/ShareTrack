@@ -125,7 +125,7 @@ const updateItemStatus = async (req, res) => {
 
         // Check if item exists first
         const { data: existingItem, error: fetchError } = await supabase
-            .from("items")
+            .from("rental_items")
             .select("id, is_available")
             .eq("id", itemId)
             .single();
