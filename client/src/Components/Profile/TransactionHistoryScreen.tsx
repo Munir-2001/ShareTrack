@@ -118,7 +118,7 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
       ) : (
         <FlatList
           data={filteredTransactions}
-          keyExtractor={(item) => item._id}
+          keyExtractor={(item) => String(item._id)}
           renderItem={({ item }) => {
             const isSent = item.sender_username === user.username;
             const isPending = item.status === 'pending';
