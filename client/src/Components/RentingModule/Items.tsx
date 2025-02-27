@@ -26,7 +26,7 @@ const itemImages = [
 ];
 
 // Function to Get a Random Image
-const getRandomImage = () => itemImages[Math.floor(Math.random() * itemImages.length)];
+// const getRandomImage = () => itemImages[Math.floor(Math.random() * itemImages.length)];
 
 export default function ItemScreen({ navigation }: any) {
   const dispatch = useAppDispatch();
@@ -197,7 +197,8 @@ export default function ItemScreen({ navigation }: any) {
           onPress={() => navigation.navigate("RENTALITEMDETAILS", { item })}
           style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}
         >
-          <Image source={getRandomImage()} style={styles.itemImage} />
+          {/* <Image source={getRandomImage()} style={styles.itemImage} /> */}
+          <Image source={{ uri: item.photo }} style={styles.itemImage} />
           <Text style={styles.itemName}>{item.item_name}</Text>
           <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
           <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
@@ -210,7 +211,7 @@ export default function ItemScreen({ navigation }: any) {
           onPress={() => navigation.navigate("ITEMDETAIL", { item })}
           style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}
         >
-          <Image source={getRandomImage()} style={styles.itemImage} />
+          <Image source={{ uri: item.photo }} style={styles.itemImage} />
           <Text style={styles.itemName}>{item.name}</Text>
           <Text style={styles.itemPrice}>
             💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
