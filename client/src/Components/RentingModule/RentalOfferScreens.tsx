@@ -171,7 +171,7 @@ export default function RentalOffersScreen({ navigation }: any) {
 
   useEffect(() => {
     if (!user?.id) {
-      console.error("❌ User ID is undefined, skipping API call.");
+      console.log("❌ User ID is undefined, skipping API call.");
       return;
     }
 
@@ -191,7 +191,7 @@ export default function RentalOffersScreen({ navigation }: any) {
         setIncomingOffers(data?.incoming || []);
         setOutgoingOffers(data?.outgoing || []);
       } catch (error) {
-        console.error('❌ Error fetching rental offers:', error);
+        console.log('❌ Error fetching rental offers:', error);
         setIncomingOffers([]);
         setOutgoingOffers([]);
       }
@@ -285,7 +285,7 @@ const handleAcceptOffer = async (offerId: number) => {
 
     Alert.alert('Success', 'Offer accepted successfully!');
   } catch (error) {
-    console.error('❌ Error accepting rental offer:', error);
+    console.log('❌ Error accepting rental offer:', error);
     Alert.alert('Error', 'Could not accept rental offer');
   }
 };
@@ -305,7 +305,7 @@ const handleRejectOffer = async (offerId: number) => {
 
     Alert.alert('Success', 'Offer rejected successfully!');
   } catch (error) {
-    console.error('❌ Error rejecting rental offer:', error);
+    console.log('❌ Error rejecting rental offer:', error);
     Alert.alert('Error', 'Could not reject rental offer');
   }
 };

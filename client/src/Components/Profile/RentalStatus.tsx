@@ -19,7 +19,7 @@ const fetchUserRentalItems = async (userId: number) => {
     return data;
   } catch (error) {
     console.log('userId is '+ userId)
-    console.error("❌ Error fetching user rental items:", error);
+    console.log("❌ Error fetching user rental items:", error);
     return [];
   }
 };

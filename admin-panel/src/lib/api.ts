@@ -49,7 +49,7 @@ export const adminLogin = async (email: string, password: string) => {
 
     return data; // ✅ Returns { message: "Admin login successful", token: "JWT_TOKEN" }
   } catch (error) {
-    console.error("❌ Admin login failed:", error);
+    console.log("❌ Admin login failed:", error);
     throw error;
   }
 };
@@ -72,7 +72,7 @@ export const fetchUsers = async () => {
 
     return response.json();
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.log("Error fetching users:", error);
     return null;
   }
 };
@@ -89,7 +89,7 @@ export async function updateUserStatus(userId: string, isActive: boolean) {
 
     return response.json();
   } catch (error) {
-    console.error("Error updating user status:", error);
+    console.log("Error updating user status:", error);
     return null;
   }
 }

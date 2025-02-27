@@ -72,7 +72,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
           setBalance(data.balance);
           setCreditScore(data.credit_score); // ✅ Store credit score in state
         } catch (error) {
-          console.error('Error fetching user balance:', error);
+          console.log('Error fetching user balance:', error);
         }
       };
 

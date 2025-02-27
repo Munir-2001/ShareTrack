@@ -42,7 +42,7 @@ export default function RentalItemScreen({ route, navigation }: any) {
             Alert.alert("Success", "Rental offer submitted!");
             setOfferPrice("");
         } catch (error) {
-            console.error("❌ Error submitting rental offer:", error);
+            console.log("❌ Error submitting rental offer:", error);
             Alert.alert("Error", "Could not submit rental offer.");
         }
     };

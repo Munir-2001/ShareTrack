@@ -141,17 +141,17 @@ const SendMoney: React.FC<SendMoneyProps> = ({ friendUsername, onClose }) => {
     console.log('🚀 Sending money from:', senderUsername, 'to:', friendUsername, 'amount:', amountToSend);
 
     if (!senderUsername) {
-      console.error("❌ Sender username is undefined.");
+      console.log("❌ Sender username is undefined.");
       return Alert.alert("Error", "Your username is missing. Please log in again.");
     }
 
     if (!friendUsername) {
-      console.error("❌ Friend username is undefined.");
+      console.log("❌ Friend username is undefined.");
       return Alert.alert("Error", "Recipient username is missing.");
     }
 
     if (!amountToSend || isNaN(Number(amountToSend)) || Number(amountToSend) <= 0) {
-      console.error("❌ Invalid amount entered.");
+      console.log("❌ Invalid amount entered.");
       return Alert.alert("Error", "Please enter a valid amount greater than 0.");
     }
 
@@ -162,7 +162,7 @@ const SendMoney: React.FC<SendMoneyProps> = ({ friendUsername, onClose }) => {
       setAmountToSend(''); // Clear the input
       onClose(); // Close the component after sending money
     } catch (error: any) {
-      console.error("❌ Error sending money:", error.message);
+      console.log("❌ Error sending money:", error.message);
       Alert.alert('Error', error.message || "Something went wrong. Please try again.");
     }
   };

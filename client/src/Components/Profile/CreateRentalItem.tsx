@@ -30,6 +30,10 @@ const CreateRentalItem = ({ navigation }: any) => {
       Alert.alert("Error", "Please fill in all fields.");
       return;
     }
+    if (!image) {
+      Alert.alert("Error", "Please select an image before creating the item.");
+      return;
+    }
   
     const formData = new FormData();
     formData.append("owner_id", user.id);
@@ -133,7 +137,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     backgroundColor: "#f9f9f9",
     fontSize: 16,
-    color: "#333",
+    color: "#000", // ✅ Ensuring input text is visible
     marginBottom: 15,
   },
   label: {
@@ -146,6 +150,8 @@ picker: {
   height: 50,
   backgroundColor: "#F5F5F5",
   marginBottom: 15,
+  color: "#000", // ✅ Ensuring picker text is visible
+
 },
 imagePicker: {
   backgroundColor: "#1E2A78",

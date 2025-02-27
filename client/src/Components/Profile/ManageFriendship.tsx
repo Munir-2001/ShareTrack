@@ -1,4 +1,4 @@
-import React, {useState, useEffect, PropsWithChildren} from 'react';
+import React, { useState, useEffect, PropsWithChildren } from 'react';
 import {
   View,
   Text,
@@ -24,10 +24,10 @@ import {
   getBlockedUsers,
   getRequestsForLending,
 } from './relationshipUtils'; // Adjust the path if needed
-import {SegmentControl} from './SegmentControl';
+import { SegmentControl } from './SegmentControl';
 import SendMoney from './SendMoney'; // Import the SendMoney component
 import RequestMoney from './RequestMoneyModal';
-import {useAppDispatch, useAppSelector} from '../../Redux/Store/hooks';
+import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 
 const options = ['Add Friends', 'Your Friends', 'Blocked Users'];
 interface User {
@@ -39,10 +39,10 @@ interface User {
   photo: string;
 }
 
-export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
+export default function ConnectionScreen({ navigation }: PropsWithChildren<any>) {
   // const dispatch = useAppDispatch();
-  const user = useAppSelector((state: {auth: any}) => state.auth.user);
-  const isAuth = useAppSelector((state: {auth: any}) => state.auth.isAuth);
+  const user = useAppSelector((state: { auth: any }) => state.auth.user);
+  const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
   const [userId, setUserId] = useState(user.id || null); // Replace with dynamic user ID
   const [friends, setFriends] = useState<User[]>([]);
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -55,8 +55,8 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
   const [filter, setFilter] = useState('Received');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
-  const [searchQuery, setSearchQuery] = useState(''); 
-  const [filteredFriends, setFilteredFriends] = useState<User[]>([]); 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredFriends, setFilteredFriends] = useState<User[]>([]);
 
   const filteredData = filter === 'Received' ? pendingRequests : sentRequests;
 
@@ -88,13 +88,13 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
   // ]);
   useEffect(() => {
     if (isAuth && userId) {
-        console.log("🔄 Fetching friends data for user:", userId);
-        fetchData();
+      console.log("🔄 Fetching friends data for user:", userId);
+      fetchData();
     }
-}, [userId, isAuth]); // ✅ Removed `friends`, `pendingRequests`, etc., from dependencies
+  }, [userId, isAuth]); // ✅ Removed `friends`, `pendingRequests`, etc., from dependencies
 
 
-  
+
 
   // const fetchData = async () => {
   //   try {
@@ -115,24 +115,24 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
 
   const fetchData = async () => {
     try {
-        console.log("🔄 Fetching data for user:", userId);
-        
-        const friendsData = await getFriends(userId);
-        const pendingRequestsData = await getFriendRequestsReceived(userId); // ✅ Correctly fetch received requests
-        const sentRequestsData = await getFriendRequestsSent(userId);
-        const blockedUsersData = await getBlockedUsers(userId);
+      console.log("🔄 Fetching data for user:", userId);
 
-        console.log("📥 Received Friend Requests:", pendingRequestsData);
-        console.log("📤 Sent Friend Requests:", sentRequestsData);
+      const friendsData = await getFriends(userId);
+      const pendingRequestsData = await getFriendRequestsReceived(userId); // ✅ Correctly fetch received requests
+      const sentRequestsData = await getFriendRequestsSent(userId);
+      const blockedUsersData = await getBlockedUsers(userId);
 
-        setFriends(friendsData);
-        setPendingRequests(pendingRequestsData); // ✅ Ensure received requests are updated
-        setSentRequests(sentRequestsData);
-        setBlockedUsers(blockedUsersData);
+      console.log("📥 Received Friend Requests:", pendingRequestsData);
+      console.log("📤 Sent Friend Requests:", sentRequestsData);
+
+      setFriends(friendsData);
+      setPendingRequests(pendingRequestsData); // ✅ Ensure received requests are updated
+      setSentRequests(sentRequestsData);
+      setBlockedUsers(blockedUsersData);
     } catch (error) {
-        console.error('Error fetching data:', error);
+      console.log('Error fetching data:', error);
     }
-};
+  };
 
   useEffect(() => {
     if (searchQuery) {
@@ -167,36 +167,38 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
     if (!friendRequestUsername) return;
 
     if (friendRequestUsername === user.username) {
-        return Alert.alert('You cannot send a friend request to yourself!');
+      return Alert.alert('You cannot send a friend request to yourself!');
     }
 
     try {
-        await requestFriend(userId, friendRequestUsername);
-        Alert.alert('Friend request sent!');
+      await requestFriend(userId, friendRequestUsername);
+      Alert.alert('Friend request sent!');
 
-        // 🔄 Fetch the latest sent requests and update state
-        const updatedSentRequests = await getFriendRequestsSent(userId);
-        setSentRequests(updatedSentRequests);
+      // 🔄 Fetch the latest sent requests and update state
+      const updatedSentRequests = await getFriendRequestsSent(userId);
+      setSentRequests(updatedSentRequests);
 
-        setFriendRequestUsername('');
-        fetchData(); // Ensuring everything is updated
+      setFriendRequestUsername('');
+      fetchData(); // Ensuring everything is updated
     } catch (error: any) {
-        Alert.alert(error.message);
+      Alert.alert(error.message);
     }
-};
+  };
 
 
   const gotoProfile = () => {
     navigation.navigate('PROFILE');
   };
 
-  const openModal = (friend:User) => {
+  const openModal = (friend: User) => {
     setSelectedFriend(friend);
     setModalVisible(true);
+    setShowMoneyRequests(false); 
+
     console.log('open modal');
   };
 
-  const closeModal = ():void => {
+  const closeModal = (): void => {
     console.log('Closing Modal'); // Add this log
     setSelectedFriend(null);
     setModalVisible(false);
@@ -219,16 +221,25 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
         <Icon name="arrow-back" size={30} color="#1E2A78" style={styles.icon} />
         <Text style={styles.backButtonText}>Profile</Text>
       </TouchableOpacity>
-      <SegmentControl
+      {/* <SegmentControl
         options={options}
         selectedOption={selectedOption}
         onOptionPress={setSelectedOption}
+        
+      /> */}
+      <SegmentControl
+        options={options}
+        selectedOption={selectedOption}
+        onOptionPress={(option) => {
+          setSelectedOption(option);
+          setSelectedFriend(null); // ✅ Close SendMoney and RequestMoney modals
+        }}
       />
 
       {/* <Text style={styles.header}>Friends</Text> */}
       {selectedOption === 'Your Friends' && (
-        <View style={{flex: 1}}>
-            <TextInput
+        <View style={{ flex: 1 }}>
+          <TextInput
             style={styles.searchInput}
             placeholder="Search friends by username"
             value={searchQuery}
@@ -240,11 +251,11 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
           <FlatList
             data={filteredFriends}
             keyExtractor={(item: any) => item.relationship.id.toString()}
-            renderItem={({item}) => (
+            renderItem={({ item }) => (
               <View style={styles.listElement}>
                 {/* Profile picture */}
                 <Image
-                  source={{uri: 'https://via.placeholder.com/50'}} // Placeholder image URL
+                  source={{ uri: 'https://via.placeholder.com/50' }} // Placeholder image URL
                   style={styles.profilePicture}
                 />
                 {/* User details */}
@@ -253,7 +264,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                   onPress={() => {
                     console.log('Selected friend:', item);
                     console.log('Selected friend username:', item.username);
-                     // Debug log
+                    // Debug log
                     setSelectedFriend(item); // Set the selected friend
                   }}>
                   <Text style={styles.userName}>{item.username}</Text>
@@ -284,7 +295,7 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                     fetchData();
                     blockAlert();
                   }}>
-                  <Text style={[styles.modalButtonText, {color: 'red'}]}>
+                  <Text style={[styles.modalButtonText, { color: 'red' }]}>
                     Block
                   </Text>
                 </Pressable>
@@ -302,132 +313,132 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
                 </Pressable>
                 {/* Cancel Button */}
                 <Pressable
-                style={[styles.modalButton]}
-                onPress={closeModal}>
-                <Text style={styles.modalButtonText}>Cancel</Text>
-            </Pressable>
+                  style={[styles.modalButton]}
+                  onPress={closeModal}>
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </Pressable>
               </View>
             </View>
           </Modal>
         </View>
       )}
 
-{selectedOption === "Add Friends" && (
-  <View style={{ flex: 1 }}>
-    <Text style={styles.header}>Send Friend Request</Text>
+      {selectedOption === "Add Friends" && (
+        <View style={{ flex: 1 }}>
+          <Text style={styles.header}>Send Friend Request</Text>
 
-    <View style={styles.addContainer}>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter username"
-        value={friendRequestUsername}
-        onChangeText={setFriendRequestUsername}
-      />
-      <TouchableOpacity style={styles.sendButton} onPress={handleSendFriendRequest}>
-        <Icon name="send" size={30} color="#1E2A78" />
-      </TouchableOpacity>
-    </View>
-
-    <Text style={styles.header}>Pending Friend Requests</Text>
-
-    <View style={styles.filterContainer}>
-      <Pressable
-        style={[styles.filterButton, filter === "Received" && styles.activeFilterButton]}
-        onPress={() => setFilter("Received")}
-      >
-        <Text style={[styles.filterText, filter === "Received" && styles.activeFilterText]}>
-          Received
-        </Text>
-      </Pressable>
-      <Pressable
-        style={[styles.filterButton, filter === "Sent" && styles.activeFilterButton]}
-        onPress={() => setFilter("Sent")}
-      >
-        <Text style={[styles.filterText, filter === "Sent" && styles.activeFilterText]}>
-          Sent
-        </Text>
-      </Pressable>
-    </View>
-
-    {/* Friend Requests List */}
-    <FlatList
-      data={filter === "Received" ? pendingRequests : sentRequests}
-      keyExtractor={(item: any) => item.id.toString()}
-      renderItem={({ item }) => (
-        <View style={styles.listElement}>
-          <View style={styles.user}>
-            <Image
-              source={{ uri: "https://via.placeholder.com/50" }}
-              style={styles.profilePicture}
+          <View style={styles.addContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter username"
+              value={friendRequestUsername}
+              onChangeText={setFriendRequestUsername}
             />
-            <Text style={styles.userName}>
-              {filter === "Received" ? item.requester_username : item.recipient_username}
-            </Text>
+            <TouchableOpacity style={styles.sendButton} onPress={handleSendFriendRequest}>
+              <Icon name="send" size={30} color="#1E2A78" />
+            </TouchableOpacity>
           </View>
-          <View style={styles.actions}>
-            {filter === "Received" && (
-              <Pressable
-                style={[styles.button, styles.approveButton]}
-                onPress={async () => {
-                  await approveFriendRequest(item.id);
-                  fetchData();
-                }}
-              >
-                <Text style={styles.buttonText}>Approve</Text>
-              </Pressable>
-            )}
+
+          <Text style={styles.header}>Pending Friend Requests</Text>
+
+          <View style={styles.filterContainer}>
             <Pressable
-              style={styles.button}
-              onPress={async () => {
-                await deleteRelationship(item.id);
-                fetchData();
-              }}
+              style={[styles.filterButton, filter === "Received" && styles.activeFilterButton]}
+              onPress={() => setFilter("Received")}
             >
-              <Icon name="trash-outline" size={20} color="#1E2A78" />
+              <Text style={[styles.filterText, filter === "Received" && styles.activeFilterText]}>
+                Received
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.filterButton, filter === "Sent" && styles.activeFilterButton]}
+              onPress={() => setFilter("Sent")}
+            >
+              <Text style={[styles.filterText, filter === "Sent" && styles.activeFilterText]}>
+                Sent
+              </Text>
             </Pressable>
           </View>
+
+          {/* Friend Requests List */}
+          <FlatList
+            data={filter === "Received" ? pendingRequests : sentRequests}
+            keyExtractor={(item: any) => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.listElement}>
+                <View style={styles.user}>
+                  <Image
+                    source={{ uri: "https://via.placeholder.com/50" }}
+                    style={styles.profilePicture}
+                  />
+                  <Text style={styles.userName}>
+                    {filter === "Received" ? item.requester_username : item.recipient_username}
+                  </Text>
+                </View>
+                <View style={styles.actions}>
+                  {filter === "Received" && (
+                    <Pressable
+                      style={[styles.button, styles.approveButton]}
+                      onPress={async () => {
+                        await approveFriendRequest(item.id);
+                        fetchData();
+                      }}
+                    >
+                      <Text style={styles.buttonText}>Approve</Text>
+                    </Pressable>
+                  )}
+                  <Pressable
+                    style={styles.button}
+                    onPress={async () => {
+                      await deleteRelationship(item.id);
+                      fetchData();
+                    }}
+                  >
+                    <Icon name="trash-outline" size={20} color="#1E2A78" />
+                  </Pressable>
+                </View>
+              </View>
+            )}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
         </View>
       )}
-      contentContainerStyle={{ paddingBottom: 20 }}
-    />
-  </View>
-)}
 
 
-        
+
       {/* </View> */}
 
       {/* <Text style={styles.header}>Blocked Users</Text> */}
       {selectedOption === 'Blocked Users' && (
-    <FlatList
-        data={blockedUsers}
-        keyExtractor={(item: any) => item.relationship?.id.toString() || item.id.toString()}
-        renderItem={({ item }) => (
+        <FlatList
+          data={blockedUsers}
+          keyExtractor={(item: any) => item.relationship?.id.toString() || item.id.toString()}
+          renderItem={({ item }) => (
             <View style={styles.listElement}>
-                {/* Profile picture */}
-                <Image
-                    source={{ uri: 'https://via.placeholder.com/50' }} // Placeholder image URL
-                    style={styles.profilePicture}
-                />
-                {/* User details */}
-                <View style={styles.userDetails}>
-                    <Text style={styles.userName}>
-                        {item.username ? item.username : "Unknown User"}
-                    </Text>
-                </View>
+              {/* Profile picture */}
+              <Image
+                source={{ uri: 'https://via.placeholder.com/50' }} // Placeholder image URL
+                style={styles.profilePicture}
+              />
+              {/* User details */}
+              <View style={styles.userDetails}>
+                <Text style={styles.userName}>
+                  {item.username ? item.username : "Unknown User"}
+                </Text>
+              </View>
 
-                <Pressable
-                    style={[styles.button, styles.approveButton]}
-                    onPress={() => {
-                        deleteRelationship(item.relationship.id);
-                        fetchData();
-                    }}>
-                    <Text style={styles.buttonText}>Unblock</Text>
-                </Pressable>
+              <Pressable
+                style={[styles.button, styles.approveButton]}
+                onPress={() => {
+                  deleteRelationship(item.relationship.id);
+                  fetchData();
+                }}>
+                <Text style={styles.buttonText}>Unblock</Text>
+              </Pressable>
             </View>
-        )}
-    />
-)}
+          )}
+        />
+      )}
 
       {selectedFriend && (
         <SendMoney
@@ -438,12 +449,12 @@ export default function ConnectionScreen({navigation}: PropsWithChildren<any>) {
         />
       )}
 
-      {selectedFriend &&(
+      {selectedFriend && (
         <RequestMoney
-        friendUsername={selectedFriend.username}
-        onClose={()=>{
-          setSelectedFriend(null);
-        }}
+          friendUsername={selectedFriend.username}
+          onClose={() => {
+            setSelectedFriend(null);
+          }}
         />
       )}
 

@@ -54,7 +54,7 @@ const RentalOffersHistory = ({ navigation }: { navigation: any })  => {
         });
       }
     } catch (error) {
-      console.error("Error fetching offers:", error);
+      console.log("Error fetching offers:", error);
     } finally {
       setLoading(false);
     }

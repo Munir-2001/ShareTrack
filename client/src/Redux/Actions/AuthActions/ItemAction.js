@@ -66,7 +66,7 @@ export const getItemOwnerPhone = async (itemId) => {
 
         return data.owner_phone;
     } catch (error) {
-        console.error("Error fetching phone number:", error.message);
+        console.log("Error fetching phone number:", error.message);
         return null;
     }
 };

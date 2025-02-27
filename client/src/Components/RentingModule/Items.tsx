@@ -62,7 +62,7 @@ export default function ItemScreen({ navigation }: any) {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch phone number. Status: ${response.status}`);
+        throw new Error(`Phone Number Not available. Status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -80,7 +80,7 @@ export default function ItemScreen({ navigation }: any) {
       Linking.openURL(whatsappUrl);
 
     } catch (error) {
-      console.error("❌ Error fetching phone number:", error);
+      console.log("❌ Error fetching phone number:", error);
       Alert.alert("Error fetching phone number");
     }
   };
@@ -92,7 +92,7 @@ export default function ItemScreen({ navigation }: any) {
       const data = await response.json();
       setRentalItems(data); // ✅ Update rental items state
     } catch (error) {
-      console.error("❌ Error fetching rental items:", error);
+      console.log("❌ Error fetching rental items:", error);
     }
   };
   const filteredData = data.filter((item) =>

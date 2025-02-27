@@ -157,7 +157,7 @@ const PendingRequestsScreen = ({ navigation }: { navigation: any }) => {
         const date = new Date(timestamp);
 
         if (isNaN(date.getTime())) {
-            console.error("❌ formatDate: Invalid date format:", timestamp);
+            console.log("❌ formatDate: Invalid date format:", timestamp);
             return "Invalid Date";
         }
 
@@ -171,7 +171,7 @@ const PendingRequestsScreen = ({ navigation }: { navigation: any }) => {
             hour12: true,
         });
     } catch (error) {
-        console.error(" formatDate: Error parsing date:", error);
+        console.log(" formatDate: Error parsing date:", error);
         return "Invalid Date";
     }
 };
