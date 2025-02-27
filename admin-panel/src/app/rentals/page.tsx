@@ -172,7 +172,7 @@ export default function RentalApprovalPage() {
         const data: RentalItem[] = await res.json();
         setRentals(data);
       } catch (error) {
-        console.error("Error fetching pending rentals:", error);
+        console.log("Error fetching pending rentals:", error);
       }
     }
     fetchPendingRentals();
@@ -184,7 +184,7 @@ export default function RentalApprovalPage() {
       await fetch(`${API_URL}/rentals/${id}/approve`, { method: "PUT" });
       setRentals((prev) => prev.filter((rental) => rental.id !== id));
     } catch (error) {
-      console.error("Error approving rental:", error);
+      console.log("Error approving rental:", error);
     }
   };
 
@@ -206,7 +206,7 @@ export default function RentalApprovalPage() {
       setSelectedRental(null);
       setRejectionReason("");
     } catch (error) {
-      console.error("Error rejecting rental:", error);
+      console.log("Error rejecting rental:", error);
     }
   };
 

@@ -70,7 +70,7 @@ const uploadToStorage = async (photo, folderName = "profilepictures") => {
 
         return new Promise((resolve, reject) => {
             stream.on("error", (err) => {
-                console.error("Upload failed", err);
+                console.log("Upload failed", err);
                 reject(err);
             });
 

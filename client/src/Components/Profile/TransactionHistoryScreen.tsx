@@ -35,7 +35,7 @@ const formatDate = (timestamp: string) => {
     }
 
     if (isNaN(date.getTime())) {
-      console.error("❌ formatDate: Unable to parse date:", timestamp);
+      console.log("❌ formatDate: Unable to parse date:", timestamp);
       return "Invalid Date";
     }
 
@@ -50,7 +50,7 @@ const formatDate = (timestamp: string) => {
       hour12: true,
     });
   } catch (error) {
-    console.error("❌ formatDate: Error parsing date:", error);
+    console.log("❌ formatDate: Error parsing date:", error);
     return "Invalid Date";
   }
 };
@@ -72,7 +72,7 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
         setTransactions(history);
         setFilteredTransactions(history);
       } catch (error) {
-        console.error('Error fetching transaction history:', error);
+        console.log('Error fetching transaction history:', error);
       }
       setLoading(false);
     };

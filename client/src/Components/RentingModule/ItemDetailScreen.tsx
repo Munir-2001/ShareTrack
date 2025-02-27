@@ -61,7 +61,7 @@ export default function ItemDetailScreen({ route, navigation }: any) {
             navigation.navigate('ITEMS', { refresh: true });
 
         } catch (error) {
-            console.error('Error updating item:', error);
+            console.log('Error updating item:', error);
             Alert.alert('Error', 'Could not update item status');
         }
     };
