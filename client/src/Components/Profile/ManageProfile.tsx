@@ -55,7 +55,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     if (user && user.id) {
       const fetchUserBalance = async () => {
         try {
-          console.log('user id defined is ' + user.userId)
+          console.log('user id defined is ' + user.id)
           const response = await fetch(`${API_URL}/api/relationship/getUserBalance`, {
             method: 'POST',
             headers: {
@@ -218,7 +218,8 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   return (
     <View
       style={{
-        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        //For theme Background
+        // backgroundColor: isDarkMode ? Colors.black : Colors.white,
         flex: 1,
       }}>
       {userState ? (

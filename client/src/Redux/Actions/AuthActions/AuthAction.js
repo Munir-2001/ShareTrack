@@ -92,7 +92,7 @@ export const updateUser = (userData) => {
                 payload: userData, // Save the user object to Redux state
             });
         } catch (error) {
-            Alert.alert("Error updating user:", error.message);
+            Alert.alert("No Error updating user:", error.message);
             // Optionally, dispatch an error action here
         }
     };

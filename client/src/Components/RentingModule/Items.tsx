@@ -16,6 +16,7 @@ import {
   getItemOwnerPhone
 } from '../../Redux/Actions/AuthActions/ItemAction';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
+import { TextInput } from 'react-native';
 const itemImages = [
   require('../../Assets/1.jpg'),
   require('../../Assets/2.jpg'),
@@ -37,6 +38,7 @@ export default function ItemScreen({ navigation }: any) {
   const [showRentals, setShowRentals] = useState(false); // ✅ Manage rentals tab visibility
   const [rentalItems, setRentalItems] = useState<any[]>([]); // ✅ Store rental items data
   const [data, setData] = useState<any[]>([]); // ✅ Ensure data is an array of objects
+  const [searchQuery, setSearchQuery] = useState('');
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       dispatch(getAllItems()); // ✅ Refresh items list when returning to screen
@@ -93,6 +95,13 @@ export default function ItemScreen({ navigation }: any) {
       console.error("❌ Error fetching rental items:", error);
     }
   };
+  const filteredData = data.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  const filteredRentalItems = rentalItems.filter((item) =>
+    item.item_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // ✅ Fetch rentals when Rentals tab is active
   useEffect(() => {
@@ -121,6 +130,7 @@ export default function ItemScreen({ navigation }: any) {
   }, []);
 
   return (
+    
     <View style={styles.container}>
       {/* <View style={styles.toggleButtonsContainer}>
         <TouchableOpacity
@@ -138,7 +148,12 @@ export default function ItemScreen({ navigation }: any) {
           </Text>
         </TouchableOpacity>
       </View> */}
-
+<TextInput
+  style={styles.searchBar}
+  placeholder=" Search items..."
+  value={searchQuery}
+  onChangeText={setSearchQuery}
+/>
       <View style={styles.toggleButtonsContainer}>
         <TouchableOpacity
           style={[styles.toggleButton, showAll && styles.activeButton]}
@@ -169,53 +184,52 @@ export default function ItemScreen({ navigation }: any) {
             setShowRentals(true);
           }}>
           <Text style={showRentals ? styles.activeButtonText : styles.toggleButtonText}>
-            🚀 Rentals
+            Rentals
           </Text>
         </TouchableOpacity>
       </View>
       <ScrollView>
-        <View style={styles.itemsRow}>
-          {showRentals
-            ? rentalItems.map((item, index) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => navigation.navigate("RENTALITEMDETAILS", { item })}
-                style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}
-              >
-                <Image source={getRandomImage()} style={styles.itemImage} />
-                <Text style={styles.itemName}>{item.item_name}</Text>
-                <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
-                <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
-                <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
-              </TouchableOpacity>
-            ))
-            : data.map((item, index) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => navigation.navigate("ITEMDETAIL", { item })}
-                style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}
-              >
-                <Image source={getRandomImage()} style={styles.itemImage} />
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemPrice}>
-                  💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
-                </Text>
-                {/* <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
-                <Text style={styles.itemLocation}>📍 Location: {item.city}, {item.state}, {item.country}</Text> */}
+      <View style={styles.itemsRow}>
+  {showRentals
+    ? filteredRentalItems.map((item, index) => (
+        <TouchableOpacity
+          key={item.id}
+          onPress={() => navigation.navigate("RENTALITEMDETAILS", { item })}
+          style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}
+        >
+          <Image source={getRandomImage()} style={styles.itemImage} />
+          <Text style={styles.itemName}>{item.item_name}</Text>
+          <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
+          <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
+          <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
+        </TouchableOpacity>
+      ))
+    : filteredData.map((item, index) => (
+        <TouchableOpacity
+          key={item.id}
+          onPress={() => navigation.navigate("ITEMDETAIL", { item })}
+          style={[styles.itemCard, index % 2 === 0 && styles.itemCardLeft]}
+        >
+          <Image source={getRandomImage()} style={styles.itemImage} />
+          <Text style={styles.itemName}>{item.name}</Text>
+          <Text style={styles.itemPrice}>
+            💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
+          </Text>
 
-                <TouchableOpacity
-                  style={styles.whatsappButton}
-                  onPress={() => fetchOwnerPhoneNumber(item.name)}
-                >
-                  <Text style={styles.whatsappText}>💬 Chat on WhatsApp</Text>
-                </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.whatsappButton}
+            onPress={() => fetchOwnerPhoneNumber(item.name)}
+          >
+            <Text style={styles.whatsappText}>💬 Chat on WhatsApp</Text>
+          </TouchableOpacity>
 
-                <Text style={[styles.itemStatus, { color: item.is_available ? 'green' : 'red' }]}>
-                  {item.is_available ? '🟢 Active' : '🔴 Inactive'}
-                </Text>
-              </TouchableOpacity>
-            ))}
-        </View>
+          <Text style={[styles.itemStatus, { color: item.is_available ? 'green' : 'red' }]}>
+            {item.is_available ? '🟢 Active' : '🔴 Inactive'}
+          </Text>
+        </TouchableOpacity>
+      ))}
+</View>
+
       </ScrollView>
 
 
@@ -286,6 +300,7 @@ const styles = StyleSheet.create({
   itemLocation: { fontSize: 14, color: '#333', marginBottom: 10 },
   deleteButton: { padding: 10, justifyContent: 'center', alignItems: 'center' },
   deleteText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
+  
   whatsappButton: {
     backgroundColor: "#25D366", // WhatsApp green color
     padding: 12,
@@ -316,6 +331,16 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 
+  searchBar: {
+    height: 40,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    backgroundColor: '#F5F5F5',
+  },
+  
   managementTile: {
     flex: 1,
     backgroundColor: "#1E2A78",

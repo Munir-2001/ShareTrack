@@ -25,31 +25,47 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
     const handleUpdate = async () => {
         setLoading(true);
         setSuccessMessage("");
-
+    
         try {
-            const response = await fetch(`${API_URL}/api/auth/update`, {
+            if (!user?.id) {
+                throw new Error("User ID is missing");
+            }
+    
+            const response = await fetch(`${API_URL}/api/auth/update/${user.id}`, { // <-- Include ID in URL
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${user.token}`,
                 },
-                body: JSON.stringify({ phone, email, age, gender, marital_status: maritalStatus, education_level: educationLevel, employment_status: employmentStatus }),
+                body: JSON.stringify({ 
+                    phone, 
+                    email, 
+                    age, 
+                    gender, 
+                    marital_status: maritalStatus, 
+                    education_level: educationLevel, 
+                    employment_status: employmentStatus 
+                }),
             });
-
+    
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.message);
             }
-
+    
             const updatedUser = await response.json();
             dispatch(updateUser(updatedUser));
-
+    
             setSuccessMessage("Profile updated successfully!");
             navigation.goBack();
-        } catch (error: any) {
-            Alert.alert("Error", error.message || "Something went wrong.");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                Alert.alert("Error", error.message);
+            } else {
+                Alert.alert("Error", "Something went wrong.");
+            }
         }
-
+    
         setLoading(false);
     };
 
