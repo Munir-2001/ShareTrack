@@ -62,8 +62,8 @@ const RentalOffersHistory = ({ navigation }: { navigation: any })  => {
 
   const filteredOffers = (tab === "incoming" ? offers.incoming : offers.outgoing).filter(
     (offer) =>
-      offer.item_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      offer.renter_name.toLowerCase().includes(searchQuery.toLowerCase())
+      offer.item_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      offer.renter_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
