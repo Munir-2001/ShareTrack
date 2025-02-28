@@ -4,6 +4,7 @@ import {
     View,
     Text,
     StyleSheet,
+    SafeAreaView,
 } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../Redux/Store/hooks';
@@ -32,17 +33,17 @@ export default function Dashboard() {
     return (
         <>
 
-            <Stack.Navigator initialRouteName="TWO">
-                <Stack.Screen name="ONE">
-                    {() => <ScreenOne />}
+            <Stack.Navigator initialRouteName="DASHBOARD">
+                <Stack.Screen name="DASHBOARD">
+                    {() => <SafeAreaView><Text style={styles.screenText}>Currently unavailable!</Text></SafeAreaView>}
                 </Stack.Screen>
 
-                <Stack.Screen name="TWO">
+                {/* <Stack.Screen name="TWO">
                     {() => <ScreenTwo />}
                 </Stack.Screen>
                 <Stack.Screen name="THREE">
                     {() => <ScreenThree />}
-                </Stack.Screen>
+                </Stack.Screen> */}
             </Stack.Navigator>
         </>
 
