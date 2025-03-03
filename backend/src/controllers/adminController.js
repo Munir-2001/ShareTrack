@@ -91,6 +91,28 @@ const updateUserStatus = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+export const getUserDetails = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // ✅ Fetch user details from Supabase
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 
 /**
  * Get reported users

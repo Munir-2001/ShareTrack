@@ -216,7 +216,8 @@ import {
   admingetPendingRentals,
   adminapproveRental,
   adminrejectRental,
-  adminLogin
+  adminLogin,
+  getUserDetails
 } from "../controllers/adminController.js";
 
 /**
@@ -315,7 +316,6 @@ adminRoutes.put("/users/:id/status", updateUserStatus);
  *         description: Forbidden - Admin access required
  */
 adminRoutes.get("/reports", getReportedUsers);
-
 /**
  * @swagger
  * /api/admin/reports/{id}/resolve:
@@ -408,5 +408,28 @@ adminRoutes.put("/rentals/:id/approve", adminapproveRental);
  *         description: Forbidden - Admin access required
  */
 adminRoutes.put("/rentals/:id/reject", adminrejectRental);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}:
+ *   get:
+ *     summary: Get user details
+ *     tags: [Admin]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User details retrieved successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal Server Error
+ */
+adminRoutes.get("/users/:id", getUserDetails);
 
 export default adminRoutes;
