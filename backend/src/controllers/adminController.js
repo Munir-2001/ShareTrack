@@ -231,4 +231,76 @@ const adminapproveRental = async (req, res) => {
   };
   
   
-export {resolveReport,getReportedUsers,updateUserStatus,getAllUsers,admingetPendingRentals,adminapproveRental,adminrejectRental}
+  // const getTransactions = async (req, res) => {
+  //   try {
+  //     const { page = 1, pageSize = 10, amount, sender, receiver } = req.query;
+  //     const offset = (parseInt(page) - 1) * parseInt(pageSize);
+  //     const limit = parseInt(pageSize); // Ensure proper row limit
+  
+  //     let query = supabase
+  //       .from("transactions")
+  //       .select(
+  //         "id, sender_id, receiver_id, amount, status, transaction_type, created_at, users_sender:sender_id(username), users_receiver:receiver_id(username)",
+  //         { count: "exact" }
+  //       )
+  //       .range(offset, offset + limit - 1); // ✅ Apply proper limit
+  
+  //     if (amount) query = query.eq("amount", amount);
+  //     if (sender) query = query.ilike("users_sender.username", `%${sender}%`);
+  //     if (receiver) query = query.ilike("users_receiver.username", `%${receiver}%`);
+  
+  //     const { data, count, error } = await query;
+  
+  //     if (error) throw error;
+  
+  //     res.status(200).json({
+  //       transactions: data.map((tx) => ({
+  //         ...tx,
+  //         sender_username: tx.users_sender?.username || "Unknown",
+  //         receiver_username: tx.users_receiver?.username || "Unknown",
+  //       })),
+  //       totalPages: Math.ceil(count / limit), // ✅ Ensure correct total pages
+  //     });
+  //   } catch (error) {
+  //     console.error("Error fetching transactions:", error);
+  //     res.status(500).json({ error: "Internal Server Error" });
+  //   }
+  // };
+  const getTransactions = async (req, res) => {
+    try {
+        // Fetch all transactions from the database without pagination
+        let query = supabase
+            .from("transactions")
+            .select(
+                "id, sender_id, receiver_id, amount, status, transaction_type, created_at, users_sender:sender_id(username), users_receiver:receiver_id(username)"
+            );
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        // Transform the response to include sender & receiver usernames
+        const transactions = data.map((tx) => ({
+            id: tx.id,
+            amount: tx.amount,
+            status: tx.status,
+            transaction_type: tx.transaction_type,
+            created_at: tx.created_at,
+            sender_id: tx.sender_id,
+            sender_username: tx.users_sender?.username || "Unknown",
+            receiver_id: tx.receiver_id,
+            receiver_username: tx.users_receiver?.username || "Unknown",
+        }));
+
+        res.status(200).json({ transactions });
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+
+  
+
+  
+export {resolveReport,getReportedUsers,updateUserStatus,getAllUsers,admingetPendingRentals,adminapproveRental,getTransactions,adminrejectRental}

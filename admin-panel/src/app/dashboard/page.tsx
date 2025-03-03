@@ -158,6 +158,13 @@ export default function DashboardPage() {
         </button>
 
       </div>
+      <div
+          onClick={() => router.push("/transactions")}
+          className="bg-green-600 text-white p-6 rounded-lg shadow-md text-center cursor-pointer hover:bg-green-700 transition-all"
+        >
+          <h2 className="text-xl font-semibold">💳 View Transactions</h2>
+          <p className="text-lg mt-2">Monitor all transactions with details</p>
+        </div>
 
       {/* User Management Table */}
       {showUsers && (

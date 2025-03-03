@@ -217,7 +217,8 @@ import {
   adminapproveRental,
   adminrejectRental,
   adminLogin,
-  getUserDetails
+  getUserDetails,
+  getTransactions
 } from "../controllers/adminController.js";
 
 /**
@@ -432,4 +433,48 @@ adminRoutes.put("/rentals/:id/reject", adminrejectRental);
  */
 adminRoutes.get("/users/:id", getUserDetails);
 
+/**
+ * @swagger
+ * /api/admin/transactions:
+ *   get:
+ *     summary: Get all transactions
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all transactions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 transactions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       amount:
+ *                         type: number
+ *                       status:
+ *                         type: string
+ *                       transaction_type:
+ *                         type: string
+ *                         nullable: true
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
+ *                       sender_id:
+ *                         type: string
+ *                       sender_username:
+ *                         type: string
+ *                       receiver_id:
+ *                         type: string
+ *                       receiver_username:
+ *                         type: string
+ *       500:
+ *         description: Internal Server Error
+ */
+
+adminRoutes.get("/transactions", getTransactions);
 export default adminRoutes;
