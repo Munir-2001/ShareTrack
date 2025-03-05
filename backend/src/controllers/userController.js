@@ -50,7 +50,8 @@ const loginUser = async (req, res) => {
     // Fetch user
     const { data: user, error } = await supabase
       .from("users")
-      .select("id, username, phone, email, password,balance,credit_score,is_active,photo")
+      // .select("id, username, phone, email, password,balance,credit_score,is_active,photo")
+      .select("*")
       .eq("email", email)
       .single();
 

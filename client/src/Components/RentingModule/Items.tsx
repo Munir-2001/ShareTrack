@@ -1049,13 +1049,22 @@ export default function RentalsScreen({ navigation }: any) {
   };
 
   // ✅ Filter Rental Items Based on Tab Selection
+  // const filteredRentalItems = rentalItems
+  //   .filter((item) =>
+  //     showMyRentals ? item.owner_id === user.id : item.owner_id !== user.id
+  //   )
+  //   .filter((item) =>
+  //     item.item_name.toLowerCase().includes(searchQuery.toLowerCase())
+  //   );
   const filteredRentalItems = rentalItems
-    .filter((item) =>
-      showMyRentals ? item.owner_id === user.id : item.owner_id !== user.id
-    )
-    .filter((item) =>
-      item.item_name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  .filter((item) =>
+    showMyRentals
+      ? item.owner_id === user.id
+      : item.is_available === true && item.owner_id !== user.id // ✅ Show only available items NOT uploaded by the owner
+  )
+  .filter((item) =>
+    item.item_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // ✅ Fetch Item Owner's Phone Number
   const fetchOwnerPhoneNumber = async (itemName: string) => {

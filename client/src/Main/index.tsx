@@ -4,18 +4,18 @@ import type { PropsWithChildren } from 'react';
 
 
 import {
-    Alert,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
-    useColorScheme,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
 } from 'react-native';
 
 import {
-    Colors,
+  Colors,
 } from 'react-native/Libraries/NewAppScreen';
 
 import { useAppDispatch, useAppSelector } from '../Redux/Store/hooks';
@@ -46,80 +46,80 @@ const Stack = createNativeStackNavigator();
 
 
 export default function Main() {
-    const isDarkMode = useColorScheme() === 'dark';
-    const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
-    const [isSignUp, setIsSignUp] = useState(false);
-    const [authState, setAuthState] = useState(isAuth || false);
+  const isDarkMode = useColorScheme() === 'dark';
+  const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [authState, setAuthState] = useState(isAuth || false);
 
-    useEffect(() => {
-        setAuthState(isAuth);
-    }, [isAuth]);
+  useEffect(() => {
+    setAuthState(isAuth);
+  }, [isAuth]);
 
 
 
-    return (<>
-        <NavigationContainer>
-            {
-                isAuth ? (
+  return (<>
+    <NavigationContainer>
+      {
+        isAuth ? (
 
-                    <Tab.Navigator
-  screenOptions={({ route }) => ({
-    header: () => (route.name === 'Profile' ? null : <Header />),
-    headerShown: true,
-    tabBarActiveTintColor: '#1E2A78', 
-    tabBarInactiveTintColor: '#8e8e93', 
-    tabBarIcon: ({ color, size }) => {
-      let iconName;
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              header: () => (route.name === 'Profile' ? null : <Header />),
+              headerShown: true,
+              tabBarActiveTintColor: '#1E2A78',
+              tabBarInactiveTintColor: '#8e8e93',
+              tabBarIcon: ({ color, size }) => {
+                let iconName;
 
-      if (route.name === 'Dashboard') {
-        iconName = 'home-outline'; 
-      } else if (route.name === 'Profile') {
-        iconName = 'person-outline'; 
-      } else if (route.name === 'Rent') {
-        iconName = 'receipt-outline'; 
+                if (route.name === 'Dashboard') {
+                  iconName = 'home-outline';
+                } else if (route.name === 'Profile') {
+                  iconName = 'person-outline';
+                } else if (route.name === 'Rent') {
+                  iconName = 'receipt-outline';
+                }
+
+                return <Icon name={iconName} size={size || 24} color={color} />;
+              },
+              tabBarStyle: {
+                backgroundColor: '#fff',
+                height: 60,
+              },
+              tabBarLabelStyle: {
+                fontSize: 12,
+              },
+            })}
+          >
+            <Tab.Screen name="Dashboard">{() => <Dashboard />}</Tab.Screen>
+            <Tab.Screen name="Profile">{() => <ProfileScreen />}</Tab.Screen>
+            <Tab.Screen name="Rent">{() => <RentingModule />}</Tab.Screen>
+          </Tab.Navigator>
+
+
+        ) : (
+          <Stack.Navigator initialRouteName="Launch" screenOptions={{ headerShown: false, }}>
+            <Stack.Screen name="Launch" >
+              {() => <LaunchScreen setIsSignUp={setIsSignUp} />}
+            </Stack.Screen>
+            <Stack.Screen name="Auth" >
+              {() => <AuthScreen isSignUp={isSignUp} setIsSignUp={setIsSignUp} />}
+            </Stack.Screen>
+
+
+          </Stack.Navigator>
+
+        )
       }
-
-      return <Icon name={iconName} size={size || 24} color={color} />;
-    },
-    tabBarStyle: {
-      backgroundColor: '#fff', 
-      height: 60, 
-    },
-    tabBarLabelStyle: {
-      fontSize: 12, 
-    },
-  })}
->
-  <Tab.Screen name="Dashboard">{() => <Dashboard />}</Tab.Screen>
-  <Tab.Screen name="Profile">{() => <ProfileScreen />}</Tab.Screen>
-  <Tab.Screen name="Rent">{() => <RentingModule />}</Tab.Screen>
-</Tab.Navigator>
-
-
-                ) : (
-                    <Stack.Navigator initialRouteName="Launch" screenOptions={{ headerShown: false, }}>
-                        <Stack.Screen name="Launch" >
-                            {() => <LaunchScreen setIsSignUp={setIsSignUp} />}
-                        </Stack.Screen>
-                        <Stack.Screen name="Auth" >
-                            {() => <AuthScreen isSignUp={isSignUp} setIsSignUp={setIsSignUp} />}
-                        </Stack.Screen>
-
-
-                    </Stack.Navigator>
-
-                )
-            }
-        </NavigationContainer>
-    </>);
+    </NavigationContainer>
+  </>);
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 

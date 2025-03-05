@@ -1,44 +1,59 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+    useColorScheme,
+    View,
+    Text,
+    StyleSheet,
+    SafeAreaView,
+} from 'react-native';
 
-function ScreenTwo({ navigation }: { navigation: any }) {
+import { useAppDispatch, useAppSelector } from '../Redux/Store/hooks';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// Individual screens
+function ScreenOne() {
+    return <View><Text style={styles.screenText}>ONE</Text></View>
+}
+
+function ScreenTwo() {
+    return <View><Text style={styles.screenText}>TWO</Text></View>
+}
+
+function ScreenThree() {
+    return <View><Text style={styles.screenText}>THREE</Text></View>
+}
+
+const Stack = createNativeStackNavigator();
+
+export default function Dashboard() {
+
+
     return (
-        <View style={styles.container}>
-            <Text style={styles.screenText}>Hello World</Text>
+        <>
 
-            <TouchableOpacity 
-                style={styles.button} 
-                onPress={() => navigation.navigate("NewScreen")} // Navigate to the new screen
-            >
-                <Text style={styles.buttonText}>Go to New Screen</Text>
-            </TouchableOpacity>
-        </View>
+            <Stack.Navigator initialRouteName="TWO">
+                <Stack.Screen name="ONE">
+                    {() => <ScreenOne />}
+                </Stack.Screen>
+
+                <Stack.Screen name="TWO">
+                    {() => <ScreenTwo />}
+                </Stack.Screen>
+                <Stack.Screen name="THREE">
+                    {() => <ScreenThree />}
+                </Stack.Screen>
+            </Stack.Navigator>
+        </>
+
     );
 }
 
-export default ScreenTwo;
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-    },
     screenText: {
         fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    button: {
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        backgroundColor: '#1E2A78',
-        borderRadius: 8,
-    },
-    buttonText: {
-        fontSize: 18,
-        color: 'white',
-        fontWeight: 'bold',
+        textAlign: 'center',
+        margin: 20,
     },
 });
-

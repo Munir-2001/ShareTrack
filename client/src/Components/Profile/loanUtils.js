@@ -53,6 +53,7 @@ export const getUserLoans = async (userId) => {
 
 // Repay a loan
 export const repayLoan = async (transactionId) => {
+  debugger;
   try {
     console.log('inside the loan utils')
     const response = await fetch(`${API_URL}/api/loans/repay`, {
