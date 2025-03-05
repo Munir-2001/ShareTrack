@@ -34,11 +34,6 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((state: { auth: any }) => state.auth.user);
-<<<<<<< HEAD
-  console.log("useruser121", useAppSelector((state: { auth: any }) => state))
-=======
-  
->>>>>>> 3a3d2691cc87e64ce108bbdda180371fd760f99c
   const [balance, setBalance] = useState<number | null>(null);
   const [creditScore, setCreditScore] = useState<number | null>(null);
 
@@ -182,8 +177,6 @@ useEffect(()=>{
 
       const data = await response.json();
 
-      console.log(data);
-
       if (response.ok) {
         Alert.alert('Success', `Photo URL: ${data.photoUrl}`);
         // Update the user state with the new photo URL
@@ -257,6 +250,7 @@ useEffect(()=>{
       }
   
       Alert.alert('Error', errorMessage);
+      //Cal refresh here or after calling it
     }
   };
 
@@ -278,9 +272,8 @@ useEffect(()=>{
                 source={{
                   uri:
                     photo?.uri ||
-                    userState?.photo 
-                    // ||
-                    // 'https://via.placeholder.com/100',
+                    userState?.photo ||
+                    'https://via.placeholder.com/100',
                 }}
                 style={styles.profilePicture}
               />
