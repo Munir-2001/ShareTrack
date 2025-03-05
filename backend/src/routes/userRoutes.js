@@ -3,7 +3,7 @@ import express from 'express';
 import multer from 'multer';
 // const multer = require("multer");
 // const { createUser, loginUser, updateUser, updatePhoto, updateUserDetails } = require("../controllers/userController");
-import { createUser, loginUser, updateUser, updatePhoto, updateUserDetails } from "../controllers/userController.js"; 
+import { createUser, loginUser, updateUser, updatePhoto, updateUserDetails,deleteImage } from "../controllers/userController.js"; 
 
 const userRouter = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -150,6 +150,9 @@ userRouter.post("/photo", upload.single("file"), updatePhoto);
  *         description: Bad request
  */
 userRouter.put("/updateDetails", updateUserDetails);
+
+
+userRouter.delete("/deleteImage/:id", deleteImage);
 
 // module.exports = userRouter;
 export default userRouter;

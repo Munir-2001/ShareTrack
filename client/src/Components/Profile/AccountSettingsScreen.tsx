@@ -16,6 +16,7 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
     const [maritalStatus, setMaritalStatus] = useState(user?.marital_status ? String(user?.marital_status) : ""); 
     const [educationLevel, setEducationLevel] = useState(user?.education_level || "");
     const [employmentStatus, setEmploymentStatus] = useState(user?.employment_status ? String(user?.employment_status) : ""); 
+    const [city, setCity] = useState(user?.city ? String(user?.setCity) : ""); 
 
     const [username, setUsername] = useState(user?.username || "");
     const [phone, setPhone] = useState(user?.phone || "");
