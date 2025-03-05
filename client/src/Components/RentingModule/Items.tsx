@@ -238,7 +238,7 @@
 //         >
 //           <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //           <Text style={styles.itemName}>{item.item_name}</Text>
-//           <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
+//           <Text style={styles.itemPrice}>💰 Price: {item.rental_price} $</Text>
 //           <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
 //           <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
 //         </TouchableOpacity>
@@ -252,7 +252,7 @@
 //           <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //           <Text style={styles.itemName}>{item.name}</Text>
 //           <Text style={styles.itemPrice}>
-//             💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
+//             💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} $` : "N/A"}
 //           </Text>
 
 //           <TouchableOpacity
@@ -276,7 +276,7 @@
 //       >
 //         <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //         <Text style={styles.itemName}>{item.item_name}</Text>
-//         <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
+//         <Text style={styles.itemPrice}>💰 Price: {item.rental_price} $</Text>
 //         <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
 //         <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
 
@@ -299,7 +299,7 @@
 //         <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //         <Text style={styles.itemName}>{item.name}</Text>
 //         <Text style={styles.itemPrice}>
-//           💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
+//           💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} $` : "N/A"}
 //         </Text>
 
 //         {/* ✅ WhatsApp Chat Button */}
@@ -600,7 +600,7 @@
 //             >
 //               <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //               <Text style={styles.itemName}>{item.item_name}</Text>
-//               <Text style={styles.itemPrice}>💰 {item.rental_price} PKR</Text>
+//               <Text style={styles.itemPrice}>💰 {item.rental_price} $</Text>
 //               <Text style={styles.itemCategory}>📌 {item.category}</Text>
 //               <Text style={styles.itemLocation}>📍 {item.location}</Text>
 
@@ -817,7 +817,7 @@
 //               >
 //                 <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //                 <Text style={styles.itemName}>{item.item_name}</Text>
-//                 <Text style={styles.itemPrice}>💰 {item.rental_price} PKR</Text>
+//                 <Text style={styles.itemPrice}>💰 {item.rental_price} $</Text>
 //                 <Text style={styles.itemCategory}>📌 {item.category}</Text>
 //                 <Text style={styles.itemLocation}>📍 {item.location}</Text>
 
@@ -1132,7 +1132,7 @@ export default function RentalsScreen({ navigation }: any) {
               >
                 <Image source={{ uri: item.photo }} style={styles.itemImage} />
                 <Text style={styles.itemName}>{item.item_name}</Text>
-                <Text style={styles.itemPrice}>💰 {item.rental_price} PKR</Text>
+                <Text style={styles.itemPrice}>💰 $ {item.rental_price}</Text>
                 <Text style={styles.itemCategory}>📌 {item.category}</Text>
                 <Text style={styles.itemLocation}>📍 {item.location}</Text>
 

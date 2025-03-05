@@ -34,6 +34,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((state: { auth: any }) => state.auth.user);
+  console.log("useruser121", useAppSelector((state: { auth: any }) => state))
   const [balance, setBalance] = useState<number | null>(null);
   const [creditScore, setCreditScore] = useState<number | null>(null);
 
@@ -42,7 +43,10 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const [adjustmentVisible, setAdjustmentVisible] = useState(false);
 
   const [userState, setUserState] = useState(user);
+  const [isUserLoaded, setIsUserLoaded] = useState(false);
   const [photo, setPhoto] = useState<any | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(`${API_URL}/uploads/profile.jpg`);
+
   const gotoPendingRequests = () => {
     navigation.navigate('PendingRequestsScreen');
   };
@@ -51,36 +55,39 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
 
   }
   useEffect(() => {
-    setUserState(user);
-    if (user && user.id) {
-      const fetchUserBalance = async () => {
-        try {
-          console.log('user id defined is ' + user.id)
-          const response = await fetch(`${API_URL}/api/relationship/getUserBalance`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username: user.username }), // Fix: Send username instead of userId
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to fetch user balance');
-          }
-
-          const data = await response.json();
-          setBalance(data.balance);
-          setCreditScore(data.credit_score); // ✅ Store credit score in state
-        } catch (error) {
-          console.log('Error fetching user balance:', error);
-        }
-      };
-
-      fetchUserBalance();
-    } else {
-      console.error('User ID is not available');
+    if (!user) {
+      console.log("User is not available yet");
+      return; // Exit early if user is null/undefined
     }
-  }, [user]);
+  
+    console.log("User found:", user);
+  
+    setUserState(user);
+  
+    const fetchUserBalance = async () => {
+      try {
+        console.log('Fetching balance for user ID:', user.id);
+        const response = await fetch(`${API_URL}/api/relationship/getUserBalance`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username: user.username }),
+        });
+  
+        if (!response.ok) throw new Error('Failed to fetch user balance');
+  
+        const data = await response.json();
+        setBalance(data.balance);
+        setCreditScore(data.credit_score);
+      } catch (error) {
+        console.log('Error fetching user balance:', error);
+      }
+    };
+  
+    fetchUserBalance();
+  }, [user]); // Runs only when user changes
+  
 
   const pickImage = async () => {
     const options: ImageLibraryOptions = {
@@ -173,7 +180,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
         });
         setPhoto(null);
         dispatch(updateUser(userState));
-
+        console.log("Updated User in Redux =>", updateUser);
       } else {
         Alert.alert('Upload Error', data.message || 'Something went wrong.');
       }
@@ -201,7 +208,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
 
   const openModal = () => {
     setModalVisible(true);
-    console.log('open modal');
+    console.log('open modal', photo ,userState );
   };
 
   const goToUpcomingRepayments = () => {
@@ -213,7 +220,32 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     setModalVisible(false);
     console.log('Modal Visible State:', modalVisible); // Log after state chang
   };
-
+  const removeProfilePicture = async () => {
+    console.log("removeProfilePicture function called");
+  
+    try {
+      const response = await fetch(`${API_URL}/api/auth/deleteImage/2`, {
+        method: 'DELETE',
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to remove profile picture');
+      }
+  
+      // ✅ Clear the profile image state after deletion
+      setProfileImage(null); 
+  
+      Alert.alert('Success', 'Profile picture removed successfully');
+    } catch (error) {
+      let errorMessage = 'Something went wrong';
+  
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+  
+      Alert.alert('Error', errorMessage);
+    }
+  };
 
   return (
     <View
@@ -223,6 +255,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
         flex: 1,
       }}>
       {userState ? (
+        
         <>
           <View style={styles.topHalf} />
 
@@ -248,15 +281,15 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
               animationType="slide">
               <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                  <Pressable
-                    style={[styles.modalButton]}
-                    onPress={() => {
-                      closeModal();
-                    }}>
-                    <Text style={[styles.modalButtonText, { color: 'red' }]}>
-                      Remove Profile Picture
-                    </Text>
-                  </Pressable>
+                <Pressable
+                style={[styles.modalButton]}
+                  onPress={() => {
+                    console.log("Button pressed!");
+                    removeProfilePicture();
+                  }}>
+                  <Text style={{ color: 'red' }}>
+                    Remove Profile Picture</Text>
+                </Pressable>
                   <Pressable
                     style={[styles.modalButton]}
                     onPress={() => {

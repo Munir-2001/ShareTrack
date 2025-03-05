@@ -197,7 +197,7 @@ export default function RentalItemScreen({ route, navigation }: any) {
             </TouchableOpacity>
 
             <Text style={styles.itemName}>{item.item_name}</Text>
-            <Text style={styles.itemPrice}>💰 Rental Price: {item.rental_price} PKR</Text>
+            <Text style={styles.itemPrice}>💰 Rental Price:$ {item.rental_price}</Text>
             <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
             <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
 
