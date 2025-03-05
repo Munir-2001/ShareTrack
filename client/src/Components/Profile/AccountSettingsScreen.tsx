@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
     View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, StyleSheet, ScrollView 
 } from "react-native";
@@ -10,21 +10,23 @@ import { Picker } from '@react-native-picker/picker';
 const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
     const dispatch = useAppDispatch();
     const user = useAppSelector((state) => state.auth.user);
-
+   
  
-    const [gender, setGender] = useState(user?.gender ? String(user?.gender) : ""); 
+    const [gender, setGender] = useState(user?.gender ? String(user?.gender) : "");
     const [maritalStatus, setMaritalStatus] = useState(user?.marital_status ? String(user?.marital_status) : ""); 
     const [educationLevel, setEducationLevel] = useState(user?.education_level || "");
-    const [employmentStatus, setEmploymentStatus] = useState(user?.employment_status ? String(user?.employment_status) : ""); 
-    const [city, setCity] = useState(user?.city ? String(user?.setCity) : ""); 
+    const [employmentStatus, setEmploymentStatus] = useState(user?.employment_status ? String(user?.employment_status) : "");
+
 
     const [username, setUsername] = useState(user?.username || "");
     const [phone, setPhone] = useState(user?.phone || "");
     const [email, setEmail] = useState(user?.email || "");
-    const [age, setAge] = useState(user?.age || "");
+    const [city, setCity] = useState(user?.city || "");
+    const [age, setAge] = useState(user?.age ? String(user?.age) : ""); // Ensure age is a string
+
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
-
+   
     const handleUpdate = async () => {
         setLoading(true);
         setSuccessMessage("");
@@ -37,13 +39,15 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
             const payload = {
                 phone,
                 email,
-                age,
+                city,
+                age: age ? Number(age) : null,
                 gender: gender ? Number(gender) : null, 
                 marital_status: maritalStatus ? Number(maritalStatus) : null, 
                 education_level: educationLevel || null, 
                 employment_status: employmentStatus ? Number(employmentStatus) : null, // Ensure correct type
+                
             };
-
+            console.log("PAyload:", payload); // Log the request body
 
             const response = await fetch(`${API_URL}/api/auth/update/${user.id}`, { 
                 method: "PUT",
@@ -100,7 +104,7 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
                 <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
 
                 <Text style={styles.label}>Age</Text>
-                <TextInput style={styles.input} value={age} onChangeText={setAge} keyboardType="numeric" />
+                <TextInput style={styles.input} value={age} onChangeText={(value) => setAge(value)} keyboardType="numeric" />
 
                 <Text style={styles.label}>Gender</Text>
                 <Picker selectedValue={gender} onValueChange={(value) => setGender(String(value))} style={styles.picker}>
@@ -136,6 +140,17 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
                     <Picker.Item label="Student" value="3" />
                     <Picker.Item label="Retired" value="4" />
                 </Picker>
+
+                <Text style={styles.label}>City</Text>
+                <Picker selectedValue={city} onValueChange={setCity} style={styles.picker}>
+                                    <Picker.Item label="Location" value="" />
+                                    <Picker.Item label="Karachi" value="Karachi" />
+                                    <Picker.Item label="Lahore" value="Lahore" />
+                                    <Picker.Item label="Islamabad" value="Islamabad" />
+                                    <Picker.Item label="Quetta" value="Quetta" />
+                                    <Picker.Item label="Peshawar" value="Peshawar" />
+                                    <Picker.Item label="Rawalpindi" value="Rawalpindi " />
+                                </Picker>
 
                 <TouchableOpacity style={styles.button} onPress={handleUpdate} disabled={loading}>
                     {loading ? <ActivityIndicator color="white" /> : <Text style={styles.buttonText}>Update</Text>}

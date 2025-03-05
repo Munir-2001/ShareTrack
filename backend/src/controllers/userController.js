@@ -128,10 +128,9 @@ const loginUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
       
-
       const { id } = req.params; // Get ID from URL
       const { phone, email, age, gender, marital_status, education_level, employment_status,city } = req.body;
-
+    
       if (!id) {
           return res.status(400).json({ message: "User ID is required" });
       }
@@ -150,7 +149,8 @@ const updateUser = async (req, res) => {
           .single();
 
       if (fetchError) throw fetchError;
-
+      
+    
       res.status(200).json(updatedUser);
   } catch (error) {
       res.status(500).json({ message: "Error updating profile", error: error.message });
