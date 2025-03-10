@@ -230,42 +230,6 @@ const adminapproveRental = async (req, res) => {
     }
   };
   
-  
-  // const getTransactions = async (req, res) => {
-  //   try {
-  //     const { page = 1, pageSize = 10, amount, sender, receiver } = req.query;
-  //     const offset = (parseInt(page) - 1) * parseInt(pageSize);
-  //     const limit = parseInt(pageSize); // Ensure proper row limit
-  
-  //     let query = supabase
-  //       .from("transactions")
-  //       .select(
-  //         "id, sender_id, receiver_id, amount, status, transaction_type, created_at, users_sender:sender_id(username), users_receiver:receiver_id(username)",
-  //         { count: "exact" }
-  //       )
-  //       .range(offset, offset + limit - 1); // ✅ Apply proper limit
-  
-  //     if (amount) query = query.eq("amount", amount);
-  //     if (sender) query = query.ilike("users_sender.username", `%${sender}%`);
-  //     if (receiver) query = query.ilike("users_receiver.username", `%${receiver}%`);
-  
-  //     const { data, count, error } = await query;
-  
-  //     if (error) throw error;
-  
-  //     res.status(200).json({
-  //       transactions: data.map((tx) => ({
-  //         ...tx,
-  //         sender_username: tx.users_sender?.username || "Unknown",
-  //         receiver_username: tx.users_receiver?.username || "Unknown",
-  //       })),
-  //       totalPages: Math.ceil(count / limit), // ✅ Ensure correct total pages
-  //     });
-  //   } catch (error) {
-  //     console.error("Error fetching transactions:", error);
-  //     res.status(500).json({ error: "Internal Server Error" });
-  //   }
-  // };
   const getTransactions = async (req, res) => {
     try {
         // Fetch all transactions from the database without pagination
@@ -299,8 +263,123 @@ const adminapproveRental = async (req, res) => {
     }
 };
 
+// export const getUserFriends = async (req, res) => {
+//   try {
+//       const { user_id } = req.params;
 
-  
+//       const { data: friends, error: friendsError } = await supabase
+//           .from("relationships")
+//           .select("recipient_id, users_recipient:recipient_id(username)")
+//           .eq("requester_id", user_id)
+//           .eq("status", 1); // Status 1 means they are friends
+
+//       if (friendsError) throw friendsError;
+
+//       const { data: requestsSent, error: sentError } = await supabase
+//           .from("relationships")
+//           .select("recipient_id, users_recipient:recipient_id(username)")
+//           .eq("requester_id", user_id)
+//           .eq("status", 0); // Status 0 means request sent but not accepted
+
+//       if (sentError) throw sentError;
+
+//       const { data: requestsReceived, error: receivedError } = await supabase
+//           .from("relationships")
+//           .select("requester_id, users_requester:requester_id(username)")
+//           .eq("recipient_id", user_id)
+//           .eq("status", 0); // Status 0 means request received but not accepted
+
+//       if (receivedError) throw receivedError;
+
+//       res.status(200).json({
+//           friends: friends.map(friend => ({
+//               id: friend.recipient_id,
+//               username: friend.users_recipient?.username || "Unknown",
+//           })),
+//           requestsSent: requestsSent.map(request => ({
+//               id: request.recipient_id,
+//               username: request.users_recipient?.username || "Unknown",
+//           })),
+//           requestsReceived: requestsReceived.map(request => ({
+//               id: request.requester_id,
+//               username: request.users_requester?.username || "Unknown",
+//           })),
+//       });
+//   } catch (error) {
+//       console.error("Error fetching user friendships:", error);
+//       res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
+export const getUserFriends = async (req, res) => {
+  try {
+      // ✅ Convert user_id to an integer
+      const userId = parseInt(req.params.user_id, 10);
+      if (isNaN(userId)) {
+          return res.status(400).json({ error: "Invalid user ID format" });
+      }
+
+      console.log(`Fetching friends for user_id: ${userId}`);
+
+      // ✅ Fetch confirmed friends (status = 1)
+      const { data: friends, error: friendsError } = await supabase
+          .from("relationships")
+          .select("recipient_id, users_recipient:recipient_id(username)")
+          .eq("requester_id", userId)
+          .eq("status", 1);
+
+      if (friendsError) {
+          console.error("Friends Query Error:", friendsError);
+          throw friendsError;
+      }
+
+      // ✅ Fetch sent friend requests (status = 0)
+      const { data: requestsSent, error: sentError } = await supabase
+          .from("relationships")
+          .select("recipient_id, users_recipient:recipient_id(username)")
+          .eq("requester_id", userId)
+          .eq("status", 0);
+
+      if (sentError) {
+          console.error("Requests Sent Query Error:", sentError);
+          throw sentError;
+      }
+
+      // ✅ Fetch received friend requests (status = 0)
+      const { data: requestsReceived, error: receivedError } = await supabase
+          .from("relationships")
+          .select("requester_id, users_requester:requester_id(username)")
+          .eq("recipient_id", userId)
+          .eq("status", 0);
+
+      if (receivedError) {
+          console.error("Requests Received Query Error:", receivedError);
+          throw receivedError;
+      }
+
+      res.status(200).json({
+          friends: friends.map(friend => ({
+              id: friend.recipient_id,
+              username: friend.users_recipient?.username || "Unknown",
+          })),
+          requestsSent: requestsSent.map(request => ({
+              id: request.recipient_id,
+              username: request.users_recipient?.username || "Unknown",
+          })),
+          requestsReceived: requestsReceived.map(request => ({
+              id: request.requester_id,
+              username: request.users_requester?.username || "Unknown",
+          })),
+      });
+  } catch (error) {
+      console.error("❌ Error fetching user friendships:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+
+
 
   
 export {resolveReport,getReportedUsers,updateUserStatus,getAllUsers,admingetPendingRentals,adminapproveRental,getTransactions,adminrejectRental}

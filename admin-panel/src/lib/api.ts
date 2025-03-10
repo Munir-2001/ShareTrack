@@ -65,6 +65,12 @@ export const adminLogin = async (email: string, password: string) => {
 //     return null;
 //   }
 // }
+export async function fetchUserFriends(userId: string) {
+  const response = await fetch(`http://localhost:5001/api/admin/users/${userId}/friends`);
+  if (!response.ok) throw new Error("Failed to fetch user friends");
+  return response.json();
+}
+
 export const fetchUsers = async () => {
   try {
     const response = await fetch(`${API_URL}/users`);

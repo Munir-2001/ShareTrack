@@ -218,7 +218,8 @@ import {
   adminrejectRental,
   adminLogin,
   getUserDetails,
-  getTransactions
+  getTransactions,
+  getUserFriends
 } from "../controllers/adminController.js";
 
 /**
@@ -477,4 +478,72 @@ adminRoutes.get("/users/:id", getUserDetails);
  */
 
 adminRoutes.get("/transactions", getTransactions);
+
+/**
+ * @swagger
+ * /api/admin/users/{user_id}/friends:
+ *   get:
+ *     summary: Get a user's friends and pending friend requests
+ *     description: Retrieve the list of friends, sent friend requests, and received friend requests for a specific user.
+ *     tags: [Admin]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The unique ID of the user whose friendships are being retrieved
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved friendships
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 friends:
+ *                   type: array
+ *                   description: List of confirmed friends
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: The unique ID of the friend
+ *                       username:
+ *                         type: string
+ *                         description: The username of the friend
+ *                 requestsSent:
+ *                   type: array
+ *                   description: List of sent friend requests
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: The unique ID of the user to whom the friend request was sent
+ *                       username:
+ *                         type: string
+ *                         description: The username of the user to whom the friend request was sent
+ *                 requestsReceived:
+ *                   type: array
+ *                   description: List of received friend requests
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: The unique ID of the user who sent the friend request
+ *                       username:
+ *                         type: string
+ *                         description: The username of the user who sent the friend request
+ *       400:
+ *         description: Bad request - Invalid user ID format
+ *       500:
+ *         description: Internal Server Error
+ */
+
+
+adminRoutes.get("/users/:user_id/friends", getUserFriends);
+
 export default adminRoutes;
