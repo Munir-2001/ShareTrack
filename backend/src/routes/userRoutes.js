@@ -3,7 +3,7 @@ import express from 'express';
 import multer from 'multer';
 // const multer = require("multer");
 // const { createUser, loginUser, updateUser, updatePhoto, updateUserDetails } = require("../controllers/userController");
-import { createUser, loginUser, updateUser, updatePhoto, updateUserDetails } from "../controllers/userController.js"; 
+import { createUser, loginUser, updateUser, updatePhoto, updateUserDetails,getReceivablesPayables } from "../controllers/userController.js"; 
 
 const userRouter = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -150,6 +150,28 @@ userRouter.post("/photo", upload.single("file"), updatePhoto);
  *         description: Bad request
  */
 userRouter.put("/updateDetails", updateUserDetails);
+/**
+ * @swagger
+ * /api/auth/receivables-payables/{userId}:
+ *   get:
+ *     summary: Get user receivables and payables
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully fetched receivables and payables
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+userRouter.get("/receivables-payables/:userId", getReceivablesPayables);
 
 // module.exports = userRouter;
 export default userRouter;

@@ -41,8 +41,61 @@ const createUser = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+export const getReceivablesPayables = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
-// Log in user by comparing hashed passwords
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    // Fetch transactions where the user is either sender or receiver
+    const { data: transactions, error } = await supabase
+      .from("transactions")
+      .select("*")
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+
+    if (error) throw error;
+
+    let receivables = 0;
+    let payables = 0;
+
+    transactions.forEach((transaction) => {
+      const { sender_id, receiver_id, amount, status } = transaction;
+
+      if (sender_id == userId) {
+        if (status === "approved") {
+          payables += amount; // User owes this amount (sent money)
+        }
+        if (status === "pending") {
+          receivables += amount; // User expects this amount back
+        }
+      }
+
+      if (receiver_id == userId) {
+        if (status === "approved") {
+          receivables += amount; // Someone owes this amount to the user
+        }
+        if (status === "pending") {
+          payables += amount; // User still needs to pay this amount
+        }
+      }
+    });
+
+    // Ensure receivables don't go negative
+    receivables = Math.max(receivables, 0);
+
+    console.log('Receivables:', receivables);
+    console.log('Payables:', payables);
+
+    res.status(200).json({ receivables, payables });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching data", error: err.message });
+  }
+};
+
+
+
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -76,54 +129,6 @@ const loginUser = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
-
-// const updateUser = async (req, res) => {
-//     try {
-//         const { phone, email, password } = req.body;
-//         const userId = req.user?.id; // Ensure userId is retrieved correctly
-
-       
-
-//         // Fetch user details
-//         const { data: user, error: userError } = await supabase
-//             .from("users")
-//             .select("id, username, phone, email, password")
-//             .eq("id", userId)
-//             .single();
-
-//         if (userError || !user) {
-//             return res.status(404).json({ message: "User not found" });
-//         }
-
-//         // Prevent username update
-//         if (req.body.username && req.body.username !== user.username) {
-//             return res.status(400).json({ message: "Username cannot be changed" });
-//         }
-
-//         // Update user details
-//         const updatedData = {
-//             phone: phone || user.phone,
-//             email: email || user.email,
-//             password: password || user.password,
-//         };
-
-//         // If a new password is provided, hash it
-//         if (password) {
-//             updatedData.password = await bcrypt.hash(password, 10);
-//         }
-
-//         const { error: updateError } = await supabase
-//             .from("users")
-//             .update(updatedData)
-//             .eq("id", userId);
-
-//         if (updateError) throw updateError;
-
-//         res.status(200).json({ message: "User details updated successfully" });
-//     } catch (err) {
-//         res.status(400).json({ message: err.message });
-//     }
-// };
 
 const updateUser = async (req, res) => {
   try {

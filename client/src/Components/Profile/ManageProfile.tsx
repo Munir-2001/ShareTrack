@@ -34,10 +34,11 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((state: { auth: any }) => state.auth.user);
-  
+
   const [balance, setBalance] = useState<number | null>(null);
   const [creditScore, setCreditScore] = useState<number | null>(null);
-
+  const [receivable, setReceivable] = useState<number | null>(null);
+  const [payable, setPayable] = useState<number | null>(null);
   // const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
   const [modalVisible, setModalVisible] = useState(false);
   const [adjustmentVisible, setAdjustmentVisible] = useState(false);
@@ -52,11 +53,11 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
 
   }
 
-useEffect(()=>{
-  console.log('user is ', user);
-  setUserState(user);
-  console.log('userState is ', userState);
-},[user])
+  useEffect(() => {
+    console.log('user is ', user);
+    setUserState(user);
+    console.log('userState is ', userState);
+  }, [user])
 
   useEffect(() => {
     setUserState(user);
@@ -84,11 +85,41 @@ useEffect(()=>{
         }
       };
 
+
+
       fetchUserBalance();
     } else {
       console.error('User ID is not available');
     }
   }, [user]);
+  useEffect(() => {
+    if (user && user.id) {
+      const fetchReceivableAndPayable = async () => {
+        try {
+          const response = await fetch(`${API_URL}/api/auth/receivables-payables/${user.id}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+  
+          if (!response.ok) {
+            throw new Error('Failed to fetch receivable and payable');
+          }
+  
+          const data = await response.json();
+          console.log('the api for receivable and payable called and data is '+data)
+          setReceivable(data.receivables);
+          setPayable(data.payables);
+        } catch (error) {
+          console.error('Error fetching receivable/payable:', error);
+        }
+      };
+  
+      fetchReceivableAndPayable();
+    }
+  }, [user]);
+  
 
   const pickImage = async () => {
     const options: ImageLibraryOptions = {
@@ -242,9 +273,9 @@ useEffect(()=>{
                 source={{
                   uri:
                     photo?.uri ||
-                    userState?.photo 
-                    // ||
-                    // 'https://via.placeholder.com/100',
+                    userState?.photo
+                  // ||
+                  // 'https://via.placeholder.com/100',
                 }}
                 style={styles.profilePicture}
               />
@@ -341,7 +372,7 @@ useEffect(()=>{
             </View>
 
 
-            <View style={styles.amountBox}>
+            {/* <View style={styles.amountBox}>
               <View style={styles.column}>
                 <Text style={styles.columnTitle}>Receivable</Text>
                 <Text style={styles.amount}>$1000</Text>
@@ -349,6 +380,16 @@ useEffect(()=>{
               <View style={styles.column}>
                 <Text style={styles.columnTitle}>Payable</Text>
                 <Text style={styles.amount}>$500</Text>
+              </View>
+            </View> */}
+            <View style={styles.amountBox}>
+              <View style={styles.column}>
+                <Text style={styles.columnTitle}>Receivable</Text>
+                <Text style={styles.amount}>${receivable?.toFixed(2) || '0.00'}</Text>
+              </View>
+              <View style={styles.column}>
+                <Text style={styles.columnTitle}>Payable</Text>
+                <Text style={styles.amount}>${payable?.toFixed(2) || '0.00'}</Text>
               </View>
             </View>
 
@@ -369,9 +410,9 @@ useEffect(()=>{
                   <Text style={styles.itemText}>Insights</Text>
                 </TouchableOpacity> */}
                 <TouchableOpacity style={styles.item} onPress={() => navigation.navigate("RentalOfferHistory")}>
-  <Icon name="analytics" size={24} color="#1E2A78" />
-  <Text style={styles.itemText}>Rental Histories</Text>
-</TouchableOpacity>
+                  <Icon name="analytics" size={24} color="#1E2A78" />
+                  <Text style={styles.itemText}>Rental Histories</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity style={styles.item} onPress={gotoTransactionHistory}>
                   <Icon name="time" size={24} color="#1E2A78" />
