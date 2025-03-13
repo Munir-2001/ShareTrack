@@ -119,8 +119,8 @@ const ViewBillsScreen = ({ navigation }: { navigation: any }) => {
         <Text>Total Amount: ${item.total_amount}</Text>
 
         {selectedTab === 'payBills' && contributor ? (
-          <View style={styles.contributorContainer}>
-            <Text style={styles.contributorTitle}>Your Contribution</Text>
+          <View>
+            <Text>Your Contribution</Text>
             <Text>Share Amount: ${contributor.share_amount}</Text>
             <Text>Paid Amount: ${contributor.paid_amount}</Text>
             <Text>Pending Amount: ${pending}</Text>
@@ -129,13 +129,13 @@ const ViewBillsScreen = ({ navigation }: { navigation: any }) => {
             </Pressable>
           </View>
         ) : selectedTab === 'myBills' && (
-          <View style={styles.contributorContainer}>
-            <Text style={styles.contributorTitle}>Bill Creator</Text>
+          <View >
+            <Text>Bill Creator</Text>
             <Text>This bill was created by you.</Text>
           </View>
         )}
 
-        <Text style={styles.timestampText}>Created on: {formatDate(item.created_at)}</Text>
+        <Text>Created on: {formatDate(item.created_at)}</Text>
       </View>
     );
   };
@@ -182,7 +182,7 @@ const ViewBillsScreen = ({ navigation }: { navigation: any }) => {
           )}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderBill}
-          ListEmptyComponent={<Text style={styles.noBillsText}>No bills found.</Text>}
+          ListEmptyComponent={<Text>No bills found.</Text>}
         />
       )}
 
