@@ -2,8 +2,11 @@
 import {supabase} from '../config/db.js'
 
 import axios from 'axios';
-const CREDIT_SCORING_API_URL = "http://localhost:8000/predict/"
-
+// const CREDIT_SCORING_API_URL = "http://localhost:8000/predict/"
+const CREDIT_SCORING_API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://your-live-server.com/predict"
+    : "http://localhost:8000/predict";
 const getUserLoans = async (req, res) => {
   try {
     console.log("Received request body:", req.body);
