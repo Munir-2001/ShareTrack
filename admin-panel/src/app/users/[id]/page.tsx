@@ -4,9 +4,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 
-const API_URL = "http://localhost:5001/api/admin"; // ✅ Backend API
-
+// const API_URL = "http://localhost:5001/api/admin"; // ✅ Backend API
+const API_URL="https://sharetrack-backend.onrender.com/api/admin"
 interface Friend {
   id: number;
   username: string;
@@ -95,7 +96,7 @@ export default function ViewUserDetailPage() {
 
       {/* User Profile Header */}
       <div className="bg-white p-8 rounded-lg shadow-lg flex items-center gap-6">
-        <img
+        <Image
           src={user.photo}
           alt="User Profile"
           className="w-28 h-28 rounded-full border border-gray-300 shadow-md"

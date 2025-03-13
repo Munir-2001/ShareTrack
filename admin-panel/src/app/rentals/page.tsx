@@ -146,7 +146,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_URL = "http://localhost:5001/api/admin";
+// const API_URL = "http://localhost:5001/api/admin";
+const API_URL= "https://sharetrack-backend.onrender.com/api/admin"
 
 interface RentalItem {
   id: number;

@@ -77,8 +77,12 @@ export default function AdminLogin() {
       const { token } = await adminLogin(email, password);
       localStorage.setItem("adminToken", token); // ✅ Store token for authentication
       router.push("/dashboard"); // ✅ Redirect to Admin Dashboard after login
-    } catch (err: any) {
-      setError(err.message || "Failed to login");
+    } catch (error:unknown) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Failed to login");
+      }
     }
   };
 

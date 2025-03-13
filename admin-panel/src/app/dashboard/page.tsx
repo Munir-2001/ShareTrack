@@ -80,7 +80,7 @@ interface User {
 
 export default function DashboardPage() {
   const [users, setUsers] = useState<User[]>([]);
-  const [showUsers, setShowUsers] = useState(false); // Toggle User Management View
+  const [showUsers] = useState(false); // Toggle User Management View
   const router = useRouter();
 
   useEffect(() => {
