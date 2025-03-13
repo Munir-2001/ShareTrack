@@ -48,7 +48,8 @@ import { swaggerUiMiddleware, swaggerUiHandler } from "./swagger.js"; // ✅ Ens
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+// const PORT = process.env.PORT || "https://sharetrack-backend.onrender.com";
+const PORT="https://sharetrack-backend.onrender.com"
 // app.use(cors({
 //   origin: "*", // Allow all origins (you can restrict it to Next.js domain later)
 //   methods: ["GET", "POST", "PUT", "DELETE"],
