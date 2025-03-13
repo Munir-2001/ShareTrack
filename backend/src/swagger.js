@@ -1,6 +1,6 @@
-
 // import swaggerJSDoc from "swagger-jsdoc";
 // import swaggerUi from "swagger-ui-express";
+
 // const options = {
 //   definition: {
 //     openapi: "3.0.0",
@@ -27,15 +27,20 @@
 //   apis: ["./src/routes/*.js"], // Path to route files
 // };
 
-// const swaggerSpec = swaggerJsdoc(options);
+// const swaggerSpec = swaggerJSDoc(options);
 
-// const swaggerUiMiddleware = swaggerUi.serve;
-// const swaggerUiHandler = swaggerUi.setup(swaggerSpec);
+// export const swaggerUiMiddleware = swaggerUi.serve;
+// export const swaggerUiHandler = swaggerUi.setup(swaggerSpec);
 
-// module.exports = { swaggerUiMiddleware, swaggerUiHandler };
 
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+
+// Determine the base URL based on the environment (production or development)
+const baseUrl =
+  process.env.NODE_ENV === "production"
+    ? "https://sharetrack-backend.onrender.com/" // Replace with your actual production URL
+    : "http://localhost:5001"; // Local development URL
 
 const options = {
   definition: {
@@ -47,7 +52,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:5001", // Adjust the port if necessary
+        url: baseUrl, // Dynamically set the base URL
       },
     ],
     components: {
