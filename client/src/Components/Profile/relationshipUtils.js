@@ -304,7 +304,10 @@ export const getBlockedUsers = async (userId) => {
 // };
 export const requestFriend = async (userId, friendUsername) => {
     try {
-        console.log("📤 Sending friend request:", { userId, friendUsername });
+        console.log("📤 Sending friend request with payload:", JSON.stringify({ 
+            requesterId: userId, 
+            recipientUsername: friendUsername 
+        }));
 
         const response = await fetch(`${API_URL}/api/relationship/request`, {
             method: "POST",
@@ -316,6 +319,7 @@ export const requestFriend = async (userId, friendUsername) => {
         });
 
         const data = await response.json();
+        console.log("Dataaaaaaaaa bohat haa",data);
 
         if (!response.ok) {
             console.error("❌ requestFriend API Error:", data.message);

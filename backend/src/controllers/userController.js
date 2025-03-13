@@ -24,19 +24,42 @@ const createUser = async (req, res) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
-    const { data, error } = await supabase.from("users").insert([
-      {
-        username,
-        phone,
-        email,
-        password: hashedPassword,
-      },
-    ]);
+       // ✅ Insert user and return the new record
+
+       const { data: newUser, error } = await supabase
+
+       .from("users")
+ 
+       .insert([
+ 
+         {
+ 
+           username,
+ 
+           phone,
+ 
+           email,
+ 
+           password: hashedPassword,
+ 
+         },
+ 
+       ])
+ 
+       .select() // ✅ This ensures Supabase returns the created user
 
     if (error) throw error;
 
-    res.status(201).json({ message: "User registered successfully", data });
+    
+    // ✅ Send back the new user data
+
+    res.status(201).json({ 
+
+      message: "User registered successfully", 
+
+      data: newUser[0] // ✅ Send only the user object, not an array
+
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -133,17 +156,16 @@ const loginUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
       
-
       const { id } = req.params; // Get ID from URL
-      const { phone, email, age, gender, marital_status, education_level, employment_status } = req.body;
-
+      const { phone, email, age, gender, marital_status, education_level, employment_status,city } = req.body;
+    
       if (!id) {
           return res.status(400).json({ message: "User ID is required" });
       }
 
       const { error } = await supabase
           .from("users")
-          .update({ phone, email, age, gender, marital_status, education_level, employment_status })
+          .update({ phone, email, age, gender, marital_status, education_level, employment_status, city })
           .eq("id", id); // Match ID from request body
 
       if (error) throw error;
@@ -155,13 +177,13 @@ const updateUser = async (req, res) => {
           .single();
 
       if (fetchError) throw fetchError;
-
+      
+    
       res.status(200).json(updatedUser);
   } catch (error) {
       res.status(500).json({ message: "Error updating profile", error: error.message });
   }
 };
-
 
 // Update user details
 const updateUserDetails = async (req, res) => {
@@ -238,5 +260,59 @@ const updatePhoto = async (req, res) => {
   }
 };
 
+const deleteImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("user ID :", id);
+    // Fetch user's profile picture URL from Supabase
+    const { data, error } = await supabase
+      .from('users')
+      .select('photo')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error("Supabase Fetch Error:", error);
+      return res.status(500).json({ error: 'Error fetching user data' });
+    }
+    
+    if (!data) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const profilePicturePath = data.photo;
+
+    // Delete image from Supabase Storage if it exists
+    if (profilePicturePath) {
+      const fileName = profilePicturePath.split('/').pop(); // Extract file name from URL
+
+      const { error: deleteError } = await supabase
+        .storage
+        .from('photos') // Adjust bucket name if needed
+        .remove([fileName]);
+
+      if (deleteError) {
+        console.error('Error deleting image from Supabase:', deleteError);
+      }
+    }
+
+    // Update user record to remove profile picture reference
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ photo: null })
+      .eq('id', id);
+
+    if (updateError) {
+      return res.status(500).json({ error: 'Failed to update user record' });
+    }
+
+    res.json({ message: 'Profile picture removed successfully' });
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 // export { createUser, loginUser, updateUser, updatePhoto, updateUserDetails };
-export { createUser, loginUser, updateUser, updatePhoto, updateUserDetails };
+export { createUser, loginUser, updateUser, updatePhoto, updateUserDetails,deleteImage };

@@ -12,6 +12,7 @@ import ProfileScreen from './ManageProfile';
 import UserProfile from './UserProfile';
 import PendingRequestsScreen from './PendingRequestsScreen';
 import TransactionHistoryScreen from './TransactionHistoryScreen';
+import ViewBillsScreen from './ViewBillsScreen'
 import AccountSettingsScreen from './AccountSettingsScreen';
 import UpcomingRepaymentsScreen from './UpcomingRepaymentsScreen'
 import RentalOffersHistory from './RentalOfferHistory';
@@ -30,9 +31,11 @@ export default function Dashboard() {
                     {(props) => <ProfileScreen {...props} />}
                 </Stack.Screen>
 
-                <Stack.Screen name="CONNECTIONS">
-                    {(props) => <ConnectionScreen {...props} />}
-                </Stack.Screen>
+                <Stack.Screen
+                    name="CONNECTIONS"
+                    component={ConnectionScreen}
+                    initialParams={{ name: 0 }}
+                />
                 <Stack.Screen name="UserProfile" component={UserProfile} />
                 <Stack.Screen name="PendingRequestsScreen">
                     {(props) => <PendingRequestsScreen {...props} />}
@@ -40,7 +43,9 @@ export default function Dashboard() {
                 <Stack.Screen name="TransactionHistoryScreen">
                     {(props) => <TransactionHistoryScreen {...props} />}
                 </Stack.Screen>
-
+                <Stack.Screen name="ViewBillsScreen">
+                    {(props) => <ViewBillsScreen {...props} />}
+                </Stack.Screen>
                 <Stack.Screen name="AccountSettingsScreen">
                     {(props) => <AccountSettingsScreen {...props} />}
                 </Stack.Screen>
@@ -52,7 +57,7 @@ export default function Dashboard() {
                 <Stack.Screen name="RentalOfferHistory">
                     {(props) => <RentalOffersHistory {...props} />}
                 </Stack.Screen>
-               
+
             </Stack.Navigator>
         </>
 

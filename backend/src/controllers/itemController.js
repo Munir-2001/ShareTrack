@@ -221,6 +221,7 @@ const createItem = async (req, res) => {
 // Get All Items
 const getAllItems = async (req, res) => {
     try {
+        console.log("Dataaaaaa Agaya",data);
         const { data, error } = await supabase.from("items").select("*").eq("is_available", true);
         if (error) throw error;
         res.json(data);

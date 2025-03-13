@@ -1,20 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { PropsWithChildren } from 'react';
-
 import {
-    SafeAreaView,
     ScrollView,
-    StatusBar,
     StyleSheet,
     Text,
-    useColorScheme,
     View,
     TextInput,
     TouchableOpacity,
     Alert,
     Image,
 } from 'react-native';
-
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 import { loginUser, registerUser } from '../../Redux/Actions/AuthActions/AuthAction';
@@ -24,9 +19,7 @@ interface AuthScreenProps {
     setIsSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, setIsSignUp }) => {
-    const isDarkMode = useColorScheme() === 'dark';
-
+const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, setIsSignUp }) => {
     const dispatch = useAppDispatch();
     const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
 
@@ -36,38 +29,53 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
     const [username, setUsername] = useState('');
     const [phone, setPhone] = useState('');
 
-
-    
+    const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
+    const validatePhone = (phone: string) => /^[0-9]{10,15}$/.test(phone);
+    const validatePassword = (password: string) => password.length >= 6;
+    const validateUsername = (username: string) => username.length >= 3;
 
     const handleAuth = () => {
-
-        if (isSignUp && password !== confirmPassword) {
-            Alert.alert('Passwords do not match');
-            return;
-        }
-        if (isSignUp && (!username || !phone || !password || !confirmPassword || !email)) {
-            Alert.alert('Please fill in all fields');
-            return;
-        }
-        if (!isSignUp && (!password || !email)) {
-            Alert.alert('Please fill in all fields');
-            return;
-        }
-
         if (isSignUp) {
-            // Dispatch signup action
+            // Full validation for sign-up
+            if (!username || !phone || !email || !password || !confirmPassword) {
+                Alert.alert('Error', 'Please fill in all fields.');
+                return;
+            }
+            if (!validateUsername(username)) {
+                Alert.alert('Invalid Username', 'Username must be at least 3 characters long.');
+                return;
+            }
+            if (!validatePhone(phone)) {
+                Alert.alert('Invalid Phone', 'Phone number must be 10-15 digits.');
+                return;
+            }
+            if (!validateEmail(email)) {
+                Alert.alert('Invalid Email', 'Please enter a valid email address.');
+                return;
+            }
+            if (!validatePassword(password)) {
+                Alert.alert('Weak Password', 'Password must be at least 6 characters long.');
+                return;
+            }
+            if (password !== confirmPassword) {
+                Alert.alert('Passwords do not match', 'Please enter the same password.');
+                return;
+            }
+
             dispatch(registerUser({ email, password, username, phone }));
         } else {
+            // Simple check for sign-in (no validation, just empty field check)
+            if (!email || !password) {
+                Alert.alert('Error', 'Please fill in all fields.');
+                return;
+            }
+
             dispatch(loginUser({ email, password }));
         }
     };
 
-
-
-
-
     return (
-        <View style={{ flex:1,backgroundColor: isDarkMode ? Colors.white : Colors.white }}>
+        <View style={{ flex: 1, backgroundColor: Colors.white }}>
             <ScrollView contentInsetAdjustmentBehavior="automatic">
                 <View style={styles.container}>
                     <Text style={styles.logo}>
@@ -90,7 +98,6 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
                                 onChangeText={setPhone}
                                 keyboardType="phone-pad"
                                 placeholderTextColor="#666"
-
                             />
                         </>
                     )}
@@ -101,7 +108,6 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
                         onChangeText={setEmail}
                         keyboardType="email-address"
                         placeholderTextColor="#666"
-
                     />
                     <TextInput
                         style={styles.input}
@@ -110,25 +116,21 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
                         onChangeText={setPassword}
                         secureTextEntry
                         placeholderTextColor="#666"
-
                     />
                     {isSignUp && (
-                        <>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Confirm Password"
-                                value={confirmPassword} // Ensure you bind to confirmPassword
-                                onChangeText={setConfirmPassword}
-                                secureTextEntry
-                                placeholderTextColor="#666"
-
-                            />
-                        </>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Confirm Password"
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            secureTextEntry
+                            placeholderTextColor="#666"
+                        />
                     )}
                     <TouchableOpacity style={styles.signInButton} onPress={handleAuth}>
                         <Text style={styles.buttonText}>{isSignUp ? 'Create Account' : 'Login'}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setIsSignUp(prev => !prev)}>
+                    <TouchableOpacity onPress={() => setIsSignUp((prev) => !prev)}>
                         <Text style={styles.switchButtonText}>
                             Switch to {isSignUp ? 'Login' : 'Sign Up'}
                         </Text>
@@ -140,11 +142,6 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({isSignUp, set
 };
 
 const styles = StyleSheet.create({
-    header: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
     logo: {
         fontSize: 32,
         fontWeight: 'bold',
@@ -154,8 +151,6 @@ const styles = StyleSheet.create({
     },
     track: {
         color: '#E63946',
-        marginVertical: 20,
-        marginTop: 75,
     },
     container: {
         flexGrow: 1,

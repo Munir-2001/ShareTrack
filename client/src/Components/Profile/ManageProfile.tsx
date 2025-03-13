@@ -28,6 +28,7 @@ import Icon from '@react-native-vector-icons/ionicons';
 
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 import { API_URL } from '../../constants';
+import { useRoute } from '@react-navigation/native';
 
 export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const isDarkMode = useColorScheme() === 'dark';
@@ -44,14 +45,28 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const [adjustmentVisible, setAdjustmentVisible] = useState(false);
 
   const [userState, setUserState] = useState(user);
+  const [isUserLoaded, setIsUserLoaded] = useState(false);
   const [photo, setPhoto] = useState<any | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(`${API_URL}/uploads/profile.jpg`);
+
   const gotoPendingRequests = () => {
     navigation.navigate('PendingRequestsScreen');
   };
+  const goToViewBills = () => {
+    navigation.navigate('ViewBillsScreen');
+
+  }
   const goToAccountSettings = () => {
     navigation.navigate('AccountSettingsScreen');
 
   }
+   const route = useRoute();
+console.log("this is route name",route)
+useEffect(()=>{
+  console.log('user is ', user);
+  setUserState(user);
+  console.log('userState is ', userState);
+},[user])
 
   useEffect(() => {
     console.log('user is ', user);
@@ -60,6 +75,13 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   }, [user])
 
   useEffect(() => {
+    if (!user) {
+      console.log("User is not available yet");
+      return; // Exit early if user is null/undefined
+    }
+  
+    console.log("User found:", user);
+  
     setUserState(user);
     if (user && user.id) {
       const fetchUserBalance = async () => {
@@ -203,8 +225,6 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
 
       const data = await response.json();
 
-      console.log(data);
-
       if (response.ok) {
         Alert.alert('Success', `Photo URL: ${data.photoUrl}`);
         // Update the user state with the new photo URL
@@ -214,7 +234,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
         });
         setPhoto(null);
         dispatch(updateUser(userState));
-
+        console.log("Updated User in Redux =>", updateUser);
       } else {
         Alert.alert('Upload Error', data.message || 'Something went wrong.');
       }
@@ -229,6 +249,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   };
 
   const gotoConnections = () => {
+    console.log('Navigating to RentalOffersHistory1212...');
     navigation.navigate('CONNECTIONS');
   };
   const gotoRentalOffersHistory = () => {
@@ -242,7 +263,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
 
   const openModal = () => {
     setModalVisible(true);
-    console.log('open modal');
+    console.log('open modal', photo ,userState );
   };
 
   const goToUpcomingRepayments = () => {
@@ -254,7 +275,33 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     setModalVisible(false);
     console.log('Modal Visible State:', modalVisible); // Log after state chang
   };
-
+  const removeProfilePicture = async () => {
+    console.log("removeProfilePicture function called");
+  
+    try {
+      const response = await fetch(`${API_URL}/api/auth/deleteImage/2`, {
+        method: 'DELETE',
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to remove profile picture');
+      }
+  
+      // ✅ Clear the profile image state after deletion
+      setProfileImage(null); 
+  
+      Alert.alert('Success', 'Profile picture removed successfully');
+    } catch (error) {
+      let errorMessage = 'Something went wrong';
+  
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+  
+      Alert.alert('Error', errorMessage);
+      //Cal refresh here or after calling it
+    }
+  };
 
   return (
     <View
@@ -264,6 +311,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
         flex: 1,
       }}>
       {userState ? (
+        
         <>
           <View style={styles.topHalf} />
 
@@ -290,15 +338,15 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
               animationType="slide">
               <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                  <Pressable
-                    style={[styles.modalButton]}
-                    onPress={() => {
-                      closeModal();
-                    }}>
-                    <Text style={[styles.modalButtonText, { color: 'red' }]}>
-                      Remove Profile Picture
-                    </Text>
-                  </Pressable>
+                <Pressable
+                style={[styles.modalButton]}
+                  onPress={() => {
+                    console.log("Button pressed!");
+                    removeProfilePicture();
+                  }}>
+                  <Text style={{ color: 'red' }}>
+                    Remove Profile Picture</Text>
+                </Pressable>
                   <Pressable
                     style={[styles.modalButton]}
                     onPress={() => {
@@ -429,7 +477,11 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
                   <Text style={styles.itemText}>Pending Requests</Text>
                 </TouchableOpacity>
               </View>
-              <View>
+              <View style={styles.row}>
+              <TouchableOpacity style={styles.item} onPress={goToViewBills}>
+                <Icon name="analytics" size={24} color="#1E2A78" />
+                <Text style={styles.itemText}>View Bills</Text>
+              </TouchableOpacity>
                 <TouchableOpacity style={styles.item} onPress={goToAccountSettings}>
                   <Icon name="settings" size={24} color="#1E2A78" />
                   <Text style={styles.itemText}>Account Settings</Text>

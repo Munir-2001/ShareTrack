@@ -585,8 +585,8 @@ export default function RentalOffersScreen({ navigation }: any) {
         renderItem={({ item }) => (
           <View style={styles.offerCard}>
             <Text style={styles.itemName}>📌 {item.item_name}</Text>
-            <Text>💰 Original Price: {item.rental_price} PKR</Text>
-            <Text>💰 Offered Price: {item.proposed_price} PKR</Text>
+            <Text>💰 Original Price: ${item.rental_price} </Text>
+            <Text>💰 Offered Price: ${item.proposed_price} </Text>
             <Text>👤 Offered by: {item.renter_name}</Text>
 
             {/* ✅ Approve/Reject Buttons for Incoming Offers */}

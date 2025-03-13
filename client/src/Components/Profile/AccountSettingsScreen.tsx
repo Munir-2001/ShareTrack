@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
     View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, StyleSheet, ScrollView 
 } from "react-native";
@@ -10,62 +10,80 @@ import { Picker } from '@react-native-picker/picker';
 const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
     const dispatch = useAppDispatch();
     const user = useAppSelector((state) => state.auth.user);
-    const [age, setAge] = useState(user?.age?.toString() || "");
-    const [gender, setGender] = useState(user?.gender || "");
-    const [maritalStatus, setMaritalStatus] = useState(user?.marital_status || "");
+   
+ 
+    const [gender, setGender] = useState(user?.gender ? String(user?.gender) : "");
+    const [maritalStatus, setMaritalStatus] = useState(user?.marital_status ? String(user?.marital_status) : ""); 
     const [educationLevel, setEducationLevel] = useState(user?.education_level || "");
-    const [employmentStatus, setEmploymentStatus] = useState(user?.employment_status || "");
+    const [employmentStatus, setEmploymentStatus] = useState(user?.employment_status ? String(user?.employment_status) : "");
+
 
     const [username, setUsername] = useState(user?.username || "");
     const [phone, setPhone] = useState(user?.phone || "");
     const [email, setEmail] = useState(user?.email || "");
+    const [city, setCity] = useState(user?.city || "");
+    const [age, setAge] = useState(user?.age ? String(user?.age) : ""); // Ensure age is a string
+
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
-
+   
     const handleUpdate = async () => {
         setLoading(true);
         setSuccessMessage("");
-    
+
         try {
             if (!user?.id) {
                 throw new Error("User ID is missing");
             }
-    
-            const response = await fetch(`${API_URL}/api/auth/update/${user.id}`, { // <-- Include ID in URL
+
+            const payload = {
+                phone,
+                email,
+                city,
+                age: age ? Number(age) : null,
+                gender: gender ? Number(gender) : null, 
+                marital_status: maritalStatus ? Number(maritalStatus) : null, 
+                education_level: educationLevel || null, 
+                employment_status: employmentStatus ? Number(employmentStatus) : null, // Ensure correct type
+                
+            };
+            console.log("PAyload:", payload); // Log the request body
+
+            const response = await fetch(`${API_URL}/api/auth/update/${user.id}`, { 
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${user.token}`,
                 },
-                body: JSON.stringify({ 
-                    phone, 
-                    email, 
-                    age, 
-                    gender, 
-                    marital_status: maritalStatus, 
-                    education_level: educationLevel, 
-                    employment_status: employmentStatus 
-                }),
+                body: JSON.stringify(payload),
             });
-    
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message);
+            
+            const textResponse = await response.text(); // Get raw response
+
+            try {
+                const responseBody = JSON.parse(textResponse); // Parse JSON
+                console.log("Parsed API Response:", responseBody);
+                
+                if (!response.ok) {
+                    throw new Error(responseBody.message || "Failed to update profile");
+                }
+            
+                dispatch(updateUser(responseBody));
+                setSuccessMessage("Profile updated successfully!");
+                navigation.goBack();
+            } catch (error) {
+                console.error("JSON Parsing Error:", error);
+                Alert.alert("Error", "Invalid API response format.");
             }
-    
-            const updatedUser = await response.json();
-            dispatch(updateUser(updatedUser));
-    
-            setSuccessMessage("Profile updated successfully!");
-            navigation.goBack();
         } catch (error: unknown) {
+            console.error("Update Error:", error);
+
             if (error instanceof Error) {
                 Alert.alert("Error", error.message);
             } else {
                 Alert.alert("Error", "Something went wrong.");
             }
         }
-    
+
         setLoading(false);
     };
 
@@ -86,18 +104,18 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
                 <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
 
                 <Text style={styles.label}>Age</Text>
-                <TextInput style={styles.input} value={age} onChangeText={setAge} keyboardType="numeric" />
+                <TextInput style={styles.input} value={age} onChangeText={(value) => setAge(value)} keyboardType="numeric" />
 
                 <Text style={styles.label}>Gender</Text>
-                <Picker selectedValue={gender} onValueChange={setGender} style={styles.picker}>
+                <Picker selectedValue={gender} onValueChange={(value) => setGender(String(value))} style={styles.picker}>
                     <Picker.Item label="Select Gender" value="" />
-                    <Picker.Item label="Male" value="Male" />
-                    <Picker.Item label="Female" value="Female" />
-                    <Picker.Item label="Other" value="Other" />
+                    <Picker.Item label="Male" value="1" />
+                    <Picker.Item label="Female" value="2" />
+                    <Picker.Item label="Other" value="3" />
                 </Picker>
 
                 <Text style={styles.label}>Marital Status</Text>
-                <Picker selectedValue={maritalStatus} onValueChange={setMaritalStatus} style={styles.picker}>
+                <Picker selectedValue={maritalStatus} onValueChange={(value) => setMaritalStatus(String(value))} style={styles.picker}>
                     <Picker.Item label="Select Marital Status" value="" />
                     <Picker.Item label="Single" value="0" />
                     <Picker.Item label="Married" value="1" />
@@ -105,7 +123,7 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
 
                 <Text style={styles.label}>Education Level</Text>
                 <Picker selectedValue={educationLevel} onValueChange={setEducationLevel} style={styles.picker}>
-                    <Picker.Item label="Select Education Level" value="" />
+                    <Picker.Item label="Education Level" value="" />
                     <Picker.Item label="High School" value="High School" />
                     <Picker.Item label="Bachelor" value="Bachelor" />
                     <Picker.Item label="Master" value="Master" />
@@ -116,12 +134,23 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
                 <Text style={styles.label}>Employment Status</Text>
                 <Picker selectedValue={employmentStatus} onValueChange={setEmploymentStatus} style={styles.picker}>
                     <Picker.Item label="Select Employment Status" value="" />
-                    <Picker.Item label="Employed" value="Employed" />
-                    <Picker.Item label="Unemployed" value="Unemployed" />
-                    <Picker.Item label="Self-Employed" value="Self-Employed" />
-                    <Picker.Item label="Student" value="Student" />
-                    <Picker.Item label="Retired" value="Retired" />
+                    <Picker.Item label="Employed" value="0" />
+                    <Picker.Item label="Unemployed" value="1" />
+                    <Picker.Item label="Self-Employed" value="2" />
+                    <Picker.Item label="Student" value="3" />
+                    <Picker.Item label="Retired" value="4" />
                 </Picker>
+
+                <Text style={styles.label}>City</Text>
+                <Picker selectedValue={city} onValueChange={setCity} style={styles.picker}>
+                                    <Picker.Item label="Location" value="" />
+                                    <Picker.Item label="Karachi" value="Karachi" />
+                                    <Picker.Item label="Lahore" value="Lahore" />
+                                    <Picker.Item label="Islamabad" value="Islamabad" />
+                                    <Picker.Item label="Quetta" value="Quetta" />
+                                    <Picker.Item label="Peshawar" value="Peshawar" />
+                                    <Picker.Item label="Rawalpindi" value="Rawalpindi " />
+                                </Picker>
 
                 <TouchableOpacity style={styles.button} onPress={handleUpdate} disabled={loading}>
                     {loading ? <ActivityIndicator color="white" /> : <Text style={styles.buttonText}>Update</Text>}

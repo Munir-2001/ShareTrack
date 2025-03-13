@@ -7,6 +7,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAppSelector } from '../../Redux/Store/hooks';
 import { requestMoney as requestMoneyAPI } from './relationshipUtils';
 
@@ -18,35 +19,57 @@ interface RequestMoneyProps {
 const RequestMoney: React.FC<RequestMoneyProps> = ({ friendUsername, onClose }) => {
   const senderUsername = useAppSelector((state: { auth: any }) => state.auth.user.username); // Get sender's username
   const [amountToSend, setAmountToSend] = useState('');
-  const [repaymentDate, setRepaymentDate] = useState<string>('');
+  const [repaymentDate, setRepaymentDate] = useState(new Date()); // ✅ Store as Date
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleRequestMoney = async () => {
-    console.log('Requesting money from:', senderUsername, 'to:', friendUsername, 'amount:', amountToSend);
+    console.log(
+      "Requesting money from:",
+      senderUsername,
+      "to:",
+      friendUsername,
+      "amount:",
+      amountToSend
+    );
+
     if (!amountToSend || isNaN(Number(amountToSend))) {
-      return Alert.alert('Please enter a valid amount.');
+      return Alert.alert("Please enter a valid amount.");
     }
-    if (!repaymentDate || !isValidDate(repaymentDate)) {
-      Alert.alert('Invalid Date', 'Please enter a valid repayment date (YYYY-MM-DD).');
-      return;
-    }
+
     const today = new Date();
-    const selectedDate = new Date(repaymentDate);
-    if (selectedDate < today) {
-      Alert.alert('Invalid Date', 'Repayment date cannot be in the past.');
+    if (repaymentDate < today) {
+      Alert.alert("Invalid Date", "Repayment date cannot be in the past.");
       return;
     }
 
     try {
-      console.log('data sent to api is RD'+ repaymentDate+'number is '+amountToSend+'sd is '+senderUsername+'fu'+friendUsername)
-      const response = await requestMoneyAPI(senderUsername, friendUsername, Number(amountToSend), repaymentDate); // Send sender's username
-      Alert.alert('Success', response.message);
-      setAmountToSend(''); // Clear the input
-      setRepaymentDate('');
-      onClose(); // Close the component after sending money
+      console.log(
+        "Data sent to API - RD:",
+        repaymentDate.toISOString().split("T")[0], // Convert to YYYY-MM-DD format
+        "Amount:",
+        amountToSend,
+        "Sender:",
+        senderUsername,
+        "Friend:",
+        friendUsername
+      );
+
+      const response = await requestMoneyAPI(
+        senderUsername,
+        friendUsername,
+        Number(amountToSend),
+        repaymentDate.toISOString().split("T")[0] // Send as YYYY-MM-DD
+      );
+
+      Alert.alert("Success", response.message);
+      setAmountToSend(""); // Clear the input
+      setRepaymentDate(new Date()); // Reset date picker
+      onClose(); // Close the component after requesting money
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert("Error", error.message);
     }
   };
+
 
   return (
     <View style={styles.container}>
@@ -59,15 +82,25 @@ const RequestMoney: React.FC<RequestMoneyProps> = ({ friendUsername, onClose }) 
         keyboardType="numeric"
                 placeholderTextColor="#666"
       />
-      {/* Repayment Date Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Enter repayment date (YYYY-MM-DD)"
-        value={repaymentDate}
-        onChangeText={(text) => setRepaymentDate(text)}
-        keyboardType="default"
-        placeholderTextColor="#666"
-      />
+     {/* Repayment Date Picker */}
+     <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+        <Text style={{ color: repaymentDate ? "#333" : "#666" }}>
+          {repaymentDate.toISOString().split("T")[0]} {/* Show selected date */}
+        </Text>
+      </TouchableOpacity>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={repaymentDate}
+          mode="date"
+          display="default"
+          minimumDate={new Date()} // Prevent selecting past dates
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(false);
+            if (selectedDate) setRepaymentDate(selectedDate);
+          }}
+        />
+      )}
 
       <TouchableOpacity style={styles.sendButton} onPress={handleRequestMoney}>
         <Text style={styles.sendButtonText}>Request Money</Text>

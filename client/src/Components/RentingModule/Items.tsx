@@ -238,7 +238,7 @@
 //         >
 //           <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //           <Text style={styles.itemName}>{item.item_name}</Text>
-//           <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
+//           <Text style={styles.itemPrice}>💰 Price: {item.rental_price} $</Text>
 //           <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
 //           <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
 //         </TouchableOpacity>
@@ -252,7 +252,7 @@
 //           <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //           <Text style={styles.itemName}>{item.name}</Text>
 //           <Text style={styles.itemPrice}>
-//             💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
+//             💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} $` : "N/A"}
 //           </Text>
 
 //           <TouchableOpacity
@@ -276,7 +276,7 @@
 //       >
 //         <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //         <Text style={styles.itemName}>{item.item_name}</Text>
-//         <Text style={styles.itemPrice}>💰 Price: {item.rental_price} PKR</Text>
+//         <Text style={styles.itemPrice}>💰 Price: {item.rental_price} $</Text>
 //         <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
 //         <Text style={styles.itemLocation}>📍 Location: {item.location}</Text>
 
@@ -299,7 +299,7 @@
 //         <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //         <Text style={styles.itemName}>{item.name}</Text>
 //         <Text style={styles.itemPrice}>
-//           💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} PKR` : "N/A"}
+//           💰 Price: {item.price !== null && item.price !== undefined ? `${parseFloat(item.price).toFixed(0)} $` : "N/A"}
 //         </Text>
 
 //         {/* ✅ WhatsApp Chat Button */}
@@ -600,7 +600,7 @@
 //             >
 //               <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //               <Text style={styles.itemName}>{item.item_name}</Text>
-//               <Text style={styles.itemPrice}>💰 {item.rental_price} PKR</Text>
+//               <Text style={styles.itemPrice}>💰 {item.rental_price} $</Text>
 //               <Text style={styles.itemCategory}>📌 {item.category}</Text>
 //               <Text style={styles.itemLocation}>📍 {item.location}</Text>
 
@@ -817,7 +817,7 @@
 //               >
 //                 <Image source={{ uri: item.photo }} style={styles.itemImage} />
 //                 <Text style={styles.itemName}>{item.item_name}</Text>
-//                 <Text style={styles.itemPrice}>💰 {item.rental_price} PKR</Text>
+//                 <Text style={styles.itemPrice}>💰 {item.rental_price} $</Text>
 //                 <Text style={styles.itemCategory}>📌 {item.category}</Text>
 //                 <Text style={styles.itemLocation}>📍 {item.location}</Text>
 
@@ -1025,15 +1025,24 @@ export default function RentalsScreen({ navigation }: any) {
   // ✅ Fetch All Rental Items
   const fetchRentalItems = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/rental/rentals`);
-      if (!response.ok) throw new Error("Failed to fetch rental items");
+        if (!user || !user.username) {
+            console.error("❌ User not found in Redux store");
+            return;
+        }
 
-      const data = await response.json();
-      setRentalItems(data); // ✅ Ensure latest data is reflected
+        console.log(`📨 Fetching rental items for user: ${user.username}`);
+
+        const response = await fetch(`${API_URL}/api/rental/rentals?username=${encodeURIComponent(user.username)}`);
+        if (!response.ok) throw new Error("Failed to fetch rental items");
+
+        const data = await response.json();
+        console.log("✅ Fetched Rental Items:", data);
+
+        setRentalItems(data); // ✅ Update state with sorted items
     } catch (error) {
-      console.error("❌ Error fetching rental items:", error);
+        console.error("❌ Error fetching rental items:", error);
     }
-  };
+};
 
   // ✅ Refresh on screen focus
   useEffect(() => {
@@ -1141,7 +1150,7 @@ export default function RentalsScreen({ navigation }: any) {
               >
                 <Image source={{ uri: item.photo }} style={styles.itemImage} />
                 <Text style={styles.itemName}>{item.item_name}</Text>
-                <Text style={styles.itemPrice}>💰 {item.rental_price} PKR</Text>
+                <Text style={styles.itemPrice}>💰 $ {item.rental_price}</Text>
                 <Text style={styles.itemCategory}>📌 {item.category}</Text>
                 <Text style={styles.itemLocation}>📍 {item.location}</Text>
 

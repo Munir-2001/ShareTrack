@@ -71,7 +71,7 @@ export default function ItemDetailScreen({ route, navigation }: any) {
         <View style={styles.container}>
             <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.itemImage} />
             <Text style={styles.itemName}>{item.name}</Text>
-            <Text style={styles.itemPrice}>💰 Price: {item.price} PKR</Text>
+            <Text style={styles.itemPrice}>💰 Price:$ {item.price}</Text>
             <Text style={styles.itemCategory}>📌 Category: {item.category}</Text>
             <Text style={styles.itemLocation}>📍 Location: {item.city}, {item.state}, {item.country}</Text>
 
