@@ -28,6 +28,7 @@ import { SegmentControl } from './SegmentControl';
 import SendMoney from './SendMoney'; // Import the SendMoney component
 import RequestMoney from './RequestMoneyModal';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
+import { useRoute } from '@react-navigation/native';
 
 const options = ['Add Friends', 'Your Friends', 'Blocked Users'];
 interface User {
@@ -37,14 +38,19 @@ interface User {
     id: string;
   };
   photo: string;
+
 }
 
 export default function ConnectionScreen({ navigation }: PropsWithChildren<any>) {
   // const dispatch = useAppDispatch();
+  const route = useRoute();
+  const { name } = route.params as { name: number }
+
   const user = useAppSelector((state: { auth: any }) => state.auth.user);
   const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
   const [userId, setUserId] = useState(user.id || null); // Replace with dynamic user ID
   const [friends, setFriends] = useState<User[]>([]);
+  const [conditionalrouting, setConditionalrouting] = useState<Number>(0);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [showMoneyRequests, setShowMoneyRequests] = useState(false);
   const [moneyRequests, setMoneyRequests] = useState([]);
@@ -68,6 +74,10 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
   useEffect(() => {
     setUserId(user?.id || null);
   }, [user]);
+
+  useEffect(() => {
+    setConditionalrouting(name)
+  }, [name])
 
   const toggleMoneyRequests = () => {
     setShowMoneyRequests(!showMoneyRequests);
@@ -193,7 +203,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
   const openModal = (friend: User) => {
     // setSelectedFriend(friend);
     setModalVisible(true);
-    setShowMoneyRequests(false); 
+    setShowMoneyRequests(false);
 
     console.log('open modal');
   };
@@ -227,16 +237,22 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
         onOptionPress={setSelectedOption}
         
       /> */}
-      <SegmentControl
-        options={options}
-        selectedOption={selectedOption}
-        onOptionPress={(option) => {
-          setSelectedOption(option);
-          setSelectedFriend(null); // ✅ Close SendMoney and RequestMoney modals
-        }}
-      />
+      {conditionalrouting == 0 && (
+        <SegmentControl
+          options={options}
+          selectedOption={selectedOption}
+          onOptionPress={(option) => {
+            setSelectedOption(option);
+            setSelectedFriend(null); // ✅ Close SendMoney and RequestMoney modals
+          }}
+        />
+      )
+      }
+
 
       {/* <Text style={styles.header}>Friends</Text> */}
+
+
       {selectedOption === 'Your Friends' && (
         <View style={{ flex: 1 }}>
           <TextInput
@@ -245,7 +261,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholderTextColor="#666"
-            
+
           />
 
 
@@ -335,7 +351,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
               placeholder="Enter username"
               value={friendRequestUsername}
               onChangeText={setFriendRequestUsername}
-                      placeholderTextColor="#666"
+              placeholderTextColor="#666"
             />
             <TouchableOpacity style={styles.sendButton} onPress={handleSendFriendRequest}>
               <Icon name="send" size={30} color="#1E2A78" />
@@ -443,7 +459,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
         />
       )}
 
-      {selectedFriend && (
+      {selectedFriend && (conditionalrouting == 1 || conditionalrouting == 0) && (
         <SendMoney
           friendUsername={selectedFriend.username}
           onClose={() => {
@@ -452,7 +468,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
         />
       )}
 
-      {selectedFriend && (
+      {selectedFriend && (conditionalrouting == 2 || conditionalrouting == 0) && (
         <RequestMoney
           friendUsername={selectedFriend.username}
           onClose={() => {

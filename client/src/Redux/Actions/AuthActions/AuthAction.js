@@ -9,28 +9,35 @@ export const registerUser = (userData) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    // "Accept": "*/*",
                 },
                 body: JSON.stringify(userData),
             });
+
+            const responseData = await response.json();
+            console.log("🔄 API Response from Register:", responseData); // ✅ Debugging
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message);
+                throw new Error(responseData.message || "Registration failed");
             }
 
+            if (!responseData.data) {
+                throw new Error("Registration successful, but no user data returned.");
+            }
 
-            const user = await response.json();
             dispatch({
                 type: 'REGISTER',
-                payload: user, // Save the user object to Redux state
+                payload: responseData.data, // ✅ Store only user data, NOT entire response
             });
+
+            console.log("✅ Redux Register Action:", responseData.data); // ✅ Log cleaned data
+            return responseData.data; // ✅ Return user data correctly
         } catch (error) {
             Alert.alert('Error registering user:', error.message);
-            // Optionally, dispatch an error action here
+            throw error;
         }
     };
 };
+
 
 // Action to log in a user with an API call
 export const loginUser = (credentials) => {

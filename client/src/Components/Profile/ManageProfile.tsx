@@ -28,6 +28,7 @@ import Icon from '@react-native-vector-icons/ionicons';
 
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 import { API_URL } from '../../constants';
+import { useRoute } from '@react-navigation/native';
 
 export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const isDarkMode = useColorScheme() === 'dark';
@@ -49,11 +50,16 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const gotoPendingRequests = () => {
     navigation.navigate('PendingRequestsScreen');
   };
+  const goToViewBills = () => {
+    navigation.navigate('ViewBillsScreen');
+
+  }
   const goToAccountSettings = () => {
     navigation.navigate('AccountSettingsScreen');
 
   }
-
+   const route = useRoute();
+console.log("this is route name",route)
 useEffect(()=>{
   console.log('user is ', user);
   setUserState(user);
@@ -201,6 +207,7 @@ useEffect(()=>{
   };
 
   const gotoConnections = () => {
+    console.log('Navigating to RentalOffersHistory1212...');
     navigation.navigate('CONNECTIONS');
   };
   const gotoRentalOffersHistory = () => {
@@ -417,7 +424,11 @@ useEffect(()=>{
                   <Text style={styles.itemText}>Pending Requests</Text>
                 </TouchableOpacity>
               </View>
-              <View>
+              <View style={styles.row}>
+              <TouchableOpacity style={styles.item} onPress={goToViewBills}>
+                <Icon name="analytics" size={24} color="#1E2A78" />
+                <Text style={styles.itemText}>View Bills</Text>
+              </TouchableOpacity>
                 <TouchableOpacity style={styles.item} onPress={goToAccountSettings}>
                   <Icon name="settings" size={24} color="#1E2A78" />
                   <Text style={styles.itemText}>Account Settings</Text>

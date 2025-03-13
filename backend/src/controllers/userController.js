@@ -24,19 +24,42 @@ const createUser = async (req, res) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
-    const { data, error } = await supabase.from("users").insert([
-      {
-        username,
-        phone,
-        email,
-        password: hashedPassword,
-      },
-    ]);
+       // ✅ Insert user and return the new record
+
+       const { data: newUser, error } = await supabase
+
+       .from("users")
+ 
+       .insert([
+ 
+         {
+ 
+           username,
+ 
+           phone,
+ 
+           email,
+ 
+           password: hashedPassword,
+ 
+         },
+ 
+       ])
+ 
+       .select() // ✅ This ensures Supabase returns the created user
 
     if (error) throw error;
 
-    res.status(201).json({ message: "User registered successfully", data });
+    
+    // ✅ Send back the new user data
+
+    res.status(201).json({ 
+
+      message: "User registered successfully", 
+
+      data: newUser[0] // ✅ Send only the user object, not an array
+
+    });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

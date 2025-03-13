@@ -3,23 +3,56 @@ import { uploadToStorage } from '../config/storage.js';
 
 const getRentalItems = async (req, res) => {
     try {
-        const { data, error } = await supabase
-            .from("rental_items")
-            .select("*")
-            .eq("status", "available") // ✅ Only fetch available items
-            // .eq("is_available", true);
+        const { username } = req.query; // Get the username from request query params
 
-        if (error) {
-            console.error("❌ Supabase Error:", error);
+        console.log("🔍 Requested Username:", username);
+
+        if (!username) {
+            return res.status(400).json({ message: "Username is required" });
+        }
+
+        // ✅ Fetch the user's city from the users table
+        const { data: userData, error: userError } = await supabase
+            .from("users")
+            .select("city")
+            .eq("username", username)
+            .single();
+
+        if (userError || !userData) {
+            console.error("❌ Error fetching user city:", userError);
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const userCity = userData.city;
+        console.log("📌 User's City:", userCity);
+
+        // ✅ Fetch rental items with owner usernames
+        const { data: rentalItems, error: rentalError } = await supabase
+            .from("rental_items")
+            .select("*, users(username)")
+            .eq("status", "available");
+
+        if (rentalError) {
+            console.error("❌ Supabase Error:", rentalError);
             return res.status(500).json({ message: "Database error while fetching rental items." });
         }
 
-        return res.status(200).json(data);
+        console.log("✅ Fetched Rental Items:", rentalItems.length);
+
+        // ✅ Prioritize rentals from user's city
+        const sortedItems = rentalItems.sort((a, b) => {
+            if (a.location === userCity && b.location !== userCity) return -1;
+            if (b.location === userCity && a.location !== userCity) return 1;
+            return a.rental_price - b.rental_price; // ✅ Sort by price within groups
+        });
+
+        return res.status(200).json(sortedItems);
     } catch (error) {
         console.error("❌ Error fetching rental items:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 
 const submitRentalOffer = async (req, res) => {

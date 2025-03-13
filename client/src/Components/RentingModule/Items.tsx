@@ -1025,15 +1025,24 @@ export default function RentalsScreen({ navigation }: any) {
   // ✅ Fetch All Rental Items
   const fetchRentalItems = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/rental/rentals`);
-      if (!response.ok) throw new Error("Failed to fetch rental items");
+        if (!user || !user.username) {
+            console.error("❌ User not found in Redux store");
+            return;
+        }
 
-      const data = await response.json();
-      setRentalItems(data); // ✅ Ensure latest data is reflected
+        console.log(`📨 Fetching rental items for user: ${user.username}`);
+
+        const response = await fetch(`${API_URL}/api/rental/rentals?username=${encodeURIComponent(user.username)}`);
+        if (!response.ok) throw new Error("Failed to fetch rental items");
+
+        const data = await response.json();
+        console.log("✅ Fetched Rental Items:", data);
+
+        setRentalItems(data); // ✅ Update state with sorted items
     } catch (error) {
-      console.error("❌ Error fetching rental items:", error);
+        console.error("❌ Error fetching rental items:", error);
     }
-  };
+};
 
   // ✅ Refresh on screen focus
   useEffect(() => {
