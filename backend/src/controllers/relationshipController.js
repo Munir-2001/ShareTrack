@@ -160,6 +160,7 @@ const blockRelationship = async (req, res) => {
     }
 };
 
+
 const API_KEY = process.env.API_KEY_NIUM;
 const CLIENT_HASH_ID = process.env.clientHashId;
 var clientHashId=process.env.clientHashId;
@@ -168,7 +169,7 @@ var walletHashId=process.env.walletHashId;//Customer
 var customer2HashId=process.env.customer2HashId;//Customer2
 var wallet2HashId=process.env.wallet2HashId;
 var customer3HashId=process.env.customer3HashId;
-var wallet3HashId=process.env.customer3HashId;
+var wallet3HashId=process.env.wallet3HashId;
 
 const sendMoney = async (req, res) => {
     try {
@@ -246,7 +247,7 @@ const sendMoney = async (req, res) => {
         //     return res.status(500).json({ message: "P2P transfer failed. Transaction rolled back." });
         // }
 
-        console.log("✅ P2P Transfer Successful:", p2pResponse);
+        console.log("✅ P2P Transfer :", p2pResponse);
         res.status(200).json({ message: "Money sent successfully (Internal + P2P)" });
 
     } catch (error) {
