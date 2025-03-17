@@ -29,8 +29,8 @@
 //   }
 // }
 
-const API_URL = "http://localhost:5001/api/admin"; // ✅ Update with your backend URL
-
+// const API_URL = "http://localhost:5001/api/admin"; // ✅ Update with your backend URL
+const API_URL= "https://sharetrack-backend.onrender.com/api/admin"
 export const adminLogin = async (email: string, password: string) => {
   try {
     const response = await fetch(`${API_URL}/login`, {
@@ -66,7 +66,7 @@ export const adminLogin = async (email: string, password: string) => {
 //   }
 // }
 export async function fetchUserFriends(userId: string) {
-  const response = await fetch(`http://localhost:5001/api/admin/users/${userId}/friends`);
+  const response = await fetch({API_URL}+`/users/${userId}/friends`);
   if (!response.ok) throw new Error("Failed to fetch user friends");
   return response.json();
 }

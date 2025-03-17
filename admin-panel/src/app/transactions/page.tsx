@@ -169,8 +169,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_URL = "http://localhost:5001/api/admin"; // Backend API
-
+// const API_URL = "http://localhost:5001/api/admin"; // Backend API
+const API_URL="https://sharetrack-backend.onrender.com/api/admin"
 interface Transaction {
   id: number;
   sender_username: string;

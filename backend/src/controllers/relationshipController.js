@@ -160,7 +160,7 @@ const blockRelationship = async (req, res) => {
     }
 };
 
-const API_KEY = "WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj";
+const API_KEY = process.env.API_KEY_NIUM;
 const CLIENT_HASH_ID = "4f65e729-869a-4a62-a12e-032abfccd401";
 var clientHashId="4f65e729-869a-4a62-a12e-032abfccd401";
 var customerHashId="446f425e-f205-4172-9c92-38e3057c6692";//Customer
@@ -169,6 +169,7 @@ var customer2HashId='47a385ac-9831-4729-a81f-dce956b83793';//Customer2
 var wallet2HashId='7d963c76-5d49-4333-8211-ec8b3a3a2348';
 var customer3HashId="a4e6c28e-669a-4924-b949-aa3909d268e1";
 var wallet3HashId='96b97851-d684-4164-b502-176bca39994c';
+
 const sendMoney = async (req, res) => {
     try {
         const { senderUsername, receiverUsername, amount } = req.body;
