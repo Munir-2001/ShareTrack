@@ -160,15 +160,16 @@ const blockRelationship = async (req, res) => {
     }
 };
 
+
 const API_KEY = process.env.API_KEY_NIUM;
-const CLIENT_HASH_ID = "4f65e729-869a-4a62-a12e-032abfccd401";
-var clientHashId="4f65e729-869a-4a62-a12e-032abfccd401";
-var customerHashId="446f425e-f205-4172-9c92-38e3057c6692";//Customer
-var walletHashId="399200ed-cfec-418b-84fe-a68d0f891490";//Customer
-var customer2HashId='47a385ac-9831-4729-a81f-dce956b83793';//Customer2
-var wallet2HashId='7d963c76-5d49-4333-8211-ec8b3a3a2348';
-var customer3HashId="a4e6c28e-669a-4924-b949-aa3909d268e1";
-var wallet3HashId='96b97851-d684-4164-b502-176bca39994c';
+const CLIENT_HASH_ID = process.env.clientHashId;
+var clientHashId=process.env.clientHashId;
+var customerHashId=process.env.customerHashId;//Customer
+var walletHashId=process.env.walletHashId;//Customer
+var customer2HashId=process.env.customer2HashId;//Customer2
+var wallet2HashId=process.env.wallet2HashId;
+var customer3HashId=process.env.customer3HashId;
+var wallet3HashId=process.env.wallet3HashId;
 
 const sendMoney = async (req, res) => {
     try {
@@ -246,7 +247,7 @@ const sendMoney = async (req, res) => {
         //     return res.status(500).json({ message: "P2P transfer failed. Transaction rolled back." });
         // }
 
-        console.log("✅ P2P Transfer Successful:", p2pResponse);
+        console.log("✅ P2P Transfer :", p2pResponse);
         res.status(200).json({ message: "Money sent successfully (Internal + P2P)" });
 
     } catch (error) {
