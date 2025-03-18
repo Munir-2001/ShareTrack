@@ -547,7 +547,7 @@ const getAllFriends = async (req, res) => {
         // Fetch user details for friends
         const { data: friends, error: friendError } = await supabase
             .from("users")
-            .select("id, username, email, phone")
+            .select("id, username, email, phone, credit_score")
             .in("id", friendIds);
 
         if (friendError) {
@@ -601,7 +601,7 @@ const getAllFriendRequestsReceived = async (req, res) => {
 
         const { data: requesters, error: requestersError } = await supabase
             .from("users")
-            .select("id, username")
+            .select("id, username,credit_score")
             .in("id", requesterIds);
 
         if (requestersError) {
@@ -610,10 +610,18 @@ const getAllFriendRequestsReceived = async (req, res) => {
         }
 
         // Map requester usernames to the requests
-        const formattedRequests = requests.map((req) => ({
-            ...req,
-            requester_username: requesters.find((u) => u.id === req.requester_id)?.username || "Unknown",
-        }));
+        // const formattedRequests = requests.map((req) => ({
+        //     ...req,
+        //     requester_username: requesters.find((u) => u.id === req.requester_id)?.username || "Unknown",
+        // }));
+        const formattedRequests = requests.map((req) => {
+            const requester = requesters.find((u) => u.id === req.requester_id);
+            return {
+                ...req,
+                requester_username: requester ? requester.username : "Unknown",
+                credit_score: requester ? requester.credit_score : "N/A", // ✅ Include credit score
+            };
+        });
 
         console.log("✅ Returning received friend requests:", formattedRequests);
         res.status(200).json(formattedRequests);
@@ -654,7 +662,7 @@ const getAllFriendRequestsSent = async (req, res) => {
 
         const { data: recipients, error: recipientsError } = await supabase
             .from("users")
-            .select("id, username")
+            .select("id, username,credit_score")
             .in("id", recipientIds);
 
         if (recipientsError) {
@@ -663,10 +671,20 @@ const getAllFriendRequestsSent = async (req, res) => {
         }
 
         // Map recipient usernames to the requests
-        const formattedRequests = requests.map((req) => ({
-            ...req,
-            recipient_username: recipients.find((u) => u.id === req.recipient_id)?.username || "Unknown",
-        }));
+        // const formattedRequests = requests.map((req) => ({
+        //     ...req,
+        //     recipient_username: recipients.find((u) => u.id === req.recipient_id)?.username || "Unknown",
+        //     recipient_credit_score: recipients ? recipients.credit_score : "N/A", // ✅ Include credit_score
+
+        // }));
+        const formattedRequests = requests.map((req) => {
+            const recipient = recipients.find((u) => u.id === req.recipient_id);
+            return {
+                ...req,
+                recipient_username: recipient ? recipient.username : "Unknown",
+                credit_score: recipient ? recipient.credit_score : "N/A", // ✅ Corrected credit score mapping
+            };
+        });
 
         console.log("✅ Returning sent friend requests:", formattedRequests);
         res.status(200).json(formattedRequests);
@@ -712,7 +730,7 @@ const getBlockedRelationships = async (req, res) => {
         // Fetch user details
         const { data: users, error: userError } = await supabase
             .from("users")
-            .select("id, username, email")
+            .select("id, username, email,credit_score")
             .in("id", blockedUserIds);
 
         if (userError) {

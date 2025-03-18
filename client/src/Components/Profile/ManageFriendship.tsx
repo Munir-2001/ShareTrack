@@ -38,6 +38,7 @@ interface User {
     id: string;
   };
   photo: string;
+  credit_score:string;
 
 }
 
@@ -84,18 +85,6 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
     if (!showMoneyRequests) fetchMoneyRequests();
   };
 
-  // useEffect(() => {
-  //   if (isAuth) {
-  //     fetchData();
-  //   }
-  // }, [
-  //   userId,
-  //   selectedOption,
-  //   blockedUsers,
-  //   friends,
-  //   pendingRequests,
-  //   sentRequests,
-  // ]);
   useEffect(() => {
     if (isAuth && userId) {
       console.log("🔄 Fetching friends data for user:", userId);
@@ -103,24 +92,6 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
     }
   }, [userId, isAuth]); // ✅ Removed `friends`, `pendingRequests`, etc., from dependencies
 
-
-
-
-  // const fetchData = async () => {
-  //   try {
-  //     const friendsData = await getFriends(userId);
-  //     const pendingRequestsData = await getFriendRequestsReceived(userId);
-  //     const sentRequestsData = await getFriendRequestsSent(userId);
-  //     const blockedUsersData = await getBlockedUsers(userId);
-
-  //     setFriends(friendsData);
-  //     setPendingRequests(pendingRequestsData);
-  //     setSentRequests(sentRequestsData);
-  //     setBlockedUsers(blockedUsersData);
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-  // };
 
 
   const fetchData = async () => {
@@ -154,24 +125,6 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
       setFilteredFriends(friends);
     }
   }, [searchQuery, friends]);
-
-
-  // const handleSendFriendRequest = async () => {
-  //   if (!friendRequestUsername) return;
-
-  //   if (friendRequestUsername === user.username) {
-  //     return Alert.alert('You cannot send a friend request to yourself!');
-  //   }
-
-  //   try {
-  //     await requestFriend(userId, friendRequestUsername);
-  //     Alert.alert('Friend request sent!');
-  //     setFriendRequestUsername(''); 
-  //     fetchData();
-  //   } catch (error: any) {
-  //     Alert.alert(error.message);
-  //   }
-  // };
 
   const handleSendFriendRequest = async () => {
     if (!friendRequestUsername) return;
@@ -286,6 +239,8 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
                     setSelectedFriend(item); // Set the selected friend
                   }}>
                   <Text style={styles.userName}>{item.username}</Text>
+                  <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text> {/* ✅ Added Credit Score */}
+
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => openModal(item)}>
@@ -380,7 +335,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
           </View>
 
           {/* Friend Requests List */}
-          <FlatList
+          {/* <FlatList
             data={filter === "Received" ? pendingRequests : sentRequests}
             keyExtractor={(item: any) => item.id.toString()}
             renderItem={({ item }) => (
@@ -393,6 +348,8 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
                   <Text style={styles.userName}>
                     {filter === "Received" ? item.requester_username : item.recipient_username}
                   </Text>
+                  <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text>
+
                 </View>
                 <View style={styles.actions}>
                   {filter === "Received" && (
@@ -419,7 +376,59 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
               </View>
             )}
             contentContainerStyle={{ paddingBottom: 20 }}
-          />
+          /> */}
+
+          {/* Friend Requests List */}
+<FlatList
+  data={filter === "Received" ? pendingRequests : sentRequests}
+  keyExtractor={(item: any) => item.id.toString()}
+  renderItem={({ item }) => (
+    <View style={styles.listElement}>
+      <View style={styles.user}>
+        <Image
+          source={{ uri: "https://via.placeholder.com/50" }}
+          style={styles.profilePicture}
+        />
+        <View>
+          <Text style={styles.userName}>
+            {filter === "Received" ? item.requester_username : item.recipient_username}
+          </Text>
+          {/* ✅ Corrected to use `requester_credit_score` for Received tab */}
+          {filter === "Received" ? (
+            <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text>
+          ) : (
+            <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text>
+          )}
+        </View>
+      </View>
+
+      <View style={styles.actions}>
+        {filter === "Received" && (
+          <Pressable
+            style={[styles.button, styles.approveButton]}
+            onPress={async () => {
+              await approveFriendRequest(item.id);
+              fetchData();
+            }}
+          >
+            <Text style={styles.buttonText}>Approve</Text>
+          </Pressable>
+        )}
+        <Pressable
+          style={styles.button}
+          onPress={async () => {
+            await deleteRelationship(item.id);
+            fetchData();
+          }}
+        >
+          <Icon name="trash-outline" size={20} color="#1E2A78" />
+        </Pressable>
+      </View>
+    </View>
+  )}
+  contentContainerStyle={{ paddingBottom: 20 }}
+/>
+
         </View>
       )}
 
@@ -444,6 +453,8 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
                 <Text style={styles.userName}>
                   {item.username ? item.username : "Unknown User"}
                 </Text>
+                {/* <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text> ✅ Added Credit Score */}
+
               </View>
 
               <Pressable
@@ -459,7 +470,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
         />
       )}
 
-      {selectedFriend && (conditionalrouting == 1 || conditionalrouting == 0) && (
+      {/* {selectedFriend && (conditionalrouting == 1 || conditionalrouting == 0) && (
         <SendMoney
           friendUsername={selectedFriend.username}
           onClose={() => {
@@ -475,7 +486,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
             setSelectedFriend(null);
           }}
         />
-      )}
+      )} */}
 
     </View>
   );
@@ -516,6 +527,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+    creditScore: {
+      fontSize: 14,
+      color: 'black',
+      marginTop: 2,
+    },
   icon: {
     marginRight: 10,
   },
