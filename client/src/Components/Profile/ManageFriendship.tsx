@@ -173,7 +173,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
   };
   const getCreditScoreLabel = (score: string | null) => {
     const numericScore = score ? parseFloat(score) : null;
-    if (numericScore === null) return "#ccc"; // Default gray if no score available
+    if (numericScore === null) return "N/A"; // Default gray if no score available
     if (numericScore > 550 && numericScore <= 650) return "Risky"; // red
     if (numericScore > 650 && numericScore <= 730) return "Fair"; // orange
     if (numericScore > 730 && numericScore <= 800) return "Trustworthy"; // Dark Green
@@ -303,11 +303,11 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
                   <Text style={styles.creditScore}>
                     Credit Score:
                     <Text style={{ color: getCreditScoreColor(item.credit_score) }}> {item.credit_score}</Text>
-                  {' '} (<Text style={{fontWeight: 'bold'}}>
-                    {getCreditScoreLabel(item.credit_score)}
-                  </Text>)
+                    {' '} (<Text style={{ fontWeight: 'bold' }}>
+                      {getCreditScoreLabel(item.credit_score)}
+                    </Text>)
                   </Text>
-                    
+
 
                 </TouchableOpacity>
 
@@ -413,12 +413,44 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
                     <Text style={styles.userName}>
                       {filter === "Received" ? item.requester_username : item.recipient_username}
                     </Text>
-                    {/* ✅ Corrected to use `requester_credit_score` for Received tab */}
-                    {filter === "Received" ? (
-                      <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text>
+                    {/* {filter === "Received" ? (
+                      <Text style={styles.creditScore}>
+                        Credit Score:
+                        <Text style={{ color: getCreditScoreColor(item.credit_score) }}> {item.credit_score}</Text> {" "}
+                        (<Text style={{ fontWeight: 'bold' }}>{getCreditScoreLabel(item.credit_score)}</Text>)
+                      </Text>
+                      
                     ) : (
-                      <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text>
+                      <Text style={styles.creditScore}>
+                        Credit Score:
+                        <Text style={{ color: getCreditScoreColor(item.credit_score) }}> {item.credit_score}</Text> {" "}
+                      </Text>
+                      
+                    )} */}
+                    {filter === "Received" ? (
+                      <View>
+                        <Text style={styles.creditScore}>
+                          Credit Score:
+                          <Text style={{ color: getCreditScoreColor(item.credit_score) }}> {item.credit_score}</Text>
+                        </Text>
+                        {/* ✅ Move Credit Label to a New Line */}
+                        <Text style={{ color: getCreditScoreColor(item.credit_score) }}>
+                          (<Text style={{fontWeight: 'bold'}}>{getCreditScoreLabel(item.credit_score)}</Text>)
+                        </Text>
+                      </View>
+                    ) : (
+                      <View>
+                        <Text style={styles.creditScore}>
+                          Credit Score:
+                          <Text style={{ color: getCreditScoreColor(item.credit_score) }}> {item.credit_score}</Text>
+                        </Text>
+                        {/* ✅ Move Credit Label to a New Line */}
+                        <Text style={{ color: getCreditScoreColor(item.credit_score) }}>
+                          (<Text style={{fontWeight: 'bold'}}>{getCreditScoreLabel(item.credit_score)}</Text>)
+                        </Text>
+                      </View>
                     )}
+
                   </View>
                 </View>
 
