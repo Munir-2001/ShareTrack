@@ -23,13 +23,13 @@ import {
   requestFriend,
   getBlockedUsers,
   getRequestsForLending,
-} from './relationshipUtils'; // Adjust the path if needed
+} from './relationshipUtils';
 import { SegmentControl } from './SegmentControl';
-import SendMoney from './SendMoney'; // Import the SendMoney component
+import SendMoney from './SendMoney';
 import RequestMoney from './RequestMoneyModal';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 import { useRoute } from '@react-navigation/native';
-
+import SendMoneyScreen from './SendMoneyScreen';
 const options = ['Add Friends', 'Your Friends', 'Blocked Users'];
 interface User {
   id: string;
@@ -38,6 +38,7 @@ interface User {
     id: string;
   };
   photo: string;
+  credit_score: string;
 
 }
 
@@ -84,43 +85,13 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
     if (!showMoneyRequests) fetchMoneyRequests();
   };
 
-  // useEffect(() => {
-  //   if (isAuth) {
-  //     fetchData();
-  //   }
-  // }, [
-  //   userId,
-  //   selectedOption,
-  //   blockedUsers,
-  //   friends,
-  //   pendingRequests,
-  //   sentRequests,
-  // ]);
   useEffect(() => {
     if (isAuth && userId) {
       console.log("🔄 Fetching friends data for user:", userId);
       fetchData();
     }
-  }, [userId, isAuth]); // ✅ Removed `friends`, `pendingRequests`, etc., from dependencies
+  }, [userId, isAuth]);
 
-
-
-
-  // const fetchData = async () => {
-  //   try {
-  //     const friendsData = await getFriends(userId);
-  //     const pendingRequestsData = await getFriendRequestsReceived(userId);
-  //     const sentRequestsData = await getFriendRequestsSent(userId);
-  //     const blockedUsersData = await getBlockedUsers(userId);
-
-  //     setFriends(friendsData);
-  //     setPendingRequests(pendingRequestsData);
-  //     setSentRequests(sentRequestsData);
-  //     setBlockedUsers(blockedUsersData);
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-  // };
 
 
   const fetchData = async () => {
@@ -128,7 +99,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
       console.log("🔄 Fetching data for user:", userId);
 
       const friendsData = await getFriends(userId);
-      const pendingRequestsData = await getFriendRequestsReceived(userId); // ✅ Correctly fetch received requests
+      const pendingRequestsData = await getFriendRequestsReceived(userId);
       const sentRequestsData = await getFriendRequestsSent(userId);
       const blockedUsersData = await getBlockedUsers(userId);
 
@@ -136,7 +107,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
       console.log("📤 Sent Friend Requests:", sentRequestsData);
 
       setFriends(friendsData);
-      setPendingRequests(pendingRequestsData); // ✅ Ensure received requests are updated
+      setPendingRequests(pendingRequestsData);
       setSentRequests(sentRequestsData);
       setBlockedUsers(blockedUsersData);
     } catch (error) {
@@ -155,24 +126,6 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
     }
   }, [searchQuery, friends]);
 
-
-  // const handleSendFriendRequest = async () => {
-  //   if (!friendRequestUsername) return;
-
-  //   if (friendRequestUsername === user.username) {
-  //     return Alert.alert('You cannot send a friend request to yourself!');
-  //   }
-
-  //   try {
-  //     await requestFriend(userId, friendRequestUsername);
-  //     Alert.alert('Friend request sent!');
-  //     setFriendRequestUsername(''); 
-  //     fetchData();
-  //   } catch (error: any) {
-  //     Alert.alert(error.message);
-  //   }
-  // };
-
   const handleSendFriendRequest = async () => {
     if (!friendRequestUsername) return;
 
@@ -183,25 +136,54 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
     try {
       await requestFriend(userId, friendRequestUsername);
       Alert.alert('Friend request sent!');
-
-      // 🔄 Fetch the latest sent requests and update state
       const updatedSentRequests = await getFriendRequestsSent(userId);
       setSentRequests(updatedSentRequests);
 
       setFriendRequestUsername('');
-      fetchData(); // Ensuring everything is updated
+      fetchData();
     } catch (error: any) {
       Alert.alert(error.message);
     }
   };
 
+  // const gotoSendMoneyScreen = (friend: User) => {
+  //   console.log("✅ Attempting navigation to SendMoneyScreen with:", friend);
+  //   console.log("Available Screens:", navigation.getState().routes);
 
+  //   if (conditionalrouting === 1) {
+  //     console.log("✅ insdei conditional routing");
+
+  //     // navigation.navigate('SendMoneyScreen', {
+  //     //   friendUsername: friend.username,
+  //     //   friendCreditScore: friend.credit_score,
+  //     // });
+  //     navigation.getParent()?.navigate('SendMoneyScreen', {
+  //       friendUsername: friend.username,
+  //       friendCreditScore: friend.credit_score,
+  //   });
+  //   }
+  // };
+  const getCreditScoreColor = (score: string | null) => {
+    const numericScore = score ? parseFloat(score) : null;
+    if (numericScore === null) return "#ccc"; // Default gray if no score available
+    if (numericScore > 550 && numericScore <= 650) return "#E57373"; // red
+    if (numericScore > 650 && numericScore <= 730) return "#FFA500"; // orange
+    if (numericScore > 730 && numericScore <= 800) return "#388E3C"; // Dark Green
+    return "#ccc"; // Default fallback
+  };
+  const getCreditScoreLabel = (score: string | null) => {
+    const numericScore = score ? parseFloat(score) : null;
+    if (numericScore === null) return "#ccc"; // Default gray if no score available
+    if (numericScore > 550 && numericScore <= 650) return "Risky"; // red
+    if (numericScore > 650 && numericScore <= 730) return "Fair"; // orange
+    if (numericScore > 730 && numericScore <= 800) return "Trustworthy"; // Dark Green
+    return "#ccc"; // Default fallback
+  };
   const gotoProfile = () => {
     navigation.navigate('PROFILE');
   };
 
   const openModal = (friend: User) => {
-    // setSelectedFriend(friend);
     setModalVisible(true);
     setShowMoneyRequests(false);
 
@@ -209,10 +191,9 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
   };
 
   const closeModal = (): void => {
-    console.log('Closing Modal'); // Add this log
-    // setSelectedFriend(null);
+    console.log('Closing Modal');
     setModalVisible(false);
-    console.log('Modal Visible State:', modalVisible); // Log after state chang
+    console.log('Modal Visible State:', modalVisible);
   };
 
   const blockAlert = () => {
@@ -225,33 +206,34 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+
+      {/* <TouchableOpacity
         onPress={gotoProfile}
         style={styles.backButtonContainer}>
         <Icon name="arrow-back" size={30} color="#1E2A78" style={styles.icon} />
         <Text style={styles.backButtonText}>Profile</Text>
-      </TouchableOpacity>
-      {/* <SegmentControl
-        options={options}
-        selectedOption={selectedOption}
-        onOptionPress={setSelectedOption}
-        
-      /> */}
+      </TouchableOpacity> */}
+      {conditionalrouting !== 1 && conditionalrouting !== 2 && (
+        <TouchableOpacity
+          onPress={gotoProfile}
+          style={styles.backButtonContainer}
+        >
+          <Icon name="arrow-back" size={30} color="#1E2A78" style={styles.icon} />
+          <Text style={styles.backButtonText}>Profile</Text>
+        </TouchableOpacity>
+      )}
+
       {conditionalrouting == 0 && (
         <SegmentControl
           options={options}
           selectedOption={selectedOption}
           onOptionPress={(option) => {
             setSelectedOption(option);
-            setSelectedFriend(null); // ✅ Close SendMoney and RequestMoney modals
+            setSelectedFriend(null);
           }}
         />
       )
       }
-
-
-      {/* <Text style={styles.header}>Friends</Text> */}
-
 
       {selectedOption === 'Your Friends' && (
         <View style={{ flex: 1 }}>
@@ -272,20 +254,61 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
             renderItem={({ item }) => (
               <View style={styles.listElement}>
                 {/* Profile picture */}
+
                 <Image
-                  source={{ uri: 'https://via.placeholder.com/50' }} // Placeholder image URL
+                  source={{ uri: 'https://via.placeholder.com/50' }}
                   style={styles.profilePicture}
                 />
-                {/* User details */}
                 <TouchableOpacity
                   style={styles.userDetails}
                   onPress={() => {
                     console.log('Selected friend:', item);
                     console.log('Selected friend username:', item.username);
                     // Debug log
-                    setSelectedFriend(item); // Set the selected friend
+                    setSelectedFriend(item);
+                    if (conditionalrouting === 1) {
+                      console.log("✅ Trying to navigate to sendmoneyscreen...");
+                      console.log("Available Screens:", navigation.getState().routes);
+
+                      // navigation.navigate('SendMoneyScreen', {
+                      //   friendUsername: item.username,
+                      //   friendCreditScore: item.credit_score,
+                      // });
+                      console.log("Navigator State:", navigation.getState().routes);
+                      navigation.navigate('SendMoneyScreen', {
+                        friendUsername: item.username,
+                        friendCreditScore: item.credit_score,
+                      });
+
+                    } else if (conditionalrouting === 2) {
+                      console.log("✅ Trying to navigate to requestmoneyscreen...");
+                      // navigation.navigate('SendMoneyScreen', {
+                      //   friendUsername: item.username,
+                      //   friendCreditScore: item.credit_score,
+                      // });
+                      console.log("Navigator State:", navigation.getState().routes);
+                      navigation.navigate('RequestMoneyScreen', {
+                        friendUsername: item.username,
+                        friendCreditScore: item.credit_score,
+                      });
+
+                    }
+
                   }}>
+
+
+                  {/* <Text style={styles.userName}>{item.username}</Text>
+                  <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text> */}
                   <Text style={styles.userName}>{item.username}</Text>
+                  <Text style={styles.creditScore}>
+                    Credit Score:
+                    <Text style={{ color: getCreditScoreColor(item.credit_score) }}> {item.credit_score}</Text>
+                  {' '} (<Text style={{fontWeight: 'bold'}}>
+                    {getCreditScoreLabel(item.credit_score)}
+                  </Text>)
+                  </Text>
+                    
+
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => openModal(item)}>
@@ -300,10 +323,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
             animationType="slide">
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
-                {/* <Text style={styles.modalHeader}>
-          Actions for {selectedFriend?.username}
-        </Text> */}
-                {/* Block Button */}
+
                 <Pressable
                   style={[styles.modalButton]}
                   onPress={() => {
@@ -379,7 +399,6 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
             </Pressable>
           </View>
 
-          {/* Friend Requests List */}
           <FlatList
             data={filter === "Received" ? pendingRequests : sentRequests}
             keyExtractor={(item: any) => item.id.toString()}
@@ -390,10 +409,19 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
                     source={{ uri: "https://via.placeholder.com/50" }}
                     style={styles.profilePicture}
                   />
-                  <Text style={styles.userName}>
-                    {filter === "Received" ? item.requester_username : item.recipient_username}
-                  </Text>
+                  <View>
+                    <Text style={styles.userName}>
+                      {filter === "Received" ? item.requester_username : item.recipient_username}
+                    </Text>
+                    {/* ✅ Corrected to use `requester_credit_score` for Received tab */}
+                    {filter === "Received" ? (
+                      <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text>
+                    ) : (
+                      <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text>
+                    )}
+                  </View>
                 </View>
+
                 <View style={styles.actions}>
                   {filter === "Received" && (
                     <Pressable
@@ -420,14 +448,10 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
             )}
             contentContainerStyle={{ paddingBottom: 20 }}
           />
+
         </View>
       )}
 
-
-
-      {/* </View> */}
-
-      {/* <Text style={styles.header}>Blocked Users</Text> */}
       {selectedOption === 'Blocked Users' && (
         <FlatList
           data={blockedUsers}
@@ -436,7 +460,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
             <View style={styles.listElement}>
               {/* Profile picture */}
               <Image
-                source={{ uri: 'https://via.placeholder.com/50' }} // Placeholder image URL
+                source={{ uri: 'https://via.placeholder.com/50' }}
                 style={styles.profilePicture}
               />
               {/* User details */}
@@ -444,6 +468,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
                 <Text style={styles.userName}>
                   {item.username ? item.username : "Unknown User"}
                 </Text>
+
               </View>
 
               <Pressable
@@ -459,23 +484,29 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
         />
       )}
 
-      {selectedFriend && (conditionalrouting == 1 || conditionalrouting == 0) && (
-        <SendMoney
-          friendUsername={selectedFriend.username}
-          onClose={() => {
-            setSelectedFriend(null);
-          }} // Close the SendMoney component
-        />
-      )}
+      {/* set page redirection from here. */}
+      {/* {selectedFriend && (conditionalrouting == 1) && (
 
-      {selectedFriend && (conditionalrouting == 2 || conditionalrouting == 0) && (
+        // <SendMoney
+        //   friendUsername={selectedFriend.username}
+        //   onClose={() => {
+        //     setSelectedFriend(null);
+        //   }} // Close the SendMoney component
+        // />
+        // <TouchableOpacity onPress={() => gotoSendMoneyScreen(selectedFriend)}>
+        // </TouchableOpacity>
+      )} */}
+
+
+
+      {/* {selectedFriend && (conditionalrouting == 2) && (
         <RequestMoney
           friendUsername={selectedFriend.username}
           onClose={() => {
             setSelectedFriend(null);
           }}
         />
-      )}
+      )} */}
 
     </View>
   );
@@ -515,6 +546,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+  },
+  creditScore: {
+    fontSize: 14,
+    color: 'black',
+    marginTop: 2,
   },
   icon: {
     marginRight: 10,
@@ -626,8 +662,7 @@ const styles = StyleSheet.create({
   },
 
   modalButton: {
-    width: '100%', // Buttons take up full width of the modal
-    // paddingVertical: 12,
+    width: '100%',
     borderRadius: 5,
     alignItems: 'center',
     paddingBottom: 10,

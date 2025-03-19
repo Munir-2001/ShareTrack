@@ -14,12 +14,14 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
 import ConnectionScreen from '../Components/Profile/ManageFriendship';
 import DashboardSendRequestMoneyTab from '../Dashboard/DashboardSendRequestMoneyTab';
+import SendMoneyScreen from '../Components/Profile/SendMoneyScreen';
+import { RequestMoneyScreen } from '../Components/Profile/RequestMoneyScreen';
 type RootStackParamList = {
     ONE: undefined;
     TWO: undefined;
     THREE: undefined;
     CONNECTIONS: { userIds: number };
-  };
+};
 // Individual screens
 interface Props {
     navigation: any;
@@ -59,22 +61,22 @@ function ScreenThree() {
 
 type DashboardProps = {
     navigation: NativeStackNavigationProp<RootStackParamList, 'TWO'>;
-  };
-  const Stack = createNativeStackNavigator();
+};
+const Stack = createNativeStackNavigator();
 
-export default function Dashboard({ navigation }:any) {
-  
+export default function Dashboard({ navigation }: any) {
+
     const [paramNumber, setParamNumber] = useState<number>(3);
     const parentChildCall = (ids: number) => {
         setParamNumber(ids)
     }
 
-    useEffect(()=>{
-        console.log("useEffect 1234 ",navigation.navigate)
+    useEffect(() => {
+        console.log("useEffect 1234 ", navigation.navigate)
         if (paramNumber !== 3) {
             //  navigation.navigate('ConnectionScreen');
         }
-    },[paramNumber])
+    }, [paramNumber])
 
     return (
         <>
@@ -99,9 +101,17 @@ export default function Dashboard({ navigation }:any) {
                 <Stack.Screen
                     name="CONNECTIONS"
                     component={ConnectionScreen}
-                    // initialParams={{ userIds: paramNumber }}
+                // initialParams={{ userIds: paramNumber }}
                 />
-               
+                <Stack.Screen
+                    name="SendMoneyScreen"
+                    component={SendMoneyScreen}
+                />
+                                <Stack.Screen
+                name="RequestMoneyScreen"
+                component={RequestMoneyScreen}>
+                </Stack.Screen>
+
 
             </Stack.Navigator>
         </>

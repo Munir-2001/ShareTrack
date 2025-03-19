@@ -18,7 +18,7 @@ export default function DashboardSendRequestMoneyTab({ navigation, parentChildCa
     };
     return (
         <View>
-            <Text style={styles.screenText}>TWO</Text>
+            {/* <Text style={styles.screenText}>TWO</Text> */}
             <TouchableOpacity style={styles.container} onPress={() => { gotoConnections(1) }}>
                 <Text style={styles.buttonText}>Send Money</Text>
             </TouchableOpacity>

@@ -16,6 +16,7 @@ import ViewBillsScreen from './ViewBillsScreen'
 import AccountSettingsScreen from './AccountSettingsScreen';
 import UpcomingRepaymentsScreen from './UpcomingRepaymentsScreen'
 import RentalOffersHistory from './RentalOfferHistory';
+import SendMoneyScreen from './SendMoneyScreen';
 const Stack = createNativeStackNavigator();
 
 export default function Dashboard() {
@@ -36,6 +37,7 @@ export default function Dashboard() {
                     component={ConnectionScreen}
                     initialParams={{ name: 0 }}
                 />
+
                 <Stack.Screen name="UserProfile" component={UserProfile} />
                 <Stack.Screen name="PendingRequestsScreen">
                     {(props) => <PendingRequestsScreen {...props} />}

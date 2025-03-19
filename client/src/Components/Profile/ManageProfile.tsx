@@ -48,7 +48,28 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const [isUserLoaded, setIsUserLoaded] = useState(false);
   const [photo, setPhoto] = useState<any | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(`${API_URL}/uploads/profile.jpg`);
-
+  // const getCreditScoreColor = (score: number | null) => {
+  //   if (score === null) return "#ccc"; // Default gray if no score available
+  //   if (score <= 630) return "#E57373"; // Red
+  //   if (score > 630 && score <= 690) return "#FDD835"; // Yellow
+  //   if (score > 690 && score < 750) return "#81C784"; // Light Green
+  //   if (score >= 750 && score <= 850) return "#388E3C"; // Dark Green
+  //   return "#ccc"; // Default fallback
+  // };
+  const getCreditScoreColor = (score: number | null) => {
+    if (score === null) return "#ccc"; // Default gray if no score available
+    if (score > 550 && score <= 650) return "#E57373"; // red
+    if (score > 650 && score <= 730) return "#FFA500"; // orange
+    if (score > 730 && score <= 800) return "#388E3C"; // Dark Green
+    return "#ccc"; // Default fallback
+  };
+  const getCreditScoreLabel = (score: number | null) => {
+    if (score === null) return "#ccc"; // Default gray if no score available
+    if (score > 550 && score <= 650) return "Risky"; // red
+    if (score > 650 && score <= 730) return "Fair"; // orange
+    if (score > 730 && score <= 800) return "Trustworthy"; // Dark Green
+    return "#ccc"; // Default fallback
+  };
   const gotoPendingRequests = () => {
     navigation.navigate('PendingRequestsScreen');
   };
@@ -60,13 +81,13 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     navigation.navigate('AccountSettingsScreen');
 
   }
-   const route = useRoute();
-console.log("this is route name",route)
-useEffect(()=>{
-  console.log('user is ', user);
-  setUserState(user);
-  console.log('userState is ', userState);
-},[user])
+  const route = useRoute();
+  console.log("this is route name", route)
+  useEffect(() => {
+    console.log('user is ', user);
+    setUserState(user);
+    console.log('userState is ', userState);
+  }, [user])
 
   useEffect(() => {
     console.log('user is ', user);
@@ -79,9 +100,9 @@ useEffect(()=>{
       console.log("User is not available yet");
       return; // Exit early if user is null/undefined
     }
-  
+
     console.log("User found:", user);
-  
+
     setUserState(user);
     if (user && user.id) {
       const fetchUserBalance = async () => {
@@ -106,7 +127,7 @@ useEffect(()=>{
           console.log('Error fetching user balance:', error);
         }
       };
-
+      
 
 
       fetchUserBalance();
@@ -124,24 +145,24 @@ useEffect(()=>{
               'Content-Type': 'application/json',
             },
           });
-  
+
           if (!response.ok) {
             throw new Error('Failed to fetch receivable and payable');
           }
-  
+
           const data = await response.json();
-          console.log('the api for receivable and payable called and data is '+data)
+          console.log('the api for receivable and payable called and data is ' + data)
           setReceivable(data.receivables);
           setPayable(data.payables);
         } catch (error) {
           console.error('Error fetching receivable/payable:', error);
         }
       };
-  
+
       fetchReceivableAndPayable();
     }
   }, [user]);
-  
+
 
   const pickImage = async () => {
     const options: ImageLibraryOptions = {
@@ -263,7 +284,7 @@ useEffect(()=>{
 
   const openModal = () => {
     setModalVisible(true);
-    console.log('open modal', photo ,userState );
+    console.log('open modal', photo, userState);
   };
 
   const goToUpcomingRepayments = () => {
@@ -277,27 +298,27 @@ useEffect(()=>{
   };
   const removeProfilePicture = async () => {
     console.log("removeProfilePicture function called");
-  
+
     try {
       const response = await fetch(`${API_URL}/api/auth/deleteImage/2`, {
         method: 'DELETE',
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to remove profile picture');
       }
-  
+
       // ✅ Clear the profile image state after deletion
-      setProfileImage(null); 
-  
+      setProfileImage(null);
+
       Alert.alert('Success', 'Profile picture removed successfully');
     } catch (error) {
       let errorMessage = 'Something went wrong';
-  
+
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-  
+
       Alert.alert('Error', errorMessage);
       //Cal refresh here or after calling it
     }
@@ -311,7 +332,7 @@ useEffect(()=>{
         flex: 1,
       }}>
       {userState ? (
-        
+
         <>
           <View style={styles.topHalf} />
 
@@ -338,15 +359,15 @@ useEffect(()=>{
               animationType="slide">
               <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                <Pressable
-                style={[styles.modalButton]}
-                  onPress={() => {
-                    console.log("Button pressed!");
-                    removeProfilePicture();
-                  }}>
-                  <Text style={{ color: 'red' }}>
-                    Remove Profile Picture</Text>
-                </Pressable>
+                  <Pressable
+                    style={[styles.modalButton]}
+                    onPress={() => {
+                      console.log("Button pressed!");
+                      removeProfilePicture();
+                    }}>
+                    <Text style={{ color: 'red' }}>
+                      Remove Profile Picture</Text>
+                  </Pressable>
                   <Pressable
                     style={[styles.modalButton]}
                     onPress={() => {
@@ -413,10 +434,19 @@ useEffect(()=>{
               </View>
 
               {/* Credit Score Section */}
-              <View style={styles.creditScoreBox}>
+              {/* <View style={styles.creditScoreBox}>
                 <Text style={styles.creditScoreTitle}>Credit Score</Text>
                 <Text style={styles.creditScoreValue}>{creditScore || 'N/A'}</Text>
+              </View> */}
+              <View style={[styles.creditScoreBox, { backgroundColor: getCreditScoreColor(creditScore) }]}>
+                <Text style={styles.creditScoreTitle}>Credit Score</Text>
+                
+                <Text style={styles.creditScoreValue}>{creditScore || 'N/A'}</Text>
+                
+                <Text style={{ fontWeight: 'bold', color:'white' }}>({getCreditScoreLabel(creditScore)})</Text>
+
               </View>
+
             </View>
 
 
@@ -478,10 +508,10 @@ useEffect(()=>{
                 </TouchableOpacity>
               </View>
               <View style={styles.row}>
-              <TouchableOpacity style={styles.item} onPress={goToViewBills}>
-                <Icon name="analytics" size={24} color="#1E2A78" />
-                <Text style={styles.itemText}>View Bills</Text>
-              </TouchableOpacity>
+                <TouchableOpacity style={styles.item} onPress={goToViewBills}>
+                  <Icon name="analytics" size={24} color="#1E2A78" />
+                  <Text style={styles.itemText}>View Bills</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.item} onPress={goToAccountSettings}>
                   <Icon name="settings" size={24} color="#1E2A78" />
                   <Text style={styles.itemText}>Account Settings</Text>
@@ -546,6 +576,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 70,
     alignSelf: 'center',
+    alignItems: 'center',
+  },
+  creditScoreBox: {
+    flex: 6, // Take up equal space
+    margin: 5,
+    padding: 15,
+    borderRadius: 10,
     alignItems: 'center',
   },
   profilePicture: {
@@ -771,14 +808,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
-  },
-  creditScoreBox: {
-    flex: 6, // Take up equal space
-    margin: 5,
-    padding: 15,
-    backgroundColor: '#4CAF50', // Green background
-    borderRadius: 10,
-    alignItems: 'center',
   },
   creditScoreTitle: {
     fontSize: 16,

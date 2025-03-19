@@ -102,28 +102,6 @@ export const getFriends = async (userId) => {
     }
 };
 
-// Get all friend requests received for a user
-// export const getFriendRequestsReceived = async (userId) => {
-//     try {
-//         const response = await fetch(`${API_URL}/api/relationship/requests/received`, {  // ✅ Changed from GET to POST
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
-//         });
-
-//         if (!response.ok) {
-//             const error = await response.json();
-//             throw new Error(error.message);
-//         }
-
-//         return await response.json();
-//     } catch (error) {
-//         console.error("❌ getFriendRequestsReceived: Error fetching requests:", error.message);
-//         throw error;
-//     }
-// };
 export const getFriendRequestsReceived = async (userId) => {
     try {
         console.log("📡 Fetching received friend requests for user:", userId);
@@ -182,64 +160,6 @@ export const getFriendRequestsSent = async (userId) => {
     }
 };
 
-// // Get all blocked users for a user
-// export const getBlockedUsers = async (userId) => {
-//     try {
-//         const response = await fetch(`${API_URL}/api/relationship/blocked`, {  // ✅ Changed from GET to POST
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify({ userId }),  // ✅ Sending userId in request body
-//         });
-
-//         if (!response.ok) {
-//             const error = await response.json();
-//             throw new Error(error.message);
-//         }
-
-//         return await response.json();
-//     } catch (error) {
-//         console.error("❌ getBlockedUsers: Error fetching blocked users:", error.message);
-//         throw error;
-//     }
-// };
-
-// export const getBlockedUsers = async (userId) => {
-//     try {
-//         console.log("📡 Fetching blocked users for user:", userId);
-
-//         const response = await fetch(`${API_URL}/api/relationship/blocked`, {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//             body: JSON.stringify({ userId }),
-//         });
-
-//         const data = await response.json();
-//         console.log("🚫 Blocked Users API Response:", data);
-
-//         if (!response.ok) {
-//             console.error("❌ API Error:", data.message);
-//             throw new Error(data.message);
-//         }
-
-//         // ✅ Ensure blocked user details are properly structured
-//         const formattedData = data.map(blockedUser => ({
-//             ...blockedUser,
-//             username: blockedUser.user?.username || "Unknown",  // ✅ Ensure username exists
-//             relationship: blockedUser.relationship || { id: blockedUser.id } // ✅ Fallback if missing
-//         }));
-
-//         console.log("🚫 Processed Blocked Users:", formattedData);
-//         return formattedData;
-//     } catch (error) {
-//         console.error("❌ getBlockedUsers: Error fetching blocked users:", error.message);
-//         throw error;
-//     }
-// };
-
 export const getBlockedUsers = async (userId) => {
     try {
         console.log("📡 Fetching blocked users for user:", userId);
@@ -277,31 +197,6 @@ export const getBlockedUsers = async (userId) => {
 
 
 
-
-// // Make a friend request
-// export const requestFriend = async (userId, friendUsername) => {
-//     try {
-//         const response = await fetch(`${API_URL}/api/relationship/request`, {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//             },
-//             credentials: "include", // Include cookies for session authentication if required
-//             body: JSON.stringify({ requester: userId, recipeintUsername: friendUsername }),
-//         });
-//         console.log('backend response was'+response)
-
-//         if (!response.ok) {
-//             const error = await response.json();
-//             throw new Error(error.message);
-//         }
-
-//         const data = await response.json();
-//         return data;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
 export const requestFriend = async (userId, friendUsername) => {
     try {
         console.log("📤 Sending friend request with payload:", JSON.stringify({ 
