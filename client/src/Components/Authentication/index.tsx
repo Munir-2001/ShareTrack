@@ -13,6 +13,7 @@ import {
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 import { loginUser, registerUser } from '../../Redux/Actions/AuthActions/AuthAction';
+import { ActivityIndicator } from 'react-native';
 
 interface AuthScreenProps {
     isSignUp: boolean;
@@ -21,6 +22,7 @@ interface AuthScreenProps {
 
 const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, setIsSignUp }) => {
     const dispatch = useAppDispatch();
+    const [loading, setLoading] = useState(false);
     const isAuth = useAppSelector((state: { auth: any }) => state.auth.isAuth);
 
     const [email, setEmail] = useState('');
@@ -34,7 +36,9 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, se
     const validatePassword = (password: string) => password.length >= 6;
     const validateUsername = (username: string) => username.length >= 3;
 
-    const handleAuth = () => {
+    const handleAuth = async () => {
+        if (loading) return;
+        setLoading(true);
         if (isSignUp) {
             // Full validation for sign-up
             if (!username || !phone || !email || !password || !confirmPassword) {
@@ -62,7 +66,7 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, se
                 return;
             }
 
-            dispatch(registerUser({ email, password, username, phone }));
+            await dispatch(registerUser({ email, password, username, phone }));
         } else {
             // Simple check for sign-in (no validation, just empty field check)
             if (!email || !password) {
@@ -70,8 +74,9 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, se
                 return;
             }
 
-            dispatch(loginUser({ email, password }));
+            await dispatch(loginUser({ email, password }));
         }
+        setLoading(false);
     };
 
     return (
@@ -127,9 +132,22 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, se
                             placeholderTextColor="#666"
                         />
                     )}
-                    <TouchableOpacity style={styles.signInButton} onPress={handleAuth}>
+                    {/* previous working below one */}
+                    {/* <TouchableOpacity style={styles.signInButton} onPress={handleAuth}>
                         <Text style={styles.buttonText}>{isSignUp ? 'Create Account' : 'Login'}</Text>
+                    </TouchableOpacity> */}
+                    {/* normal login maybe with text no spinner */}
+                    {/* <TouchableOpacity style={styles.signInButton} onPress={handleAuth} disabled={loading}>
+                        <Text style={styles.buttonText}>{loading ? 'Loading...' : isSignUp ? 'Create Account' : 'Login'}</Text>
+                    </TouchableOpacity> */}
+                    <TouchableOpacity style={styles.signInButton} onPress={handleAuth} disabled={loading}>
+                        {loading ? (
+                            <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                            <Text style={styles.buttonText}>{isSignUp ? 'Create Account' : 'Login'}</Text>
+                        )}
                     </TouchableOpacity>
+
                     <TouchableOpacity onPress={() => setIsSignUp((prev) => !prev)}>
                         <Text style={styles.switchButtonText}>
                             Switch to {isSignUp ? 'Login' : 'Sign Up'}

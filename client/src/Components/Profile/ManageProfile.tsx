@@ -48,12 +48,26 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const [isUserLoaded, setIsUserLoaded] = useState(false);
   const [photo, setPhoto] = useState<any | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(`${API_URL}/uploads/profile.jpg`);
+  // const getCreditScoreColor = (score: number | null) => {
+  //   if (score === null) return "#ccc"; // Default gray if no score available
+  //   if (score <= 630) return "#E57373"; // Red
+  //   if (score > 630 && score <= 690) return "#FDD835"; // Yellow
+  //   if (score > 690 && score < 750) return "#81C784"; // Light Green
+  //   if (score >= 750 && score <= 850) return "#388E3C"; // Dark Green
+  //   return "#ccc"; // Default fallback
+  // };
   const getCreditScoreColor = (score: number | null) => {
     if (score === null) return "#ccc"; // Default gray if no score available
-    if (score <= 630) return "#E57373"; // Red
-    if (score > 630 && score <= 690) return "#FDD835"; // Yellow
-    if (score > 690 && score < 750) return "#81C784"; // Light Green
-    if (score >= 750 && score <= 850) return "#388E3C"; // Dark Green
+    if (score > 550 && score <= 650) return "#E57373"; // red
+    if (score > 650 && score <= 730) return "#FFA500"; // orange
+    if (score > 730 && score <= 800) return "#388E3C"; // Dark Green
+    return "#ccc"; // Default fallback
+  };
+  const getCreditScoreLabel = (score: number | null) => {
+    if (score === null) return "#ccc"; // Default gray if no score available
+    if (score > 550 && score <= 650) return "Risky"; // red
+    if (score > 650 && score <= 730) return "Fair"; // orange
+    if (score > 730 && score <= 800) return "Trustworthy"; // Dark Green
     return "#ccc"; // Default fallback
   };
   const gotoPendingRequests = () => {
@@ -426,7 +440,11 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
               </View> */}
               <View style={[styles.creditScoreBox, { backgroundColor: getCreditScoreColor(creditScore) }]}>
                 <Text style={styles.creditScoreTitle}>Credit Score</Text>
+                
                 <Text style={styles.creditScoreValue}>{creditScore || 'N/A'}</Text>
+                
+                <Text style={{ fontWeight: 'bold', color:'white' }}>({getCreditScoreLabel(creditScore)})</Text>
+
               </View>
 
             </View>
