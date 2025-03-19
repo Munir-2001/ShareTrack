@@ -2,9 +2,11 @@ import { Alert } from 'react-native';
 import { API_URL } from '../../../constants';
 
 // Action to register a user with an API call
+const CLIENT_HASH_ID = "4f65e729-869a-4a62-a12e-032abfccd401";
 export const registerUser = (userData) => {
     return async (dispatch) => {
         try {
+            // ✅ Step 1: Register the user (calls backend)
             const response = await fetch(`${API_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: {
@@ -14,7 +16,7 @@ export const registerUser = (userData) => {
             });
 
             const responseData = await response.json();
-            console.log("🔄 API Response from Register:", responseData); // ✅ Debugging
+            console.log("🔄 API Response from Register:", responseData);
 
             if (!response.ok) {
                 throw new Error(responseData.message || "Registration failed");
@@ -24,20 +26,21 @@ export const registerUser = (userData) => {
                 throw new Error("Registration successful, but no user data returned.");
             }
 
+            // 🛠 Dispatch User Data to Redux Store
             dispatch({
                 type: 'REGISTER',
-                payload: responseData.data, // ✅ Store only user data, NOT entire response
+                payload: responseData.data,
             });
 
-            console.log("✅ Redux Register Action:", responseData.data); // ✅ Log cleaned data
-            return responseData.data; // ✅ Return user data correctly
+            console.log("✅ Redux Register Action:", responseData.data);
+
+            return responseData.data;  // ✅ Only return the registered user data
         } catch (error) {
             Alert.alert('Error registering user:', error.message);
             throw error;
         }
     };
 };
-
 
 // Action to log in a user with an API call
 export const loginUser = (credentials) => {

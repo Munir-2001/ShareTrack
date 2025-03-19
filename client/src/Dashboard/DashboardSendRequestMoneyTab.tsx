@@ -14,6 +14,7 @@ export default function DashboardSendRequestMoneyTab({ navigation, parentChildCa
     const gotoConnections = (ids: number) => {
         parentChildCall(ids);
         navigation.navigate('CONNECTIONS', {name: ids});
+        console.log("CONNECTIONS",{name: ids})
     };
     return (
         <View>

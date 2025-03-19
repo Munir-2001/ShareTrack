@@ -6,64 +6,143 @@ import { uploadToStorage } from '../config/storage.js';
 // import supabase from '../config/db.js'
 // Register a new user, ensuring no repeated email, username, or phone
 // const { uploadToStorage } = require('../config/storage'); 
+
 const createUser = async (req, res) => {
   try {
-    const { username, phone, email, password } = req.body;
+      const { username, firstname, lastname, phone, email, password, nic, address, dob } = req.body;
 
-    // Check if the user already exists
-    const { data: existingUser, error: userError } = await supabase
-      .from("users")
-      .select("*")
-      .or(`email.eq.${email},phone.eq.${phone},username.eq.${username}`)
-      .single();
+      // ✅ Step 1: Check if the user already exists
+      const { data: existingUser, error: userError } = await supabase
+          .from("users")
+          .select("*")
+          .or(`email.eq.${email},phone.eq.${phone},username.eq.${username},nic.eq.${nic}`)
+          .single();
 
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
-    }
+      if (existingUser) {
+          return res.status(400).json({ message: "User already exists" });
+      }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+      // ✅ Step 2: Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-       // ✅ Insert user and return the new record
+      // ✅ Step 3: Insert user into Supabase
+      const { data: newUser, error: insertError } = await supabase
+          .from("users")
+          .insert([
+              {
+                  username,
+                  firstname,
+                  lastname,
+                  phone,
+                  email,
+                  password: hashedPassword,
+                  nic,
+                  address,
+                  dob,
+              }
+          ])
+          .select();
 
-       const { data: newUser, error } = await supabase
+      if (insertError) throw insertError;
 
-       .from("users")
- 
-       .insert([
- 
-         {
- 
-           username,
- 
-           phone,
- 
-           email,
- 
-           password: hashedPassword,
- 
-         },
- 
-       ])
- 
-       .select() // ✅ This ensures Supabase returns the created user
+      console.log("✅ User registered successfully:", newUser[0]);
 
-    if (error) throw error;
+      // ✅ Step 4: Call NIUM API using the registered user data (updates user inside this function)
+      await createNiumCustomer(newUser[0]);
 
-    
-    // ✅ Send back the new user data
+      res.status(201).json({
+          message: "User registered successfully",
+          data: newUser[0]
+      });
 
-    res.status(201).json({ 
-
-      message: "User registered successfully", 
-
-      data: newUser[0] // ✅ Send only the user object, not an array
-
-    });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+      console.error("❌ Error creating user:", err);
+      res.status(400).json({ message: err.message });
   }
 };
+
+const createNiumCustomer = async (userData) => {
+  const CLIENT_HASH_ID = '4f65e729-869a-4a62-a12e-032abfccd401';  // Load from .env
+
+  const url = `https://gateway.nium.com/api/v4/client/${CLIENT_HASH_ID}/customer`;
+
+  const headers = {
+      'Content-Type': 'application/json',
+      'X-Api-Key': 'WPVLt88We83qV3Q7eqAKV5o08U4Z5hvJ5GBaf9Wj'
+  };
+
+  const body = {
+      billingAddress1: userData.address,
+      billingCity: "Karachi",
+      billingCountry: "PK",
+      billingState: "SD",
+      billingZipCode: "74600",
+      correspondenceAddress1: userData.address,
+      correspondenceCity: "Karachi",
+      correspondenceCountry: "PK",
+      correspondenceState: "SD",
+      correspondenceZipCode: "75290",
+      dateOfBirth: '1995-03-25',  // ✅ Use actual DOB from user
+      deliveryAddress1: userData.address,
+      deliveryCity: "Karachi",
+      deliveryCountry: "PK",
+      countryCode: "PK",
+      deliveryState: "SD",
+      deliveryZipCode: "74600",
+      email: userData.email,
+      firstName: userData.firstname,
+      gender: "Male",
+      lastName: userData.lastname,
+      mobile: userData.phone,
+      nationality: "PK",
+      preferredName: userData.username,
+      verificationConsent: true,
+      identificationDoc: [
+          {
+              identificationType: 'National Id',
+              identificationValue: userData.nic,
+          }
+      ]
+  };
+
+  console.log("📤 Sending Data to NIUM API:", JSON.stringify(body, null, 2));
+
+  try {
+      const response = await fetch(url, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+          throw new Error(`NIUM API Error: ${response.status}`);
+      }
+
+      const niumData = await response.json();
+      console.log("✅ NIUM Customer Created:", niumData);
+
+      // ✅ Step 5: Update User in Supabase with NIUM `customerHashId` & `walletHashId`
+      const { data: updatedUser, error: updateError } = await supabase
+          .from("users")
+          .update({
+              customerHashId: niumData.customerHashId,
+              walletHashId: niumData.walletHashId
+          })
+          .eq("email", userData.email)
+          .select();
+
+      if (updateError) throw updateError;
+
+      console.log("✅ User updated successfully in Supabase:", updatedUser[0]);
+
+      return niumData;
+
+  } catch (error) {
+      console.error("❌ NIUM API Error:", error);
+      throw error;
+  }
+};
+
 export const getReceivablesPayables = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -116,8 +195,6 @@ export const getReceivablesPayables = async (req, res) => {
     res.status(500).json({ message: "Error fetching data", error: err.message });
   }
 };
-
-
 
 const loginUser = async (req, res) => {
   try {

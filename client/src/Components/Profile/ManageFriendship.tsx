@@ -257,7 +257,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
         <View style={{ flex: 1 }}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search friends by username"
+            placeholder="Search friends by usernames"
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholderTextColor="#666"
