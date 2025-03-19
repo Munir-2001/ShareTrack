@@ -163,7 +163,15 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
   //   });
   //   }
   // };
-
+  const getCreditScoreColor = (score: string | null) => {
+    const numericScore = score ? parseFloat(score) : null;
+    if (numericScore === null) return "#ccc"; // Default gray if no score available
+    if (numericScore <= 630) return "#E57373"; // Red
+    if (numericScore > 630 && numericScore <= 690) return "#FDD835"; // Yellow
+    if (numericScore > 690 && numericScore < 750) return "#81C784"; // Light Green
+    if (numericScore >= 750 && numericScore <= 850) return "#388E3C"; // Dark Green
+    return "#ccc"; // Default fallback
+  };
   const gotoProfile = () => {
     navigation.navigate('PROFILE');
   };
@@ -265,7 +273,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
                         friendCreditScore: item.credit_score,
                       });
 
-                    }else if (conditionalrouting === 2) {
+                    } else if (conditionalrouting === 2) {
                       console.log("✅ Trying to navigate to requestmoneyscreen...");
                       // navigation.navigate('SendMoneyScreen', {
                       //   friendUsername: item.username,
@@ -278,12 +286,17 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
                       });
 
                     }
-                    
-                  }}>
-                    
 
+                  }}>
+
+
+                  {/* <Text style={styles.userName}>{item.username}</Text>
+                  <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text> */}
                   <Text style={styles.userName}>{item.username}</Text>
-                  <Text style={styles.creditScore}>Credit Score: {item.credit_score}</Text>
+                  <Text style={styles.creditScore}>
+                    Credit Score:
+                    <Text style={{ color: getCreditScoreColor(item.credit_score) }}> {item.credit_score}</Text>
+                  </Text>
 
                 </TouchableOpacity>
 
