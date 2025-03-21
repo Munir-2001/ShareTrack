@@ -175,6 +175,7 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useAppSelector } from '../../Redux/Store/hooks';
@@ -196,6 +197,7 @@ export const RequestMoneyScreen: React.FC = () => {
   const [amountToRequest, setAmountToRequest] = useState('');
   const [repaymentDate, setRepaymentDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   // 📍 Get Current Date & Time
   const currentDate = new Date();
@@ -228,6 +230,7 @@ export const RequestMoneyScreen: React.FC = () => {
     }
 
     try {
+      setIsSending(true);
       const response = await requestMoneyAPI(
         requesterUsername,
         friendUsername,
@@ -243,6 +246,9 @@ export const RequestMoneyScreen: React.FC = () => {
       console.log("❌ Error requesting money:", error.message);
       Alert.alert('Error', error.message || "Something went wrong. Please try again.");
     }
+    finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -257,10 +263,11 @@ export const RequestMoneyScreen: React.FC = () => {
         <Text style={styles.header}>Request Money from {friendUsername}</Text>
         
         {/* 📍 Updated UI with Credit Score */}
+        
         <Text style={styles.subHeader}>
           Credit Score: <Text style={{ fontWeight: 'bold' }}>{friendCreditScore}</Text>
         </Text>
-
+                    
         {/* 📍 Request Date & Time */}
         <View style={styles.transactionDetails}>
           <Text style={styles.transactionText}>📅 Request Date: {formattedDate}</Text>
@@ -298,8 +305,15 @@ export const RequestMoneyScreen: React.FC = () => {
         )}
 
         {/* Request Money Button */}
-        <TouchableOpacity style={styles.requestButton} onPress={handleRequestMoney}>
+        {/* <TouchableOpacity style={styles.requestButton} onPress={handleRequestMoney}>
           <Text style={styles.requestButtonText}>💰 Request Money</Text>
+        </TouchableOpacity> */}
+        <TouchableOpacity style={styles.requestButton} onPress={handleRequestMoney} disabled={isSending}>
+                    {isSending ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Text style={styles.requestButtonText}>💸 Request Money</Text>
+                    )}
         </TouchableOpacity>
       </View>
     </View>

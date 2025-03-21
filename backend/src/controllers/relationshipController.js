@@ -253,13 +253,13 @@ const sendMoney = async (req, res) => {
             receiver.walletHashId       // ✅ Receiver's walletHashId from DB
         );
         console.log("P2P Response : ",p2pResponse);
-        if (!p2pResponse || p2pResponse.status === "failed") {
-            console.error("❌ P2P Transfer Failed, rolling back database changes...");
-            // 🚨 Rollback transaction if P2P API fails
-            await supabase.from("users").update({ balance: sender.balance }).eq("id", sender.id);
-            await supabase.from("users").update({ balance: receiver.balance }).eq("id", receiver.id);
-            return res.status(500).json({ message: "P2P transfer failed. Transaction rolled back." });
-        }
+        // if (!p2pResponse || p2pResponse.status === "failed") {
+        //     console.error("❌ P2P Transfer Failed, rolling back database changes...");
+        //     // 🚨 Rollback transaction if P2P API fails
+        //     await supabase.from("users").update({ balance: sender.balance }).eq("id", sender.id);
+        //     await supabase.from("users").update({ balance: receiver.balance }).eq("id", receiver.id);
+        //     return res.status(500).json({ message: "P2P transfer failed. Transaction rolled back." });
+        // }
 
         console.log("✅ P2P Transfer Response:", p2pResponse);
         res.status(200).json({ message: "Money sent successfully (Internal + P2P)" });

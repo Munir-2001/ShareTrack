@@ -143,6 +143,7 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import { useAppSelector } from '../../Redux/Store/hooks';
 import { sendMoney as sendMoneyAPI } from './relationshipUtils';
@@ -156,6 +157,7 @@ const getCreditScoreInfo = (score: string | null) => {
   if (numericScore > 550 && numericScore <= 650) return { color: "#E57373", label: "Risky" }; // Red
   if (numericScore > 650 && numericScore <= 730) return { color: "#FFA500", label: "Fair" }; // Orange
   if (numericScore > 730 && numericScore <= 800) return { color: "#388E3C", label: "Trustworthy" }; // Green
+  
   return { color: "#ccc", label: "Not Available" }; // Default fallback
 };
 
@@ -172,6 +174,7 @@ export const SendMoneyScreen: React.FC = () => {
   const user = useAppSelector((state: { auth: any }) => state.auth?.user || {});
   const senderUsername = user.username || ""; // Ensure senderUsername is always defined
   const [amountToSend, setAmountToSend] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
   // 📍 Get color and label
   const { color, label } = getCreditScoreInfo(friendCreditScore);
@@ -200,6 +203,7 @@ export const SendMoneyScreen: React.FC = () => {
     }
 
     try {
+      setIsSending(true);
       const response = await sendMoneyAPI(senderUsername, friendUsername, Number(amountToSend)); 
       console.log("✅ Send Money API Response:", response);
       Alert.alert('Success', response.message);
@@ -208,6 +212,8 @@ export const SendMoneyScreen: React.FC = () => {
     } catch (error: any) {
       console.log("❌ Error sending money:", error.message);
       Alert.alert('Error', error.message || "Something went wrong. Please try again.");
+    }finally {
+      setIsSending(false);
     }
   };
 
@@ -245,9 +251,13 @@ export const SendMoneyScreen: React.FC = () => {
         />
 
         {/* Send Money Button */}
-        <TouchableOpacity style={styles.sendButton} onPress={handleSendMoney}>
-          <Text style={styles.sendButtonText}>💸 Send Money</Text>
-        </TouchableOpacity>
+                  <TouchableOpacity style={styles.sendButton} onPress={handleSendMoney} disabled={isSending}>
+            {isSending ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.sendButtonText}>💸 Send Money</Text>
+            )}
+</TouchableOpacity>
       </View>
     </View>
   );
