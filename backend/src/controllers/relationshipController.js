@@ -177,13 +177,13 @@ const sendMoney = async (req, res) => {
         if (!senderUsername || !receiverUsername || !amount) {
             return res.status(400).json({ message: "Missing required fields" });
         }
-        console.log('in new sendMoney')
+
         console.log(`📥 Received request: sender=${senderUsername}, receiver=${receiverUsername}, amount=${amount}`);
 
-        // ✅ Fetch sender details
+        // ✅ Fetch sender details (including customerHashId & walletHashId)
         const { data: sender, error: senderError } = await supabase
             .from("users")
-            .select("id, balance")
+            .select("id, balance, customerHashId, walletHashId")
             .eq("username", senderUsername)
             .single();
 
@@ -191,11 +191,11 @@ const sendMoney = async (req, res) => {
             console.error("❌ Sender not found:", senderError);
             return res.status(404).json({ message: "Sender not found" });
         }
-        debugger;
-        // ✅ Fetch receiver details
+
+        // ✅ Fetch receiver details (including customerHashId & walletHashId)
         const { data: receiver, error: receiverError } = await supabase
             .from("users")
-            .select("id, balance")
+            .select("id, balance, customerHashId, walletHashId")
             .eq("username", receiverUsername)
             .single();
 
@@ -205,6 +205,8 @@ const sendMoney = async (req, res) => {
         }
 
         console.log(`✅ Converted to IDs: senderId=${sender.id}, receiverId=${receiver.id}`);
+        console.log(`🔹 Sender Wallet: ${sender.walletHashId}, Sender Customer: ${sender.customerHashId}`);
+        console.log(`🔹 Receiver Wallet: ${receiver.walletHashId}, Receiver Customer: ${receiver.customerHashId}`);
 
         // ✅ Ensure sender has enough balance
         if (sender.balance < amount) {
@@ -229,25 +231,37 @@ const sendMoney = async (req, res) => {
         }
 
         // ✅ Record transaction in ShareTrack
-        await supabase.from("transactions").insert([
+        const { error: transactionError } = await supabase.from("transactions").insert([
             { sender_id: sender.id, receiver_id: receiver.id, amount, status: "transferred" }
         ]);
+
+        if (transactionError) {
+            console.error("❌ Error saving transaction:", transactionError);
+            return res.status(500).json({ message: "Error recording transaction" });
+        }
 
         console.log("✅ Money transferred internally!");
 
         // ✅ Call P2P Transfer API on Nium
         console.log("🚀 Initiating external P2P transfer...");
-        const p2pResponse = await transferP2P(clientHashId, customerHashId, walletHashId, amount, wallet3HashId);
+        console.log("sender : ",sender);
+        const p2pResponse = await transferP2P(
+            CLIENT_HASH_ID,            // ✅ Nium's clientHashId (Receiver's primary customer ID)
+            sender.customerHashId,     // ✅ Sender's unique customerHashId from DB
+            sender.walletHashId,       // ✅ Sender's walletHashId from DB
+            amount,                    // ✅ Transfer Amount
+            receiver.walletHashId       // ✅ Receiver's walletHashId from DB
+        );
+        console.log("P2P Response : ",p2pResponse);
+        if (!p2pResponse || p2pResponse.status === "failed") {
+            console.error("❌ P2P Transfer Failed, rolling back database changes...");
+            // 🚨 Rollback transaction if P2P API fails
+            await supabase.from("users").update({ balance: sender.balance }).eq("id", sender.id);
+            await supabase.from("users").update({ balance: receiver.balance }).eq("id", receiver.id);
+            return res.status(500).json({ message: "P2P transfer failed. Transaction rolled back." });
+        }
 
-        // if (p2pResponse.data.status=="failed") {
-        //     // 🚨 Rollback transaction if P2P API fails
-        //     console.error("❌ P2P Transfer Failed, rolling back database changes...");
-        //     await supabase.from("users").update({ balance: sender.balance }).eq("id", sender.id);
-        //     await supabase.from("users").update({ balance: receiver.balance }).eq("id", receiver.id);
-        //     return res.status(500).json({ message: "P2P transfer failed. Transaction rolled back." });
-        // }
-
-        console.log("✅ P2P Transfer :", p2pResponse);
+        console.log("✅ P2P Transfer Response:", p2pResponse);
         res.status(200).json({ message: "Money sent successfully (Internal + P2P)" });
 
     } catch (error) {
