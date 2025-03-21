@@ -66,11 +66,11 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     return "#ccc"; // Default fallback
   };
   const getCreditScoreLabel = (score: number | null) => {
-    if (score === null) return "#ccc"; // Default gray if no score available
+    if (score === null) return "New User"; // Default gray if no score available
     if (score > 550 && score <= 650) return "Risky"; // red
     if (score > 650 && score <= 730) return "Fair"; // orange
     if (score > 730 && score <= 800) return "Trustworthy"; // Dark Green
-    return "#ccc"; // Default fallback
+    return "New User"; // Default fallback
   };
   const gotoPendingRequests = () => {
     navigation.navigate('PendingRequestsScreen');
