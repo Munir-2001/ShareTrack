@@ -160,17 +160,6 @@ const blockRelationship = async (req, res) => {
     }
 };
 
-
-const API_KEY = process.env.API_KEY_NIUM;
-const CLIENT_HASH_ID = process.env.clientHashId;
-var clientHashId=process.env.clientHashId;
-var customerHashId=process.env.customerHashId;//Customer
-var walletHashId=process.env.walletHashId;//Customer
-var customer2HashId=process.env.customer2HashId;//Customer2
-var wallet2HashId=process.env.wallet2HashId;
-var customer3HashId=process.env.customer3HashId;
-var wallet3HashId=process.env.wallet3HashId;
-
 const sendMoney = async (req, res) => {
     try {
         const { senderUsername, receiverUsername, amount } = req.body;
@@ -246,14 +235,14 @@ const sendMoney = async (req, res) => {
         console.log("🚀 Initiating external P2P transfer...");
         console.log("sender : ",sender);
         const p2pResponse = await transferP2P(
-            CLIENT_HASH_ID,            // ✅ Nium's clientHashId (Receiver's primary customer ID)
+            process.env.CLIENT_HASH_ID,            // ✅ Nium's clientHashId (Receiver's primary customer ID)
             sender.customerHashId,     // ✅ Sender's unique customerHashId from DB
             sender.walletHashId,       // ✅ Sender's walletHashId from DB
             amount,                    // ✅ Transfer Amount
             receiver.walletHashId       // ✅ Receiver's walletHashId from DB
         );
         console.log("P2P Response : ",p2pResponse);
-        // if (!p2pResponse || p2pResponse.status === "failed") {
+        // if (!data || data.status === "Failed") {
         //     console.error("❌ P2P Transfer Failed, rolling back database changes...");
         //     // 🚨 Rollback transaction if P2P API fails
         //     await supabase.from("users").update({ balance: sender.balance }).eq("id", sender.id);
@@ -294,7 +283,7 @@ async function transferP2P(clientHashId, customerHashId, walletHashId, destinati
     };
   
     const headers = {
-      "X-Api-Key": API_KEY,
+      "X-Api-Key": process.env.API_KEY_NIUM,
       "Content-Type": "application/json"
     };
   
