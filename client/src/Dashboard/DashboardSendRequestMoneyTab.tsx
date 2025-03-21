@@ -9,11 +9,9 @@ interface Props {
 
 export default function DashboardSendRequestMoneyTab({ navigation, parentChildCall }: Props) {
     const route = useRoute();
-
-    console.log("this is route name", route)
     const gotoConnections = (ids: number) => {
         parentChildCall(ids);
-        navigation.navigate('CONNECTIONS', {name: ids});
+        navigation.navigate('Back', {name: ids});
         console.log("CONNECTIONS",{name: ids})
     };
     return (

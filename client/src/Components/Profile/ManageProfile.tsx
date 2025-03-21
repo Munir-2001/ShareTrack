@@ -29,6 +29,7 @@ import Icon from '@react-native-vector-icons/ionicons';
 import { useAppDispatch, useAppSelector } from '../../Redux/Store/hooks';
 import { API_URL } from '../../constants';
 import { useRoute } from '@react-navigation/native';
+import { ActivityIndicator } from 'react-native';
 
 export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const isDarkMode = useColorScheme() === 'dark';
@@ -48,6 +49,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const [isUserLoaded, setIsUserLoaded] = useState(false);
   const [photo, setPhoto] = useState<any | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(`${API_URL}/uploads/profile.jpg`);
+  const [loadingBalance, setLoadingBalance] = useState(true); 
   // const getCreditScoreColor = (score: number | null) => {
   //   if (score === null) return "#ccc"; // Default gray if no score available
   //   if (score <= 630) return "#E57373"; // Red
@@ -104,37 +106,42 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
     console.log("User found:", user);
 
     setUserState(user);
-    if (user && user.id) {
-      const fetchUserBalance = async () => {
-        try {
-          console.log('user id defined is ' + user.id)
-          const response = await fetch(`${API_URL}/api/relationship/getUserBalance`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username: user.username }), // Fix: Send username instead of userId
-          });
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch user balance');
-          }
+ if (user && user.id) {
+    const fetchUserBalance = async () => {
+      try {
+        console.log('user id defined is ' + user.id);
+        setLoadingBalance(true); // Show loader before fetching
 
-          const data = await response.json();
-          setBalance(data.balance);
-          setCreditScore(data.credit_score); // ✅ Store credit score in state
-        } catch (error) {
-          console.log('Error fetching user balance:', error);
+        const response = await fetch(`${API_URL}/api/relationship/getUserBalance`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username: user.username }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user balance');
         }
-      };
-      
+
+        const data = await response.json();
+        setBalance(data.balance);
+        setCreditScore(data.credit_score); // ✅ Store credit score in state
+      } catch (error) {
+        console.log('Error fetching user balance:', error);
+      } finally {
+        setLoadingBalance(false); // Hide loader after fetching
+      }
+    };
+
+    fetchUserBalance();
+  } else {
+    console.error('User ID is not available');
+  }
+}, [user]);
 
 
-      fetchUserBalance();
-    } else {
-      console.error('User ID is not available');
-    }
-  }, [user]);
   useEffect(() => {
     if (user && user.id) {
       const fetchReceivableAndPayable = async () => {
@@ -427,11 +434,14 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             <Text style={styles.userName}>{userState.username || userState.email}</Text>
             <View style={styles.balanceCreditContainer}>
-              {/* Balance Section */}
-              <View style={styles.balanceBox}>
-                <Text style={styles.balanceTitle}>Balance</Text>
-                <Text style={styles.balanceAmount}>${balance?.toFixed(2) || '0.00'}</Text>
-              </View>
+            <View style={styles.balanceBox}>
+            <Text style={styles.balanceTitle}>Balance</Text>
+            {loadingBalance ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.balanceAmount}>${balance?.toFixed(2) || '0.00'}</Text>
+            )}
+          </View>
 
               {/* Credit Score Section */}
               {/* <View style={styles.creditScoreBox}>

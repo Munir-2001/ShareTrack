@@ -462,7 +462,8 @@ import {
   TextInput, 
   StyleSheet, 
   Alert, 
-  ActivityIndicator 
+  ActivityIndicator,
+  Pressable,
 } from 'react-native';
 import { API_URL } from '../../constants';
 import { useAppSelector } from '../../Redux/Store/hooks';
@@ -604,6 +605,9 @@ export default function RentalOffersScreen({ navigation }: any) {
           </View>
         )}
       />
+      <Pressable style={styles.backButton} onPress={() => navigation.goBack()}>
+              <Text style={styles.backButtonText}>Back</Text>
+            </Pressable>
     </View>
   );
 }
@@ -622,5 +626,18 @@ const styles = StyleSheet.create({
   acceptButton: { flex: 1, backgroundColor: 'green', padding: 10, borderRadius: 5, alignItems: 'center', marginRight: 5 },
   rejectButton: { flex: 1, backgroundColor: 'red', padding: 10, borderRadius: 5, alignItems: 'center' },
   buttonText: { color: '#fff', fontWeight: 'bold' },
+  backButton: {
+    marginTop: 20,
+    alignSelf: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: "#1E2A78",
+    borderRadius: 8,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "bold",
+  },
 });
 

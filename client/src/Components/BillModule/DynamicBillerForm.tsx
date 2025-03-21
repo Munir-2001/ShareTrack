@@ -5,13 +5,12 @@ import { useAppSelector } from '../../Redux/Store/hooks';
 import { getFriends } from '../Profile/relationshipUtils';
 
 export default function DynamicBillerForm(props: any) {
-    const { getBillerDynamicFormDataFromChild, conditionFortrigerringdatacollector } = props
+    const { getBillerDynamicFormDataFromChild, conditionFortrigerringdatacollector } = props;
     const user = useAppSelector((state: { auth: any }) => state.auth.user);
 
     const [userId, setUserId] = useState(user || null);
     const [inputs, setInputs] = useState<any>([]);
     const [friends, setFriends] = useState<any>([]);
-
 
     useEffect(() => {
         const fetchData = async () => {
@@ -28,9 +27,23 @@ export default function DynamicBillerForm(props: any) {
         fetchData();
     }, [user]);
 
+    // Helper function: returns available friends for the friend selection Picker
+    const getAvailableFriends = (currentIndex: number) => {
+        // Get all friend ids that are selected in other friend pickers
+        const selectedFriendIds:any = [];
+        // Loop through inputs at every 3rd index (friend selection fields)
+        for (let i = 0; i < inputs.length; i += 3) {
+            // Skip current Picker field
+            if (i !== currentIndex && inputs[i]) {
+                selectedFriendIds.push(inputs[i]);
+            }
+        }
+        // Filter the full friend list so that already selected friend ids (elsewhere) are removed.
+        return friends.filter(friend => !selectedFriendIds.includes(friend.id));
+    };
 
     // Function to add three new input entries (a group)
-    const addInputs: any = () => {
+    const addInputs = () => {
         setInputs((prevInputs: any) => [
             ...prevInputs,
             '', '', ''
@@ -39,7 +52,7 @@ export default function DynamicBillerForm(props: any) {
 
     // Handler to update a specific input value
     const handleChange = (text: any, index: any) => {
-        const newInputs: any = [...inputs];
+        const newInputs = [...inputs];
         newInputs[index] = text;
         setInputs(newInputs);
     };
@@ -64,38 +77,40 @@ export default function DynamicBillerForm(props: any) {
         const billerData = [];
         for (let i = 0; i < inputs.length; i += 3) {
             billerData.push({
-                contributor_id: (inputs[i] !='' ? parseFloat(inputs[i]):0),
-                share_amount:  inputs[i + 1] != '' ? parseFloat(inputs[i + 1]):0,
-                paid_amount:  inputs[i + 2] !='' ?parseFloat(inputs[i + 2]) :0,
+                contributor_id: (inputs[i] !== '' ? parseFloat(inputs[i]) : 0),
+                share_amount: inputs[i + 1] !== '' ? parseFloat(inputs[i + 1]) : 0,
+                paid_amount: inputs[i + 2] !== '' ? parseFloat(inputs[i + 2]) : 0,
             });
         }
         getBillerDynamicFormDataFromChild(billerData, userId);
     }
 
-    // console.log("this is a user api",friends[0]?.id ,friends[0]?.username, friends.length)
     return (
-        <ScrollView >
+        <ScrollView>
             {groupedInputs.map((group, groupIndex) => (
                 <View key={groupIndex} style={styles.groupContainer}>
                     {group.map((value: any, indexInGroup: any) => {
                         const overallIndex = groupIndex * 3 + indexInGroup;
                         if (indexInGroup === 0) {
                             // First input as a select input (Picker)
+                            const availableFriends = getAvailableFriends(overallIndex);
                             return (
                                 <Picker
                                     key={overallIndex}
                                     selectedValue={value}
                                     style={styles.picker}
-                                    onValueChange={(itemValue, itemIndex) => handleChange(itemValue, overallIndex)}
+                                    onValueChange={(itemValue) => handleChange(itemValue, overallIndex)}
                                 >
-                                    {friends.map((friend: any, index: any) => (
+                                    {/* You might want to include a placeholder option */}
+                                    <Picker.Item label="Select friend" value="" />
+                                    {availableFriends.map((friend: any, index: any) => (
                                         <Picker.Item key={index} label={friend.username} value={friend.id} />
                                     ))}
                                 </Picker>
                             );
                         } else {
                             // Second input: Share Amount, Third input: Paid Amount
-                            const placeholder = indexInGroup == 1 ? 'Share Amount' : 'Paid Amount';
+                            const placeholder = indexInGroup === 1 ? 'Share Amount' : 'Paid Amount';
                             return (
                                 <TextInput
                                     key={overallIndex}
@@ -121,7 +136,6 @@ export default function DynamicBillerForm(props: any) {
 }
 
 const styles = StyleSheet.create({
-
     groupContainer: {
         marginBottom: 20,
         padding: 10,
@@ -148,4 +162,3 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
 });
-

@@ -11,6 +11,7 @@ import {
   Pressable,
   Modal,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from '@react-native-vector-icons/ionicons';
 import {
@@ -64,7 +65,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredFriends, setFilteredFriends] = useState<User[]>([]);
-
+  const [loading, setLoading] = useState(false); // ✅ Added Loader State
   const filteredData = filter === 'Received' ? pendingRequests : sentRequests;
 
   const fetchMoneyRequests = async () => {
@@ -92,7 +93,26 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
     }
   }, [userId, isAuth]);
 
+  useEffect(() => {
+    setUserId(user?.id || null);
+  }, [user]);
 
+  useEffect(() => {
+    if (isAuth && userId) {
+      fetchDataWithLoader();
+    }
+  }, [userId, isAuth]);
+
+  const fetchDataWithLoader = async () => {
+    try {
+      setLoading(true); // ✅ Show Loader
+      await fetchData();
+    } catch (error) {
+      console.error('❌ Error fetching data:', error);
+    } finally {
+      setLoading(false); // ✅ Hide Loader
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -140,6 +160,7 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
       setSentRequests(updatedSentRequests);
 
       setFriendRequestUsername('');
+      fetchDataWithLoader();
       fetchData();
     } catch (error: any) {
       Alert.alert(error.message);
@@ -230,11 +251,16 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
           onOptionPress={(option) => {
             setSelectedOption(option);
             setSelectedFriend(null);
+            fetchDataWithLoader();
           }}
         />
       )
       }
-
+      {/* ✅ Show Loader when switching tabs */}
+      {loading ? (
+        <ActivityIndicator size="large" color="#1E2A78" style={styles.loader} />
+      ) : (
+        <>
       {selectedOption === 'Your Friends' && (
         <View style={{ flex: 1 }}>
           <TextInput
@@ -512,34 +538,11 @@ export default function ConnectionScreen({ navigation }: PropsWithChildren<any>)
                 <Text style={styles.buttonText}>Unblock</Text>
               </Pressable>
             </View>
-          )}
-        />
-      )}
-
-      {/* set page redirection from here. */}
-      {/* {selectedFriend && (conditionalrouting == 1) && (
-
-        // <SendMoney
-        //   friendUsername={selectedFriend.username}
-        //   onClose={() => {
-        //     setSelectedFriend(null);
-        //   }} // Close the SendMoney component
-        // />
-        // <TouchableOpacity onPress={() => gotoSendMoneyScreen(selectedFriend)}>
-        // </TouchableOpacity>
-      )} */}
-
-
-
-      {/* {selectedFriend && (conditionalrouting == 2) && (
-        <RequestMoney
-          friendUsername={selectedFriend.username}
-          onClose={() => {
-            setSelectedFriend(null);
-          }}
-        />
-      )} */}
-
+           )}
+           />
+         )}
+       </>
+     )}
     </View>
   );
 }
@@ -592,7 +595,11 @@ const styles = StyleSheet.create({
     color: '#1E2A78',
     fontWeight: 'bold',
   },
-
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
   listElement: {
     flexDirection: 'row',
     justifyContent: 'space-between',

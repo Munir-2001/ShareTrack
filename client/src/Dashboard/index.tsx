@@ -20,15 +20,16 @@ type RootStackParamList = {
     ONE: undefined;
     TWO: undefined;
     THREE: undefined;
-    CONNECTIONS: { userIds: number };
+    Back: { userIds: number };
 };
 // Individual screens
 interface Props {
     navigation: any;
 }
-function ScreenOne() {
-    return <View><Text style={styles.screenText}>ONE</Text></View>
-}
+
+// function ScreenOne() {
+//     return <View><Text style={styles.screenText}>ONE</Text></View>
+// }
 
 // function ScreenTwo({ navigation }: PropsWithChildren<any>) {
 
@@ -54,9 +55,9 @@ function ScreenOne() {
 
 // }
 
-function ScreenThree() {
-    return <View><Text style={styles.screenText}>THREE</Text></View>
-}
+// function ScreenThree() {
+//     return <View><Text style={styles.screenText}>THREE</Text></View>
+// }
 
 
 type DashboardProps = {
@@ -80,13 +81,9 @@ export default function Dashboard({ navigation }: any) {
 
     return (
         <>
-            <Stack.Navigator initialRouteName="TWO">
+            <Stack.Navigator initialRouteName="Dashboard">
 
-
-                <Stack.Screen name="ONE">
-                    {() => <ScreenOne />}
-                </Stack.Screen>
-                <Stack.Screen name="TWO">
+                <Stack.Screen name="Dashboard">
                     {(props) =>
                         <DashboardSendRequestMoneyTab
                             {...props}
@@ -94,12 +91,8 @@ export default function Dashboard({ navigation }: any) {
                         />}
                 </Stack.Screen>
 
-                <Stack.Screen name="THREE">
-                    {() => <ScreenThree />}
-                </Stack.Screen>
-
                 <Stack.Screen
-                    name="CONNECTIONS"
+                    name="Back"
                     component={ConnectionScreen}
                 // initialParams={{ userIds: paramNumber }}
                 />

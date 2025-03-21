@@ -27,6 +27,34 @@ const AccountSettingsScreen = ({ navigation }: { navigation: any }) => {
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
    
+    const getGenderLabel = (value: string | null) => {
+        switch (value) {
+            case "1": return "Male";
+            case "2": return "Female";
+            case "3": return "Other";
+            default: return "Select Gender";
+        }
+    };
+
+    const getMaritalStatusLabel = (value: string | null) => {
+        switch (value) {
+            case "1": return "Single";
+            case "2": return "Married";
+            default: return "Select Marital Status";
+        }
+    };
+
+    const getEmploymentStatusLabel = (value: string | null) => {
+        switch (value) {
+            case "1": return "Employed";
+            case "2": return "Unemployed";
+            case "3": return "Self-Employed";
+            case "4": return "Student";
+            case "5": return "Retired";
+            default: return "Select Employment Status";
+        }
+    };
+    
     const handleUpdate = async () => {
         setLoading(true);
         setSuccessMessage("");
