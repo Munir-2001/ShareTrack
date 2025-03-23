@@ -13,6 +13,8 @@ import {
   Alert,
   Pressable,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 import {
   ImageLibraryOptions,
@@ -50,14 +52,7 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const [photo, setPhoto] = useState<any | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(`${API_URL}/uploads/profile.jpg`);
   const [loadingBalance, setLoadingBalance] = useState(true); 
-  // const getCreditScoreColor = (score: number | null) => {
-  //   if (score === null) return "#ccc"; // Default gray if no score available
-  //   if (score <= 630) return "#E57373"; // Red
-  //   if (score > 630 && score <= 690) return "#FDD835"; // Yellow
-  //   if (score > 690 && score < 750) return "#81C784"; // Light Green
-  //   if (score >= 750 && score <= 850) return "#388E3C"; // Dark Green
-  //   return "#ccc"; // Default fallback
-  // };
+
   const getCreditScoreColor = (score: number | null) => {
     if (score === null) return "#ccc"; // Default gray if no score available
     if (score > 550 && score <= 650) return "#E57373"; // red
@@ -85,91 +80,130 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   }
   const route = useRoute();
   console.log("this is route name", route)
-  useEffect(() => {
-    console.log('user is ', user);
-    setUserState(user);
-    console.log('userState is ', userState);
-  }, [user])
+//   useEffect(() => {
+//     console.log('user is ', user);
+//     setUserState(user);
+//     console.log('userState is ', userState);
+//   }, [user])
 
-  useEffect(() => {
-    console.log('user is ', user);
-    setUserState(user);
-    console.log('userState is ', userState);
-  }, [user])
+//   useEffect(() => {
+//     console.log('user is ', user);
+//     setUserState(user);
+//     console.log('userState is ', userState);
+//   }, [user])
 
-  useEffect(() => {
-    if (!user) {
-      console.log("User is not available yet");
-      return; // Exit early if user is null/undefined
-    }
+//   useEffect(() => {
+//     if (!user) {
+//       console.log("User is not available yet");
+//       return; // Exit early if user is null/undefined
+//     }
 
-    console.log("User found:", user);
+//     console.log("User found:", user);
 
-    setUserState(user);
+//     setUserState(user);
 
- if (user && user.id) {
-    const fetchUserBalance = async () => {
-      try {
-        console.log('user id defined is ' + user.id);
-        setLoadingBalance(true); // Show loader before fetching
+//  if (user && user.id) {
+//     const fetchUserBalance = async () => {
+//       try {
+//         console.log('user id defined is ' + user.id);
+//         setLoadingBalance(true); // Show loader before fetching
 
-        const response = await fetch(`${API_URL}/api/relationship/getUserBalance`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username: user.username }),
-        });
+//         const response = await fetch(`${API_URL}/api/relationship/getUserBalance`, {
+//           method: 'POST',
+//           headers: {
+//             'Content-Type': 'application/json',
+//           },
+//           body: JSON.stringify({ username: user.username }),
+//         });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch user balance');
-        }
+//         if (!response.ok) {
+//           throw new Error('Failed to fetch user balance');
+//         }
 
-        const data = await response.json();
-        setBalance(data.balance);
-        setCreditScore(data.credit_score); // ✅ Store credit score in state
-      } catch (error) {
-        console.log('Error fetching user balance:', error);
-      } finally {
-        setLoadingBalance(false); // Hide loader after fetching
-      }
-    };
+//         const data = await response.json();
+//         setBalance(data.balance);
+//         setCreditScore(data.credit_score); // ✅ Store credit score in state
+//       } catch (error) {
+//         console.log('Error fetching user balance:', error);
+//       } finally {
+//         setLoadingBalance(false); // Hide loader after fetching
+//       }
+//     };
 
-    fetchUserBalance();
-  } else {
-    console.error('User ID is not available');
+//     fetchUserBalance();
+//   } else {
+//     console.error('User ID is not available');
+//   }
+// }, [user]);
+
+
+//   useEffect(() => {
+//     if (user && user.id) {
+//       const fetchReceivableAndPayable = async () => {
+//         try {
+//           const response = await fetch(`${API_URL}/api/auth/receivables-payables/${user.id}`, {
+//             method: 'GET',
+//             headers: {
+//               'Content-Type': 'application/json',
+//             },
+//           });
+
+//           if (!response.ok) {
+//             throw new Error('Failed to fetch receivable and payable');
+//           }
+
+//           const data = await response.json();
+//           console.log('the api for receivable and payable called and data is ' + data)
+//           setReceivable(data.receivables);
+//           setPayable(data.payables);
+//         } catch (error) {
+//           console.error('Error fetching receivable/payable:', error);
+//         }
+//       };
+
+//       fetchReceivableAndPayable();
+//     }
+//   }, [user]);
+
+
+
+const fetchUserBalance = async () => {
+  if (!user?.username) return;
+
+  try {
+    setLoadingBalance(true);
+
+    const response = await fetch(`${API_URL}/api/relationship/getUserBalance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user.username }),
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch user balance');
+    const data = await response.json();
+    setBalance(data.balance);
+    setCreditScore(data.credit_score);
+  } catch (error) {
+    console.log('Error fetching user balance:', error);
+  } finally {
+    setLoadingBalance(false);
   }
-}, [user]);
+};
 
+const fetchReceivableAndPayable = async () => {
+  if (!user?.id) return;
 
-  useEffect(() => {
-    if (user && user.id) {
-      const fetchReceivableAndPayable = async () => {
-        try {
-          const response = await fetch(`${API_URL}/api/auth/receivables-payables/${user.id}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
+  try {
+    const response = await fetch(`${API_URL}/api/auth/receivables-payables/${user.id}`);
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch receivable and payable');
-          }
-
-          const data = await response.json();
-          console.log('the api for receivable and payable called and data is ' + data)
-          setReceivable(data.receivables);
-          setPayable(data.payables);
-        } catch (error) {
-          console.error('Error fetching receivable/payable:', error);
-        }
-      };
-
-      fetchReceivableAndPayable();
-    }
-  }, [user]);
-
+    if (!response.ok) throw new Error('Failed to fetch receivable/payable');
+    const data = await response.json();
+    setReceivable(data.receivables);
+    setPayable(data.payables);
+  } catch (error) {
+    console.error('Error fetching receivable/payable:', error);
+  }
+};
 
   const pickImage = async () => {
     const options: ImageLibraryOptions = {
@@ -330,7 +364,21 @@ export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
       //Cal refresh here or after calling it
     }
   };
-
+  useFocusEffect(
+    useCallback(() => {
+      console.log('Profile screen focused: refreshing data');
+  
+      if (!user) {
+        console.log('User not available yet');
+        return;
+      }
+  
+      setUserState(user);
+      fetchUserBalance();
+      fetchReceivableAndPayable();
+    }, [user])
+  );
+  
   return (
     <View
       style={{

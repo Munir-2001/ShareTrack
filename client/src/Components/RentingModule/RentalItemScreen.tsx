@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     availabilityText: { fontSize: 18, fontWeight: "bold", marginVertical: 10, color: "#1E2A78" },
     
     /* ✅ Toggle Availability Button */
-    availabilityButton: { backgroundColor: "#E63946", padding: 12, borderRadius: 8, marginVertical: 10 },
+    availabilityButton: { backgroundColor: "#1E2A78", padding: 12, borderRadius: 8, marginVertical: 10 },
     availabilityButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
 
     backButton: { alignSelf: "flex-start", padding: 10, marginBottom: 10 },
