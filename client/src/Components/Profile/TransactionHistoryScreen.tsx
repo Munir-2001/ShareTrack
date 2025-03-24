@@ -143,7 +143,7 @@ const TransactionHistoryScreen = ({ navigation }: { navigation: any }) => {
                       : `Pending to send $${item.amount} to ${item.sender_username}`
                     : isSent
                     ? `Sent $${item.amount} to ${item.receiver_username}`
-                    : `Received request for $${item.amount} from ${item.sender_username}`}
+                    : `Sent request for $${item.amount} from ${item.sender_username}`}
                 </Text>
                 <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
                 <Text style={styles.dateText}>{formatDate(item.created_at)}</Text>
