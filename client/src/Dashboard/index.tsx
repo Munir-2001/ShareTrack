@@ -81,9 +81,9 @@ export default function Dashboard({ navigation }: any) {
 
     return (
         <>
-            <Stack.Navigator initialRouteName="Dashboard">
+            <Stack.Navigator initialRouteName="Transactions">
 
-                <Stack.Screen name="Dashboard">
+                <Stack.Screen name="Transactions">
                     {(props) =>
                         <DashboardSendRequestMoneyTab
                             {...props}

@@ -18,6 +18,7 @@ interface Contributor {
   share_amount: number;
   paid_amount: number;
   pending_amount?: number;
+  payment_request_id?: number;
 }
 
 interface Bill {
@@ -99,11 +100,35 @@ const ViewBillsScreen = ({ navigation }: { navigation: any }) => {
     }
   };
 
+  const handlePayBill = async (paymentRequestId: number) => {
+    try {
+      const response = await fetch(`${API_URL}/api/bills/billPay`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentRequestId }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert("Success", data.message);
+        // Optionally re-fetch bills to update the UI:
+        fetchBillsWithContributors();
+      } else {
+        Alert.alert("Error", data.message);
+      }
+    } catch (error: any) {
+      console.error("Error paying bill:", error);
+      Alert.alert("Error", error.message || "Something went wrong. Please try again.");
+    }
+  };
+
+
+
   const renderBill = ({ item }: { item: Bill }) => {
     const contributors = item.contributors || [];
+    // Try to find the current user's contribution record
     const contributor = contributors.find(c => c.contributor_id === user.id);
     const pending = contributor ? contributor.share_amount - contributor.paid_amount : 0;
-
+  
     if (
       searchQuery &&
       !item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -111,34 +136,54 @@ const ViewBillsScreen = ({ navigation }: { navigation: any }) => {
     ) {
       return null;
     }
-
+  
     return (
       <View style={styles.billContainer}>
         <Text style={styles.billName}>{item.name}</Text>
         <Text>{item.description}</Text>
         <Text>Total Amount: ${item.total_amount}</Text>
-
-        {selectedTab === 'payBills' && contributor ? (
+  
+        {selectedTab === 'payBills' ? (
           <View>
-            <Text>Your Contribution</Text>
-            <Text>Share Amount: ${contributor.share_amount}</Text>
-            <Text>Paid Amount: ${contributor.paid_amount}</Text>
-            <Text>Pending Amount: ${pending}</Text>
-            <Pressable style={styles.payButton}>
+            {contributor ? (
+              <>
+                <Text>Your Contribution</Text>
+                <Text>Share Amount: ${contributor.share_amount}</Text>
+                <Text>Paid Amount: ${contributor.paid_amount}</Text>
+                <Text>Pending Amount: ${pending}</Text>
+              </>
+            ) : (
+              <Text>No contribution record found for you.</Text>
+            )}
+            <Pressable
+              style={styles.payButton}
+              onPress={() => {
+                if (contributor) {
+                  if (contributor.payment_request_id != null) {
+                    handlePayBill(contributor.payment_request_id as number);
+                  } else {
+                    Alert.alert("Error", "Payment request ID not available.");
+                  }
+                } else {
+                  Alert.alert("Error", "No contribution record available.");
+                }
+              }}
+            >
               <Text style={styles.payButtonText}>Pay Bill</Text>
             </Pressable>
           </View>
-        ) : selectedTab === 'myBills' && (
-          <View >
+        ) : selectedTab === 'myBills' ? (
+          <View>
             <Text>Bill Creator</Text>
             <Text>This bill was created by you.</Text>
           </View>
-        )}
-
+        ) : null}
+  
         <Text>Created on: {formatDate(item.created_at)}</Text>
       </View>
     );
   };
+  
 
   return (
     <View style={styles.container}>
