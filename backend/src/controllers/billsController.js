@@ -83,7 +83,7 @@ const payBill = async (req, res) => {
       }
   
       // ✅ Fetch transaction details
-      const { data: transaction, error: paymentRequesError } = await supabase
+      const { data: transaction, error: transactionError } = await supabase
         .from("payment_requests")
         .select("id, requested_amount, contributor_id, owner_id, status")
         .eq("id", paymentRequestId)
@@ -145,7 +145,7 @@ const payBill = async (req, res) => {
       // ✅ Mark the transaction as "repaid"
       const { error: updateTransactionError } = await supabase
         .from("payment_requests")
-        .update({ status: "repaid" })
+        .update({ status: "paid" })
         .eq("id", paymentRequestId);
   
       if (updateTransactionError) {
@@ -207,6 +207,7 @@ const payBill = async (req, res) => {
     }
   };
 
+
   const updateCreditScore = async (userId, userData, financialMetrics) => {
     try {
       // ✅ Prepare Data for Credit Score API
@@ -223,8 +224,9 @@ const payBill = async (req, res) => {
       console.log(`📨 Sending data to Credit Scoring API for user ${userId}:`, requestData);
   
       // ✅ Call the API
-      const response = await axios.post(CREDIT_SCORING_API_URL, requestData);
-      const creditScore = response.data.credit_score;
+      // const response = await axios.post(CREDIT_SCORING_API_URL, requestData);
+      // const creditScore = response.data.credit_score;
+      const creditScore = 700;
   
       console.log(`✅ Credit Score Received for user ${userId}: ${creditScore}`);
   
@@ -237,8 +239,13 @@ const payBill = async (req, res) => {
       if (updateError) {
         console.error(`❌ Failed to update credit score for user ${userId}:`, updateError);
       }
+  
+      // Return the updated credit score
+      return { credit_score: creditScore };
+  
     } catch (error) {
       console.error(`❌ Error fetching credit score for user ${userId}:`, error.message);
+      return { credit_score: null };
     }
   };
   
@@ -277,7 +284,7 @@ const payBill = async (req, res) => {
           totalBorrowed += payment_requests.requested_amount;
   
           // ✅ Check if repayment was on time
-          if (payment_requests.status === "repaid") {
+          if (payment_requests.status === "paid") {
             totalRepayments++;
   
             // Assume repayment was timely if done within 7 days of borrowing
@@ -331,11 +338,24 @@ const getBill = async (req, res) => {
       .eq("bill_id", billId);
     if (contributorsError) throw contributorsError;
 
-    // Compute pending amount for each contributor (share_amount - paid_amount)
-    const contributorsWithPending = contributors.map(c => ({
-      ...c,
-      pending_amount: c.share_amount - c.paid_amount
-    }));
+    // Get all payment_requests for this bill
+    const { data: paymentRequests, error: paymentRequestsError } = await supabase
+      .from("payment_requests")
+      .select("*")
+      .eq("bill_id", billId);
+    if (paymentRequestsError) throw paymentRequestsError;
+
+    // Merge each contributor with its corresponding payment_request id
+    const contributorsWithPending = contributors.map((c) => {
+      const matchingRequest = paymentRequests.find(
+        (pr) => pr.contributor_id === c.contributor_id
+      );
+      return {
+        ...c,
+        pending_amount: c.share_amount - c.paid_amount,
+        payment_request_id: matchingRequest ? matchingRequest.id : null,
+      };
+    });
 
     res.status(200).json({ bill, contributors: contributorsWithPending });
   } catch (err) {

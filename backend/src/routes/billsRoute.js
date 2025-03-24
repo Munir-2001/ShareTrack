@@ -60,6 +60,6 @@ billsRouter.patch("/:billId/contributors/:contributorId", updateContributorPayme
 billsRouter.delete("/:billId", deleteBill);
 
 
-billsRouter.post("/:payBill", payBill);
+billsRouter.post("/billPay", payBill);
 
 export default billsRouter;
