@@ -1,5 +1,5 @@
 import { supabase } from "../config/db.js";
-
+import axios from 'axios';
 // Create a new bill with its contributors and payment requests
 const createBill = async (req, res) => {
   try {
@@ -9,7 +9,7 @@ const createBill = async (req, res) => {
     if (!creator_id || !name || !total_amount || !Array.isArray(contributors) || contributors.length === 0) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-
+    
     // Insert the bill record into the bills table
     const { data: billData, error: billError } = await supabase
       .from("bills")
@@ -25,18 +25,20 @@ const createBill = async (req, res) => {
 
     // Loop through contributors and insert each into billcontributors
     for (const contributor of contributors) {
-      const { contributor_id, share_amount, paid_amount } = contributor;
+      const { owner_id = creator_id, contributor_id, share_amount, paid_amount } = contributor;
       const final_paid_amount = paid_amount || 0;
 
+      // Insert into billcontributors table
       const { data: contributorData, error: contributorError } = await supabase
-      .from("billcontributors")
-      .insert([{
-        bill_id: bill.id,
-        contributor_id,
-        share_amount,
-        paid_amount: final_paid_amount
-      }])
-      .select();
+        .from("billcontributors")
+        .insert([{
+          bill_id: bill.id,
+          contributor_id,
+          owner_id,
+          share_amount,
+          paid_amount: final_paid_amount
+        }])
+        .select();
     
     if (contributorError) {
       console.error("Error inserting contributor:", contributorError);
@@ -54,6 +56,7 @@ const createBill = async (req, res) => {
         .insert([{
           bill_id: bill.id,
           contributor_id,
+          owner_id,
           requested_amount,
           status: "pending"
         }]);
@@ -66,6 +69,244 @@ const createBill = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+const CREDIT_SCORING_API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://your-live-server.com/predict"
+    : "http://localhost:8000/predict";
+const payBill = async (req, res) => {
+    try {
+      const { paymentRequestId } = req.body;
+  
+      if (!paymentRequestId) {
+        return res.status(400).json({ message: "Transaction ID is required" });
+      }
+  
+      // ✅ Fetch transaction details
+      const { data: transaction, error: paymentRequesError } = await supabase
+        .from("payment_requests")
+        .select("id, requested_amount, contributor_id, owner_id, status")
+        .eq("id", paymentRequestId)
+        .single();
+  
+      if (transactionError || !transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+  
+      let { requested_amount, contributor_id, owner_id, status } = transaction;
+  
+      // ✅ Borrower is ALWAYS the sender_id (the original requester)
+      let borrower_id = contributor_id;
+      let lender_id = owner_id;
+  
+      console.log(`🔄 Borrower (Who is repaying): ${borrower_id}`);
+      console.log(`✅ Lender (Who gets repaid): ${lender_id}`);
+  
+      // ✅ Fetch borrower and lender balances
+      const { data: borrower, error: borrowerError } = await supabase
+        .from("users")
+        .select("id, balance")
+        .eq("id", borrower_id)
+        .single();
+  
+      const { data: lender, error: lenderError } = await supabase
+        .from("users")
+        .select("id, balance")
+        .eq("id", lender_id)
+        .single();
+  
+      if (borrowerError || lenderError || !borrower || !lender) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      // ✅ Ensure borrower has enough balance before repayment
+      if (borrower.balance < requested_amount) {
+        return res.status(400).json({ message: "Insufficient balance to repay loan" });
+      }
+  
+      // ✅ Deduct amount from borrower & add to lender **(CORRECTED)**
+      const updatedBorrowerBalance = borrower.balance - requested_amount; // Borrower loses money
+      const updatedLenderBalance = lender.balance + requested_amount; // Lender gains money back
+  
+      const { error: updateBorrowerError } = await supabase
+        .from("users")
+        .update({ balance: updatedBorrowerBalance })
+        .eq("id", borrower_id);
+  
+      const { error: updateLenderError } = await supabase
+        .from("users")
+        .update({ balance: updatedLenderBalance })
+        .eq("id", lender_id);
+  
+      if (updateBorrowerError || updateLenderError) {
+        return res.status(500).json({ message: "Failed to update balances" });
+      }
+  
+      // ✅ Mark the transaction as "repaid"
+      const { error: updateTransactionError } = await supabase
+        .from("payment_requests")
+        .update({ status: "repaid" })
+        .eq("id", paymentRequestId);
+  
+      if (updateTransactionError) {
+        return res.status(500).json({ message: "Failed to update transaction status" });
+      }
+      // ✅ Calculate & update financial metrics for both lender & borrower
+          const lenderMetrics = await calculateUserFinancialMetrics(lender_id);
+          const borrowerMetrics = await calculateUserFinancialMetrics(borrower_id);
+  
+          // ✅ Update metrics in DB
+          const { error: updateLenderMetricsError } = await supabase
+            .from("users")
+            .update({
+              total_lend_borrow_ratio: lenderMetrics.totalLendBorrowRatio,
+              timely_payment_score: lenderMetrics.timelyPaymentScore,
+            })
+            .eq("id", lender_id);
+  
+          const { error: updateBorrowerMetricsError } = await supabase
+            .from("users")
+            .update({
+              total_lend_borrow_ratio: borrowerMetrics.totalLendBorrowRatio,
+              timely_payment_score: borrowerMetrics.timelyPaymentScore,
+            })
+            .eq("id", borrower_id);
+  
+          if (updateLenderMetricsError || updateBorrowerMetricsError) {
+            return res.status(500).json({ message: "Failed to update financial metrics" });
+          }
+  
+          const { data: borrowerobj, error: borrowerErrors } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", borrower_id)
+          .single();
+  
+      const { data: lenderobj, error: lenderErrors } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", lender_id)
+          .single();
+          console.log('borrower obj is '+ borrowerobj)
+          const borrowerscore = await updateCreditScore(borrower_id, borrowerobj, borrowerMetrics);
+          console.log('ledner obj is '+ lenderobj)
+          const lenderscore= await updateCreditScore(lender_id, lenderobj, lenderMetrics);
+  
+          console.log('the lender score is '+ lenderscore.credit_score)
+          console.log('the borrowerscoreis '+ borrowerscore.credit_score)
+  
+  
+      res.status(200).json({
+        message: "Loan repaid successfully",
+        borrower_balance: updatedBorrowerBalance,
+        lender_balance: updatedLenderBalance
+      });
+  
+    } catch (error) {
+      res.status(500).json({ message: "Error repaying loan", error: error.message });
+    }
+  };
+
+  const updateCreditScore = async (userId, userData, financialMetrics) => {
+    try {
+      // ✅ Prepare Data for Credit Score API
+      const requestData = {
+        age: userData.age,
+        gender: userData.gender, // 1 for male, 0 for female
+        marital_status: userData.marital_status, // 1 for married, 0 otherwise
+        education_level: userData.education_level, // "Bachelor", "Master", etc.
+        employment_status: userData.employment_status, // 1 for employed, 0 otherwise
+        total_lend_borrow_ratio: financialMetrics.totalLendBorrowRatio,
+        timely_payment_score: financialMetrics.timelyPaymentScore,
+      };
+  
+      console.log(`📨 Sending data to Credit Scoring API for user ${userId}:`, requestData);
+  
+      // ✅ Call the API
+      const response = await axios.post(CREDIT_SCORING_API_URL, requestData);
+      const creditScore = response.data.credit_score;
+  
+      console.log(`✅ Credit Score Received for user ${userId}: ${creditScore}`);
+  
+      // ✅ Store Credit Score in Database
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ credit_score: creditScore })
+        .eq("id", userId);
+  
+      if (updateError) {
+        console.error(`❌ Failed to update credit score for user ${userId}:`, updateError);
+      }
+    } catch (error) {
+      console.error(`❌ Error fetching credit score for user ${userId}:`, error.message);
+    }
+  };
+  
+  const calculateUserFinancialMetrics = async (userId) => {
+    try {
+      if (!userId) {
+        throw new Error("User ID is required");
+      }
+  
+      // ✅ Fetch all transactions where user is sender (lender) or receiver (borrower)
+      const { data: transactions, error: transactionsError } = await supabase
+      .from("payment_requests")
+      .select("id, requested_amount, contributor_id, owner_id, status, created_at")
+        .or(`contributor_id.eq.${userId},owner_id.eq.${userId}`);
+  
+      if (transactionsError) {
+        throw transactionsError;
+      }
+  
+      if (!transactions || transactions.length === 0) {
+        return { totalLendBorrowRatio: 0, timelyPaymentScore: 0 };
+      }
+  
+      let totalLent = 0;
+      let totalBorrowed = 0;
+      let totalRepayments = 0;
+      let timelyRepayments = 0;
+  
+      const now = new Date();
+  
+      transactions.forEach(payment_requests => {
+        if (payment_requests.contributor_id === userId) {
+          totalLent += payment_requests.requested_amount;
+        }
+        if (payment_requests.owner_id === userId) {
+          totalBorrowed += payment_requests.requested_amount;
+  
+          // ✅ Check if repayment was on time
+          if (payment_requests.status === "repaid") {
+            totalRepayments++;
+  
+            // Assume repayment was timely if done within 7 days of borrowing
+            const repaymentDeadline = new Date(payment_requests.created_at);
+            repaymentDeadline.setDate(repaymentDeadline.getDate() + 7);
+  
+            if (now <= repaymentDeadline) {
+              timelyRepayments++;
+            }
+          }
+        }
+      });
+  
+      // ✅ Calculate Total Lend/Borrow Ratio (Prevent division by zero)
+      const totalLendBorrowRatio = totalBorrowed > 0 ? (totalLent / totalBorrowed) : (totalLent > 0 ? 1 : 0);
+  
+      // ✅ Calculate Timely Payment Score (Percentage of timely repayments)
+      const timelyPaymentScore = totalRepayments > 0 ? (timelyRepayments / totalRepayments) * 100 : 0;
+  
+      //here we must call the model and send the data as input then get the output
+  
+  
+      return { totalLendBorrowRatio, timelyPaymentScore };
+  
+    } catch (error) {
+      console.error("Error calculating user financial metrics:", error.message);
+      return { totalLendBorrowRatio: 0, timelyPaymentScore: 0 };
+    }
+  };
 
 // Retrieve details of a specific bill along with its contributors
 const getBill = async (req, res) => {
@@ -201,4 +442,4 @@ const deleteBill = async (req, res) => {
   }
 };
 
-export { createBill, getBill, listBills, updateBill, updateContributorPayment, deleteBill };
+export { createBill, getBill, listBills, updateBill, updateContributorPayment, deleteBill, payBill };

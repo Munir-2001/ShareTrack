@@ -31,6 +31,7 @@ import { API_URL } from '../../constants';
 import { useRoute } from '@react-navigation/native';
 import { ActivityIndicator } from 'react-native';
 
+
 export default function ProfileScreen({ navigation }: PropsWithChildren<any>) {
   const isDarkMode = useColorScheme() === 'dark';
   const dispatch = useAppDispatch();

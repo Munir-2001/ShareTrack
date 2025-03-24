@@ -6,6 +6,7 @@ import {
   updateBill,
   updateContributorPayment,
   deleteBill,
+  payBill
 } from "../controllers/billsController.js";
 
 const billsRouter = express.Router();
@@ -57,5 +58,8 @@ billsRouter.patch("/:billId/contributors/:contributorId", updateContributorPayme
  *     summary: Delete a bill and all associated records
  */
 billsRouter.delete("/:billId", deleteBill);
+
+
+billsRouter.post("/:payBill", payBill);
 
 export default billsRouter;

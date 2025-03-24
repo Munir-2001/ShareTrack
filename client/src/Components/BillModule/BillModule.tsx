@@ -40,8 +40,29 @@ export default function BillModule() {
             contributors: getBillerSplitdata,
           };
       
-          console.log("hello i am timer ", apiBodyForSplitBill);
-      
+          console.log("hello i am timer ", apiBodyForSplitBill.total_amount);
+          
+
+          const billAmount = Number(apiBodyForSplitBill.total_amount); // ensure amount is a number
+
+                // Validate each contributor's requested amount
+                const invalidContributors = getBillerSplitdata.filter(contributor => {
+                  const requestedAmount = contributor.share_amount - contributor.paid_amount;
+                  return requestedAmount < 0 || requestedAmount > billAmount;
+                });
+
+                if (invalidContributors.length > 0) {
+                  Alert.alert("Error", "Invalid contribution amounts. Each requested amount (share - paid) must be at least 0 and cannot exceed the total bill amount.");
+                  return;
+                }
+
+        //   const requestedSum = apiBodyForSplitBill.contributors.reduce(
+        //     (acc:any, contributor:any) => acc + (contributor.share_amount - contributor.paid_amount),
+        //     0
+        //   );
+        //   console.log("Total requested amount:", requestedSum);
+        
+
           try {
             const response = await fetch(`${API_URL}/api/bills`, {
               method: "POST",
@@ -100,11 +121,24 @@ export default function BillModule() {
 
 
 
-                <Button title="Create Bill" onPress={() => { 
-                    handleCreateReq({ eventName: eventName, description: description, amount: amount }); 
-                    setconditionFortrigerringdatacollector(1)
-                    
-                    }} />
+                <Button
+                  title="Create Bill"
+                  onPress={() => {
+                    // Validate required fields
+                    if (!eventName.trim() || !description.trim() || !amount.trim()) {
+                      Alert.alert("Error", "Please fill in all fields.");
+                      return;
+                    }
+                    if (isNaN(Number(amount)) || Number(amount) <= 0) {
+                      Alert.alert("Error", "Please enter a valid bill amount.");
+                      return;
+                    }
+                    // Optionally validate dynamic biller data here if needed
+
+                    handleCreateReq({ eventName, description, amount });
+                    setconditionFortrigerringdatacollector(1);
+                  }}
+/>
             </View>
         </>
     );

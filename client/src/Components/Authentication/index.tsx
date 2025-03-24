@@ -42,8 +42,8 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, se
     const validatePhone = (phone: string) => /^[0-9]{11}$/.test(phone);
     const validatePassword = (password: string) => password.length >= 6;
     const validateUsername = (username: string) => username.length >= 3;
-    const validateFirstname = (firstname: string) => firstname.length >= 0;
-    const validateLastname = (lastname: string) => lastname.length >= 0;
+    const validateFirstname = (firstname: string) =>/^[A-Za-z]+$/.test(firstname) && firstname.length > 3;
+     const validateLastname = (lastname: string) =>/^[A-Za-z]+$/.test(lastname) && lastname.length > 3;
     const validateNic = (nic: string) => /^[0-9]{13}$/.test(nic);
     const validateAddress = (address: string) => address.length >= 3;
     const validateDob = (dob: string) => dob.length >= 3;
@@ -56,43 +56,53 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, se
             
             if (!username || !phone || !email || !password || !confirmPassword || !nic || !address || !dob) {
                 Alert.alert('Error', 'Please fill in all fields.');
+                setLoading(false);
                 return;
             }
             if (!validateUsername(username)) {
                 Alert.alert('Invalid Username', 'Username must be at least 3 characters long.');
+                setLoading(false);
                 return;
             }
             if (!validateFirstname(firstname)) {
-                Alert.alert('Invalid First name', 'Please Enter Your First Name.');
+                Alert.alert('Invalid First name', 'First Name nust be reater the 3 words. First Name should not contain any special character, number or space');
+                setLoading(false);
                 return;
             }
             if (!validateLastname(lastname)) {
-                Alert.alert('Invalid Last name', 'Please Enter Your Last Name.');
+                Alert.alert('Invalid Last name', 'Last Name nust be reater the 3 words.. Last Name should not contain any special character, number or space');
+                setLoading(false);
                 return;
             }
             if (!validatePhone(phone)) {
                 Alert.alert('Invalid Phone', 'Phone number must be 11 digits.');
+                setLoading(false);
                 return;
             }
             if (!validateEmail(email)) {
                 Alert.alert('Invalid Email', 'Please enter a valid email address.');
+                setLoading(false);
                 return;
             }
             if (!validateNic(nic)) {
                 Alert.alert('Invalid NIC', 'NIC must be 13 digits.');
+                setLoading(false);
                 return;
             }
             if (!validateAddress(address)) {
                 Alert.alert('Please Enter Address', 'Please Enter Address');
+                setLoading(false);
                 return;
             }
             
             if (!validatePassword(password)) {
                 Alert.alert('Weak Password', 'Password must be at least 6 characters long.');
+                setLoading(false);
                 return;
             }
             if (password !== confirmPassword) {
                 Alert.alert('Passwords do not match', 'Please enter the same password.');
+                setLoading(false);
                 return;
             }
 
@@ -101,6 +111,7 @@ const AuthScreen: React.FC<PropsWithChildren<AuthScreenProps>> = ({ isSignUp, se
             // Simple check for sign-in (no validation, just empty field check)
             if (!email || !password) {
                 Alert.alert('Error', 'Please fill in all fields.');
+                setLoading(false);
                 return;
             }
 
