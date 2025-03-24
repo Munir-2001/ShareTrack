@@ -1,11 +1,10 @@
-
 import {supabase} from '../config/db.js'
 
 import axios from 'axios';
 // const CREDIT_SCORING_API_URL = "http://localhost:8000/predict/"
 const CREDIT_SCORING_API_URL =
   process.env.NODE_ENV === "production"
-    ? "https://your-live-server.com/predict"
+    ? "https://sharetrack-creditscoringservice.onrender.com/predict"
     : "http://localhost:8000/predict";
 const getUserLoans = async (req, res) => {
   try {
@@ -280,10 +279,21 @@ const calculateUserFinancialMetrics = async (userId) => {
       throw new Error("User ID is required");
     }
 
-    // ✅ Fetch all transactions where user is sender (lender) or receiver (borrower)
+    // Fetch transactions with lending details
     const { data: transactions, error: transactionsError } = await supabase
       .from("transactions")
-      .select("id, amount, sender_id, receiver_id, status, created_at")
+      .select(`
+        id, 
+        amount, 
+        sender_id, 
+        receiver_id, 
+        status, 
+        created_at,
+        lending_details (
+          repayment_date,
+          created_at
+        )
+      `)
       .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
 
     if (transactionsError) {
@@ -299,8 +309,6 @@ const calculateUserFinancialMetrics = async (userId) => {
     let totalRepayments = 0;
     let timelyRepayments = 0;
 
-    const now = new Date();
-
     transactions.forEach(transaction => {
       if (transaction.sender_id === userId) {
         totalLent += transaction.amount;
@@ -308,16 +316,23 @@ const calculateUserFinancialMetrics = async (userId) => {
       if (transaction.receiver_id === userId) {
         totalBorrowed += transaction.amount;
 
-        // ✅ Check if repayment was on time
-        if (transaction.status === "repaid") {
+        if (transaction.status === "repaid" && transaction.lending_details) {
           totalRepayments++;
-
-          // Assume repayment was timely if done within 7 days of borrowing
-          const repaymentDeadline = new Date(transaction.created_at);
-          repaymentDeadline.setDate(repaymentDeadline.getDate() + 7);
-
-          if (now <= repaymentDeadline) {
-            timelyRepayments++;
+          
+          // Calculate days difference between repayment and due date
+          const repaymentDate = new Date(transaction.lending_details.repayment_date);
+          const actualRepaymentDate = new Date(transaction.lending_details.created_at);
+          const daysDifference = Math.floor((actualRepaymentDate - repaymentDate) / (1000 * 60 * 60 * 24));
+          
+          // Calculate weight based on repayment timing
+          let weight = 100; // Start with full weight
+          if (daysDifference <= 0) {
+            // On time or early payment
+            timelyRepayments += weight;
+          } else {
+            // Late payment - reduce weight by 5 for each day late
+            weight = Math.max(0, weight - (daysDifference * 5));
+            timelyRepayments += weight;
           }
         }
       }
@@ -326,11 +341,11 @@ const calculateUserFinancialMetrics = async (userId) => {
     // ✅ Calculate Total Lend/Borrow Ratio (Prevent division by zero)
     const totalLendBorrowRatio = totalBorrowed > 0 ? (totalLent / totalBorrowed) : (totalLent > 0 ? 1 : 0);
 
-    // ✅ Calculate Timely Payment Score (Percentage of timely repayments)
-    const timelyPaymentScore = totalRepayments > 0 ? (timelyRepayments / totalRepayments) * 100 : 0;
+    // Calculate Timely Payment Score with weights
+    const timelyPaymentScore = totalRepayments > 0 ? (timelyRepayments / (totalRepayments * 100)) * 100 : 0;
 
     //here we must call the model and send the data as input then get the output
-
+    
 
     return { totalLendBorrowRatio, timelyPaymentScore };
 
